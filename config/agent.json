@@ -2,7 +2,7 @@
   "_comment": "circuit-agent configuration — edit these values before starting",
   "api": {
     "baseUrl": "https://api.circuitllm.xyz",
-    "_note": "Public CIRCUIT API. Self-hosters: change to http://localhost:18700 and set CIRCUIT_INTERNAL_KEY in .env to bypass payment."
+    "_note": "Public CIRCUIT API. Self-hosters: change to http://localhost:18960 and set CIRCUIT_INTERNAL_KEY in .env to bypass payment."
   },
   "strategy": {
     "scanIntervalMs": 300000,
