@@ -1,0 +1,55 @@
+# circuit-agent systemd user service
+#
+# Runs the agent as a persistent user service — auto-starts on boot,
+# auto-restarts on crash, logs via journald.
+#
+# ── Install (single agent) ────────────────────────────────────────────────────
+#
+#   1. Edit WorkingDirectory below to match your install path
+#   2. Enable linger so the service survives logout:
+#        loginctl enable-linger $USER
+#   3. Install and start:
+#        mkdir -p ~/.config/systemd/user
+#        cp deploy/circuit-agent.service ~/.config/systemd/user/circuit-agent.service
+#        systemctl --user daemon-reload
+#        systemctl --user enable --now circuit-agent
+#
+# ── Multi-agent swarm ─────────────────────────────────────────────────────────
+#
+#   Copy this file once per agent, updating the name and WorkingDirectory:
+#        cp deploy/circuit-agent.service ~/.config/systemd/user/circuit-agent-2.service
+#   Then enable each one:
+#        systemctl --user enable --now circuit-agent-2
+#
+# ── Useful commands ───────────────────────────────────────────────────────────
+#
+#   systemctl --user status circuit-agent        # is it running?
+#   systemctl --user restart circuit-agent       # restart after an update
+#   journalctl --user -u circuit-agent -f        # live logs
+#   journalctl --user -u circuit-agent --since today
+
+[Unit]
+Description=circuit-agent — autonomous Solana trading agent
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/YOUR_USER/circuit-agent
+ExecStart=/usr/bin/node agent.js start
+Restart=always
+RestartSec=10
+# Prevent a crash loop from hammering the network — back off after 5 rapid restarts
+StartLimitIntervalSec=120
+StartLimitBurst=5
+StandardOutput=journal
+StandardError=journal
+# Graceful shutdown — agent catches SIGTERM and saves state before exiting
+KillSignal=SIGTERM
+TimeoutStopSec=30
+
+# Secrets live in .env in WorkingDirectory — agent.js loads them at startup.
+# Do not put AGENT_KEYPAIR or other secrets in this file; it may be world-readable.
+
+[Install]
+WantedBy=default.target

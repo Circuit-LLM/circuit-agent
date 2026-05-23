@@ -1,0 +1,70 @@
+{
+  "_comment": "circuit-agent configuration — edit these values before starting",
+  "api": {
+    "baseUrl": "https://api.circuitllm.xyz",
+    "_note": "Public CIRCUIT API. Self-hosters: change to http://localhost:18700 and set CIRCUIT_INTERNAL_KEY in .env to bypass payment."
+  },
+  "strategy": {
+    "scanIntervalMs": 300000,
+    "positionCheckMs": 10000,
+    "maxOpenPositions": 3,
+    "entryBudgetSol": 0.005,
+    "minScanScore": 55,
+    "minLiquidity": 50000,
+    "stopLossPct": -6,
+    "takeProfitPct": 25,
+    "maxHoldMinutes": 45,
+    "trailingStopActivatePct": 4,
+    "trailingStopDistancePct": 3,
+    "buyCooldownMinutes": 60,
+    "_strategy_note": "buyCooldownMinutes: skip re-entry on the same mint for this many minutes after closing a position."
+  },
+  "circuit": {
+    "minCircuitBalance": 5000,
+    "_note": "Agent will warn when CIRCUIT balance drops below this (for API payment top-up)"
+  },
+  "risk": {
+    "maxEntry1hDropPct": -15,
+    "blacklist": [],
+    "safeOnly": false
+  },
+  "llm": {
+    "model": "x-ai/grok-4.1-fast",
+    "provider": "openrouter",
+    "baseUrl": "",
+    "openrouterKey": "",
+    "_note": "provider: 'openrouter' (cloud) or 'ollama' (local). baseUrl overrides provider default. openrouterKey or OPENROUTER_API_KEY env var."
+  },
+  "survival": {
+    "minSolWarning": 0.03,
+    "minSolPause": 0.01,
+    "circuitReinvestPct": 0.25,
+    "_note": "Warn when SOL < minSolWarning. Pause new buys when SOL < minSolPause. circuitReinvestPct: fraction of each profit used to buy CIRCUIT (0.25 = 25%)."
+  },
+  "reflect": {
+    "intervalMs": 14400000,
+    "autoApply": true,
+    "_note": "Self-improvement loop interval (default 4h). autoApply: true = auto-apply suggested config changes within safe bounds."
+  },
+  "telegram": {
+    "token": "",
+    "heartbeatChatId": null,
+    "_note": "Set token here OR in TELEGRAM_BOT_TOKEN env var. heartbeatChatId = your Telegram user ID to receive heartbeat messages."
+  },
+  "heartbeat": {
+    "intervalMs": 300000,
+    "contextRefreshMs": 1800000,
+    "_note": "intervalMs: proactive check-in cadence (default 5 min, 0 to disable). contextRefreshMs: how often to refresh cached SOL price + Fear & Greed index (default 30 min)."
+  },
+  "swarm": {
+    "enabled": true,
+    "autoPublish": true,
+    "minReputationToFollow": 40,
+    "consensusBoostFactor": 1.2,
+    "_note": "autoPublish: emit buy/sell signals automatically on trade execution. minReputationToFollow: only factor signals from agents above this reputation score (0-100). consensusBoostFactor: multiply scan score by this when swarm consensus agrees (e.g. 1.2 = +20% score boost)."
+  },
+  "agentLoop": {
+    "intervalMs": 5400000,
+    "_note": "How often the agent reasons about and updates its session strategy (default 90 min). The LLM sets mode/patternFilter/minScore for the next window. Modes: active (auto-buy best scorer), selective (LLM gate per candidate), watchOnly (scan only, no buys)."
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "_preset": "conservative",
+  "_description": "Low risk, lower returns. Tight filters, small positions, fast exits.",
+  "_apply": "Copy these values into config/agent.json strategy and risk sections.",
+
+  "strategy": {
+    "entryBudgetSol":          0.005,
+    "minScanScore":            55,
+    "minLiquidity":            200000,
+    "stopLossPct":             -4,
+    "takeProfitPct":           8,
+    "maxHoldMinutes":          30,
+    "maxOpenPositions":        2,
+    "trailingStopActivatePct": 3,
+    "trailingStopDistancePct": 2
+  },
+
+  "risk": {
+    "maxEntry1hDropPct": -10,
+    "safeOnly":          true
+  },
+
+  "swarm": {
+    "minReputationToFollow": 60,
+    "consensusBoostFactor":  1.1
+  }
+}

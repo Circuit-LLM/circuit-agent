@@ -1,0 +1,27 @@
+{
+  "_preset": "balanced",
+  "_description": "Middle-ground risk profile. Slightly larger entries than conservative, looser filters than conservative but tighter than degen. Good starting point for most users.",
+  "_apply": "Copy these values into config/agent.local.json to override the defaults.",
+
+  "strategy": {
+    "entryBudgetSol":          0.01,
+    "minScanScore":            45,
+    "minLiquidity":            100000,
+    "stopLossPct":             -6,
+    "takeProfitPct":           20,
+    "maxHoldMinutes":          45,
+    "maxOpenPositions":        3,
+    "trailingStopActivatePct": 4,
+    "trailingStopDistancePct": 3
+  },
+
+  "risk": {
+    "maxEntry1hDropPct": -15,
+    "safeOnly":          false
+  },
+
+  "swarm": {
+    "minReputationToFollow": 40,
+    "consensusBoostFactor":  1.2
+  }
+}

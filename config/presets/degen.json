@@ -1,0 +1,27 @@
+{
+  "_preset": "degen",
+  "_description": "High risk, high reward. Looser filters, larger positions, wider stop-loss, bigger take-profit targets. Use with caution.",
+  "_apply": "Copy these values into config/agent.json strategy and risk sections.",
+
+  "strategy": {
+    "entryBudgetSol":          0.02,
+    "minScanScore":            35,
+    "minLiquidity":            25000,
+    "stopLossPct":             -10,
+    "takeProfitPct":           25,
+    "maxHoldMinutes":          90,
+    "maxOpenPositions":        5,
+    "trailingStopActivatePct": 8,
+    "trailingStopDistancePct": 5
+  },
+
+  "risk": {
+    "maxEntry1hDropPct": -25,
+    "safeOnly":          false
+  },
+
+  "swarm": {
+    "minReputationToFollow": 20,
+    "consensusBoostFactor":  1.3
+  }
+}

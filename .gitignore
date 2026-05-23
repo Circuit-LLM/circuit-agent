@@ -1,0 +1,34 @@
+# Environment & secrets
+.env
+.env.*
+!.env.example
+
+# Agent runtime data (positions, queues, memory, logs)
+data/
+logs/
+
+# User customizations — these override repo defaults and are never touched by updates.
+# See: config/agent.json (repo defaults) vs config/agent.local.json (your overrides)
+#      soul.md (repo default)           vs soul.local.md (your agent personality)
+config/agent.local.json
+soul.local.md
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
+# Local guides and notes (not for distribution)
+walkthrough.md
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
