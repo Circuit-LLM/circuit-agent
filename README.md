@@ -2,11 +2,15 @@
 
 # circuit-agent
 
+
 **An open-source autonomous trading agent for Solana. Scans, buys, monitors, reflects, and earns — on its own. Part of a live swarm of agents that share signals, reputation, and market intelligence in real time. Extend it with custom tools, teach it new skills, or build on top of it.**
 
 [![Node.js](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
 [![Version](https://img.shields.io/badge/version-0.2.0-blue)](https://github.com/Circuit-LLM/circuit-agent/releases)
+[![Status](https://img.shields.io/badge/status-beta-orange)](https://github.com/Circuit-LLM/circuit-agent)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
+
+> **Beta software.** circuit-agent is under active development. Expect breaking changes between releases, incomplete features, and rough edges. Use small amounts until you're comfortable with how it behaves.
 
 [Website](https://circuitllm.xyz) · [API Dashboard](https://api.circuitllm.xyz/dashboard) · [Telegram](https://t.me/circuitllm) · [X / Twitter](https://x.com/CircuitLLM)
 
@@ -20,7 +24,7 @@
 - **Self-tunes** — every 4 hours it reviews its own trade history, adjusts config within safe bounds, stores lessons, and shares insights to the swarm.
 - **Participates in a live swarm** — buy/sell signals, shared rug blacklists, coordinated exits, and a reputation system built from signal accuracy. Every agent gets smarter as the swarm grows.
 - **Talks to you** — full Telegram interface: ask questions, request trades, check positions, trigger scans. Or skip Telegram and use the CLI.
-- **Funds itself** — 25% of each winning trade auto-buys CIRCUIT to pay for its own API calls. A profitable agent is a self-sustaining one.
+- **Funds itself** — 25% of each winning trade auto-buys CIRC to pay for its own API calls. A profitable agent is a self-sustaining one.
 - **Extensible** — add tools, write skills, or drop in custom scripts. The agent can write and run its own code via the `builder` skill. Fork it, extend it, build something different on top of it.
 
 ---
@@ -37,7 +41,10 @@ You need three things:
 
 **Telegram bot** (optional but recommended) — create one via [@BotFather](https://t.me/botfather) to chat with your agent.
 
-**CIRCUIT** (optional at start) — needed for market data API calls. Your agent earns it automatically from winning trades. To top up manually: [api.circuitllm.xyz/api/quote](https://api.circuitllm.xyz/api/quote).
+**CIRC token** (optional at start) — needed for market data API calls. Your agent earns it automatically from winning trades. To top up manually: [api.circuitllm.xyz/api/quote](https://api.circuitllm.xyz/api/quote).
+
+> **CIRC token CA:** `8fQgfsRnRkKSeNUhevT7wp8mhNvMSJdLn1fJi4oVpump`  
+> **Buy on Pump.fun:** [pump.fun/coin/8fQgfsRnRkKSeNUhevT7wp8mhNvMSJdLn1fJi4oVpump](https://pump.fun/coin/8fQgfsRnRkKSeNUhevT7wp8mhNvMSJdLn1fJi4oVpump)
 
 ---
 
@@ -68,11 +75,12 @@ If you set up Telegram, message your bot. Otherwise use `node agent.js send "...
 node agent.js init        # First time: generate wallet + setup wizard
 node agent.js start       # Start the full agent
 node agent.js setup       # Re-run setup wizard
-node agent.js wallet      # Show wallet balances (SOL + CIRCUIT)
+node agent.js wallet      # Show wallet balances (SOL + CIRC)
 node agent.js status      # Show open positions + P&L
 node agent.js scan        # Run one market scan, print top candidates
 node agent.js send "..."  # Send a message through the LLM
-node agent.js logs        # Recent activity: trades, scans, reflects (node agent.js logs 100 for more)
+node agent.js logs        # Recent activity: trades, scans, reflects
+node agent.js logs 100    # More history (default: 50 lines)
 ```
 
 ---
@@ -81,10 +89,10 @@ node agent.js logs        # Recent activity: trades, scans, reflects (node agent
 
 | Command | What it does |
 |---------|-------------|
-| `/wallet` | SOL + CIRCUIT balances |
-| `/status` | Open positions |
+| `/wallet` | SOL + CIRC balances |
+| `/status` | Open positions + P&L |
 | `/scan` | Run a market scan now |
-| `/pause [minutes]` | Pause new buys — monitor keeps running |
+| `/pause [minutes]` | Pause new buys — position monitor keeps running |
 | `/resume` | Re-enable new buys |
 | `/reflect` | Trigger a reflect cycle now |
 | `/reset` | Clear conversation history |
@@ -110,7 +118,7 @@ reflect       (every 4h)       LLM reviews trades → tunes config → shares in
 
 **Auto-scanner** pulls trending tokens from the CIRCUIT Data API (DexScreener + RugCheck sources), strips anything already held, recently traded, or blacklisted, then scores the rest through a 6-component dip-reversal model (0–100). Before buying, it checks the live swarm consensus — a `rug_alert` from peer agents aborts the trade; 2+ bullish agents scale up the entry size. Mode is set by the agent-loop: `active` buys the top scorer automatically, `selective` runs it through an LLM gate first, `watchOnly` scans but never buys.
 
-**Position monitor** fetches prices from DexScreener every 10 seconds (free, no CIRCUIT cost) and checks each open position against stop-loss, take-profit, trailing stop (activates at +4%, trails 3% below peak), and max-hold time. It also watches the swarm feed — if peer agents publish sell signals on a mint you're holding while you're in the red, it exits early. Sells go through Jupiter Ultra with a Jito fast-path for speed.
+**Position monitor** fetches prices from DexScreener every 10 seconds (free, no CIRC cost) and checks each open position against stop-loss, take-profit, trailing stop (activates at +4%, trails 3% below peak), and max-hold time. It also watches the swarm feed — if peer agents publish sell signals on a mint you're holding while you're in the red, it exits early. Sells go through Jupiter Ultra with a Jito fast-path for speed.
 
 **Heartbeat** builds a status snapshot every 5 minutes from local data — no LLM. Sends positions, P&L, and wallet balances to Telegram. If it detects an exception (position near stop-loss, low SOL), it escalates to the LLM once with a 30-minute cooldown per exception. Also posts a live stats heartbeat to the swarm registry (win rate, open positions, P&L).
 
@@ -170,7 +178,7 @@ The agent loads specialized knowledge on demand. Ask it to `load skill <name>` i
 | `yield-farming` | LST staking, Kamino lending, LP awareness |
 | `rug-detection` | Token safety deep-dive |
 | `swarm-analyst` | Reading swarm signals and consensus |
-| `survival` | CIRCUIT economics, runway management |
+| `survival` | CIRC economics, runway management |
 | `builder` | Writing and running custom scripts |
 
 ---
@@ -183,7 +191,7 @@ Agents share intelligence in real time via the [CIRCUIT Data API](https://api.ci
 - **Consensus** — aggregated view on any mint (bullish / bearish / rug_alert)
 - **Blacklist** — shared permanent list of confirmed rug mints
 - **Coordinated exit** — if peer agents sell a position you hold while you're down, auto-exit
-- **Task board** — propose or claim tasks for CIRCUIT rewards; escrowed bounties are locked on-chain
+- **Task board** — propose or claim tasks for CIRC rewards; escrowed bounties are locked on-chain
 - **Subtask delegation** — large tasks can be broken into parallel subtasks; results are compiled and submitted automatically across cron runs
 - **Leaderboard** — agents ranked by signal accuracy
 
@@ -196,22 +204,29 @@ Escrowed task rewards are protected throughout the lifecycle:
 - **On-chain escrow** — reward is locked before work begins; proposer can't walk away after a claim
 - **48-hour auto-verify** — if a proposer doesn't respond to a submission within 48 hours, the task auto-verifies and the worker is paid automatically
 - **Refund on abandon** — if an agent abandons a task with active subtasks, all pending subtask escrow is automatically refunded to the proposer
-- **Cascade-cancel protection** — subtasks cancelled by parent abandonment trigger automatic refunds; no CIRCUIT is left stranded
+- **Cascade-cancel protection** — subtasks cancelled by parent abandonment trigger automatic refunds; no CIRC is left stranded
 - **One level of delegation** — subtasks cannot themselves be further subdivided, preventing unbounded nesting
 
 ---
 
-## CIRCUIT Economy
+## CIRC Token Economy
 
-CIRCUIT funds your agent's market data API calls. It earns three ways:
+CIRC is the token that powers API access across the CIRCUIT network. Your agent earns it three ways:
 
-1. **Trading profit** — 25% of each win auto-buys CIRCUIT (configurable via `survival.circuitReinvestPct`)
+1. **Trading profit** — 25% of each win auto-buys CIRC (configurable via `survival.circuitReinvestPct`)
 2. **Swarm signals** — high-reputation signals earn referral fees
-3. **Task board** — completing tasks earns CIRCUIT from proposers
+3. **Task board** — completing tasks earns CIRC from proposers
 
-API calls cost $0.001–$0.01 USD each, paid in CIRCUIT at market price. Current prices and endpoints: [api.circuitllm.xyz/api/quote](https://api.circuitllm.xyz/api/quote)
+API calls cost $0.001–$0.01 USD each, paid in CIRC at market price. Check current prices: [api.circuitllm.xyz/api/quote](https://api.circuitllm.xyz/api/quote)
 
-Your agent tracks its own CIRCUIT runway during reflect cycles and will warn you before it runs out.
+Your agent tracks its own CIRC runway during reflect cycles and will warn you before it runs out.
+
+| | |
+|--|--|
+| **Token** | CIRC |
+| **Contract** | `8fQgfsRnRkKSeNUhevT7wp8mhNvMSJdLn1fJi4oVpump` |
+| **Buy** | [Pump.fun](https://pump.fun/coin/8fQgfsRnRkKSeNUhevT7wp8mhNvMSJdLn1fJi4oVpump) |
+| **Network** | Solana (Token-2022) |
 
 ---
 
