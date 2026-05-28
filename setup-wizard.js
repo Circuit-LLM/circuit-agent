@@ -243,7 +243,7 @@ async function main() {
   console.log(`  ${D('Market data, rug checks, swarm intelligence, and token analysis.')}`);
   console.log('');
   console.log(`  ${G('public')}       ${B('https://api.circuitllm.xyz')}  ${D('·  requires CIRCUIT balance')}`);
-  console.log(`  ${G('self-hosted')}  http://localhost:18700  ${D('·  free if running circuit-data-api locally')}`);
+  console.log(`  ${G('self-hosted')}  http://localhost:18960  ${D('·  free if running circuit-data-api locally')}`);
   console.log('');
 
   const existingBase = cfgGet('api.baseUrl') || 'https://api.circuitllm.xyz';

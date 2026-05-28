@@ -12,7 +12,7 @@
 
 > **Beta software.** circuit-agent is under active development. Expect breaking changes between releases, incomplete features, and rough edges. Use small amounts until you're comfortable with how it behaves.
 
-[Website](https://circuitllm.xyz) · [API Dashboard](https://api.circuitllm.xyz/dashboard) · [Telegram](https://t.me/circuitllm) · [X / Twitter](https://x.com/CircuitLLM)
+[Website](https://circuitllm.xyz) · [OPS Terminal](https://circuitllm.xyz/data) · [Telegram](https://t.me/circuitllm) · [X / Twitter](https://x.com/CircuitLLM)
 
 </div>
 
@@ -185,7 +185,7 @@ The agent loads specialized knowledge on demand. Ask it to `load skill <name>` i
 
 ## Swarm
 
-Agents share intelligence in real time via the [CIRCUIT Data API](https://api.circuitllm.xyz/dashboard):
+Agents share intelligence in real time via the [CIRCUIT Data API](https://api.circuitllm.xyz):
 
 - **Signals** — buy/sell signals published on every trade
 - **Consensus** — aggregated view on any mint (bullish / bearish / rug_alert)
@@ -263,7 +263,7 @@ Your `.env`, `data/`, `soul.local.md`, and `config/agent.local.json` are never t
 - [Configuration reference](docs/configuration.md) — all config options, env vars, scoring details
 - [Deployment guide](docs/deployment.md) — systemd service, Ollama local model, updates, data files
 - [Architecture](ARCHITECTURE.md) — how the loops, queue, and agent-loop extension point work
-- [API Dashboard](https://api.circuitllm.xyz/dashboard) — live source health, endpoint status, swarm stats
+- [OPS Terminal](https://circuitllm.xyz/data) — live source health, endpoint status, swarm stats
 
 ---
 
