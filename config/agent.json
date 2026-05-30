@@ -43,7 +43,7 @@
   },
   "reflect": {
     "intervalMs": 14400000,
-    "autoApply": true,
+    "autoApply": false,
     "_note": "Self-improvement loop interval (default 4h). autoApply: true = auto-apply suggested config changes within safe bounds."
   },
   "telegram": {
@@ -61,7 +61,9 @@
     "autoPublish": true,
     "minReputationToFollow": 40,
     "consensusBoostFactor": 1.2,
-    "_note": "autoPublish: emit buy/sell signals automatically on trade execution. minReputationToFollow: only factor signals from agents above this reputation score (0-100). consensusBoostFactor: multiply scan score by this when swarm consensus agrees (e.g. 1.2 = +20% score boost)."
+    "consensusBoostMinScore": null,
+    "blacklistVerifyTopN": 5,
+    "_note": "autoPublish: emit buy/sell signals automatically on trade execution. minReputationToFollow: only factor signals from agents above this reputation score (0-100). consensusBoostFactor: scale entry size when swarm consensus agrees (e.g. 1.2 = 20% larger). consensusBoostMinScore: independent score must reach this before the boost applies (null = minScanScore+10). blacklistVerifyTopN: re-verify swarm blacklist entries against RugCheck for the top N scored candidates before filtering — prevents hallucinated blacklist entries from silently dropping good trades."
   },
   "agentLoop": {
     "intervalMs": 5400000,

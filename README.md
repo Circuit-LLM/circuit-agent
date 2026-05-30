@@ -270,6 +270,5 @@ Your `.env`, `data/`, `soul.local.md`, and `config/agent.local.json` are never t
 ## Community
 
 - **X / Twitter:** [@CircuitLLM](https://x.com/CircuitLLM)
-- **Watchtower agent:** [@CircuitOverseer](https://x.com/CircuitOverseer)
 - **Telegram:** [t.me/circuitllm](https://t.me/circuitllm)
 - **Website:** [circuitllm.xyz](https://circuitllm.xyz)
