@@ -29,7 +29,7 @@
     "safeOnly": false
   },
   "llm": {
-    "model": "x-ai/grok-4.1-fast",
+    "model": "google/gemini-2.5-flash-lite",
     "provider": "openrouter",
     "baseUrl": "",
     "openrouterKey": "",

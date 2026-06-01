@@ -110,7 +110,7 @@ async function main() {
   console.log(`  ${D('Get one (30 seconds):')}  ${Y('https://helius.dev')}  ${D('→ sign up → copy RPC URL')}`);
   console.log('');
 
-  const existingRpc = envGet('HELIUS_RPC_URL');
+  const existingRpc = envGet('CIRCUIT_RPC_URL');
   let heliusRpcUrl;
   if (existingRpc) {
     console.log(`  ${D('current:')}  ${Y(existingRpc.slice(0, 55) + '…')}`);
@@ -129,7 +129,7 @@ async function main() {
     console.log(`  ${D('  · Slow balance checks and price lookups')}`);
     console.log(`  ${D('  · Failed swap transactions during high traffic')}`);
     console.log(`  ${D('  · Missed position exits if RPC times out')}`);
-    console.log(`  ${D('  Add HELIUS_RPC_URL to .env later to upgrade.')}`);
+    console.log(`  ${D('  Add CIRCUIT_RPC_URL to .env later to upgrade.')}`);
   }
   console.log(`  ${G('✓  RPC configured')}`);
 
@@ -197,7 +197,7 @@ async function main() {
     console.log(`  ${D('Recommended models:')}`);
     console.log('');
     console.log(`  ${G('1')}  anthropic/claude-sonnet-4-6   ${D('·  best reasoning + tool use')}`);
-    console.log(`  ${G('2')}  x-ai/grok-4.1-fast            ${D('·  very fast, strong analysis')}`);
+    console.log(`  ${G('2')}  google/gemini-2.5-flash-lite   ${D('·  fast, cheap, strong tool calling')}`);
     console.log(`  ${G('3')}  google/gemini-2.0-flash       ${D('·  free tier, capable')}`);
     console.log(`  ${G('4')}  Custom                        ${D('·  enter any OpenRouter model ID')}`);
     console.log('');
@@ -280,7 +280,7 @@ async function main() {
   const envContent = [
     `# circuit-agent environment — updated ${new Date().toISOString()}`,
     `AGENT_KEYPAIR=${keypair}`,
-    `HELIUS_RPC_URL=${heliusRpcUrl}`,
+    `CIRCUIT_RPC_URL=${heliusRpcUrl}`,
     `OPENROUTER_API_KEY=${openrouterKey}`,
     `TELEGRAM_BOT_TOKEN=${tgToken}`,
     `CIRCUIT_INTERNAL_KEY=${circuitInternalKey}`,

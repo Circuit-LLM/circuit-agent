@@ -43,7 +43,7 @@ async function main() {
   const key = process.env.AGENT_KEYPAIR;
   if (!key) { console.error('AGENT_KEYPAIR not set in .env'); process.exit(1); }
 
-  const rpc    = process.env.HELIUS_RPC_URL || 'https://api.mainnet-beta.solana.com';
+  const rpc    = process.env.CIRCUIT_RPC_URL || 'https://api.mainnet-beta.solana.com';
   const kp     = Keypair.fromSecretKey(bs58.decode(key));
   const conn   = new Connection(rpc, { commitment: 'confirmed' });
   const owner  = kp.publicKey;
