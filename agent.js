@@ -383,7 +383,8 @@ async function cmdStart() {
   }, CTX_REFRESH_MS);
 
   // 2. Publish profile to swarm (non-blocking)
-  profile.refreshAndPublish(api).catch(e => log('warn', `Profile publish: ${e.message}`));
+  profile.refreshAndPublish(api, { paperMode: swap?.paperMode ?? false })
+    .catch(e => log('warn', `Profile publish: ${e.message}`));
 
   // 3. Queue processor (AI brain — must start first)
   const processor = require('./lib/processor');
