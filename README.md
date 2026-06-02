@@ -67,6 +67,10 @@ node agent.js start
 
 If you set up Telegram, message your bot. Otherwise use `node agent.js send "..."` to talk to the LLM directly.
 
+Once the agent is running, open **http://localhost:18800** in your browser to access the local dashboard — live positions, P&L, trade history, swarm stats, tasks, and a chat interface to talk to your agent directly.
+
+> Running on a VPS? Access the dashboard via SSH tunnel: `ssh -L 18800:localhost:18800 user@your-vps`
+
 ---
 
 ## CLI Commands
