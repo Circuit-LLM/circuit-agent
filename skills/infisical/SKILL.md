@@ -11,7 +11,7 @@ circuit-agent loads secrets from `.env` at startup. This is sufficient for most 
 ```bash
 # .env (never commit this file — it's in .gitignore)
 AGENT_KEYPAIR=your_base58_private_key
-HELIUS_RPC_URL=https://mainnet.helius-rpc.com/?api-key=YOUR_KEY
+CIRCUIT_RPC_URL=https://mainnet.helius-rpc.com/?api-key=YOUR_KEY
 OPENROUTER_API_KEY=sk-or-v1-...
 TELEGRAM_BOT_TOKEN=1234567890:AAH...
 JUPITER_API_KEY=optional

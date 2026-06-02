@@ -70,7 +70,7 @@ The LLM `buy_token` tool also enforces a blacklist check as a hard gate regardle
 ## API Keys
 
 Keys stored in `.env`:
-- `HELIUS_RPC_URL` — Solana RPC (read access to chain data)
+- `CIRCUIT_RPC_URL` — Solana RPC (read access to chain data)
 - `OPENROUTER_API_KEY` — LLM inference spend
 - `TELEGRAM_BOT_TOKEN` — controls your bot
 - `JUPITER_API_KEY` — optional, higher rate limits

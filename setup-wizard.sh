@@ -112,23 +112,23 @@ echo -e "  ${DIM}Used for all Solana queries: wallet balance, token accounts, sw
 echo -e "  ${DIM}A free Helius key gives you 50k credits/day — plenty for normal operation.${NC}"
 echo -e "  ${DIM}Get one (takes 30 seconds):${NC} ${YELLOW}https://helius.dev${NC} ${DIM}→ sign up → copy RPC URL${NC}"
 echo ""
-EXISTING_RPC=$(_env_get "HELIUS_RPC_URL")
+EXISTING_RPC=$(_env_get "CIRCUIT_RPC_URL")
 if [ -n "$EXISTING_RPC" ]; then
   echo -e "  ${DIM}current:${NC}  ${YELLOW}${EXISTING_RPC:0:55}…${NC}"
-  read -rp "  New URL (Enter to keep): " HELIUS_RPC_URL
-  HELIUS_RPC_URL="${HELIUS_RPC_URL:-$EXISTING_RPC}"
+  read -rp "  New URL (Enter to keep): " CIRCUIT_RPC_URL
+  CIRCUIT_RPC_URL="${CIRCUIT_RPC_URL:-$EXISTING_RPC}"
 else
-  read -rp "  Helius RPC URL (Enter to use public): " HELIUS_RPC_URL
+  read -rp "  Helius RPC URL (Enter to use public): " CIRCUIT_RPC_URL
 fi
-if [ -z "$HELIUS_RPC_URL" ]; then
-  HELIUS_RPC_URL="https://api.mainnet-beta.solana.com"
+if [ -z "$CIRCUIT_RPC_URL" ]; then
+  CIRCUIT_RPC_URL="https://api.mainnet-beta.solana.com"
   echo ""
   echo -e "  ${YELLOW}⚠  Using Solana public RPC${NC}"
   echo -e "  ${DIM}  This works but is heavily rate-limited — you may see:${NC}"
   echo -e "  ${DIM}  · Slow balance checks and price lookups${NC}"
   echo -e "  ${DIM}  · Failed swap transactions during high traffic${NC}"
   echo -e "  ${DIM}  · Missed position exits if RPC times out${NC}"
-  echo -e "  ${DIM}  Add HELIUS_RPC_URL to .env later to upgrade.${NC}"
+  echo -e "  ${DIM}  Add CIRCUIT_RPC_URL to .env later to upgrade.${NC}"
 fi
 echo -e "  ${GREEN}✓  RPC configured${NC}"
 
@@ -278,7 +278,7 @@ EXISTING_JUP=$(_env_get "JUPITER_API_KEY")
 cat > "$ENV_FILE" << EOF
 # circuit-agent environment — updated $(date -u +%Y-%m-%dT%H:%M:%SZ)
 AGENT_KEYPAIR=${KEYPAIR}
-HELIUS_RPC_URL=${HELIUS_RPC_URL}
+CIRCUIT_RPC_URL=${CIRCUIT_RPC_URL}
 OPENROUTER_API_KEY=${OPENROUTER_KEY}
 TELEGRAM_BOT_TOKEN=${TG_TOKEN}
 CIRCUIT_INTERNAL_KEY=${CIRCUIT_INTERNAL_KEY}
