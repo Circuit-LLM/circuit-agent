@@ -75,6 +75,7 @@
     "enabled": true,
     "port": 18800,
     "apiKey": "",
-    "_note": "Local web dashboard served at http://localhost:18800. Set apiKey to require ?key=<apiKey> for access. Set enabled:false to disable."
+    "allowCors": "",
+    "_note": "Local web dashboard at http://localhost:18800 (loopback only — use SSH tunnel for remote access). apiKey: require x-api-key header on all API routes. allowCors: explicit origin to allow (e.g. 'http://localhost:3000') — leave empty to disable CORS entirely."
   }
 }
