@@ -70,5 +70,11 @@
   "agentLoop": {
     "intervalMs": 5400000,
     "_note": "How often the agent reasons about and updates its session strategy (default 90 min). The LLM sets mode/patternFilter/minScore for the next window. Modes: active (auto-buy best scorer), selective (LLM gate per candidate), watchOnly (scan only, no buys)."
+  },
+  "dashboard": {
+    "enabled": true,
+    "port": 18800,
+    "apiKey": "",
+    "_note": "Local web dashboard served at http://localhost:18800. Set apiKey to require ?key=<apiKey> for access. Set enabled:false to disable."
   }
 }

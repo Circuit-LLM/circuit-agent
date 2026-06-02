@@ -400,7 +400,15 @@ async function cmdStart() {
     log('info', 'Telegram disabled — add TELEGRAM_BOT_TOKEN to .env or run: node agent.js setup');
   }
 
-  // 5. Heartbeat
+  // 5. Local dashboard
+  const dashboard = require('./lib/dashboard');
+  const dashServer = dashboard.start(cfg, makeCtx());
+  if (dashServer) {
+    const dashPort = cfg.dashboard?.port ?? 18800;
+    log('info', `Dashboard at http://localhost:${dashPort}`);
+  }
+
+  // 6. Heartbeat
   const heartbeat = require('./lib/heartbeat');
   heartbeat.start(cfg, makeCtx(), telegramBot);
 
@@ -423,6 +431,7 @@ async function cmdStart() {
   log('info', 'Agent running', {
     address:    wallet.address.slice(0, 8) + '…',
     telegram:   TG_TOKEN ? 'on' : 'off',
+    dashboard:  `http://localhost:${cfg.dashboard?.port ?? 18800}`,
     heartbeat:  `${(cfg.heartbeat?.intervalMs ?? 300_000) / 60_000}min`,
     monitor:    `${(cfg.strategy?.positionCheckMs ?? 10_000) / 1000}s`,
     scanner:    `${(cfg.strategy?.scanIntervalMs ?? 300_000) / 60_000}min`,
