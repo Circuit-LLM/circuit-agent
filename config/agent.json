@@ -17,7 +17,9 @@
     "trailingStopActivatePct": 4,
     "trailingStopDistancePct": 3,
     "buyCooldownMinutes": 60,
-    "_strategy_note": "buyCooldownMinutes: skip re-entry on the same mint for this many minutes after closing a position."
+    "paperTrading": false,
+    "paperSolBalance": 1.0,
+    "_strategy_note": "buyCooldownMinutes: skip re-entry on the same mint for this many minutes after closing a position. paperTrading: true enables paper mode — no real swaps, free data sources only. paperSolBalance: starting virtual SOL for paper mode."
   },
   "circuit": {
     "minCircuitBalance": 5000,

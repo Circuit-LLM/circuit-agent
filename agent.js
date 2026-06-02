@@ -47,10 +47,11 @@ if (process.env.CIRCUIT_API_URL) cfg.api.baseUrl = process.env.CIRCUIT_API_URL;
 
 // ── Modules ───────────────────────────────────────────────────────────────────
 
-const { CircuitClient }  = require('./lib/circuit');
-const { loadWallet }   = require('./lib/wallet');
-const { SwapExecutor } = require('./lib/swap');
-const positions        = require('./lib/positions');
+const { CircuitClient }    = require('./lib/circuit');
+const { loadWallet }       = require('./lib/wallet');
+const { SwapExecutor }     = require('./lib/swap');
+const { PaperSwapExecutor } = require('./lib/paper-swap');
+const positions             = require('./lib/positions');
 const profile          = require('./lib/profile');
 
 // ── Version ───────────────────────────────────────────────────────────────────
@@ -81,13 +82,21 @@ function initModules() {
     internalKey: INTERNAL_KEY,
     wallet:      { keypair: wallet.keypair, connection: wallet.connection },
   });
-  swap = new SwapExecutor({
-    keypair:     wallet.keypair,
-    connection:  wallet.connection,
-    jupApiKey:   JUP_API_KEY,
-    slippageBps: cfg.strategy?.slippageBps ?? 100,
-  });
-  log('info', 'Agent initialized', { address: wallet.address.slice(0, 8) + '…', apiBase: cfg.api.baseUrl });
+
+  const paperMode = cfg.strategy?.paperTrading === true;
+  if (paperMode) {
+    swap = new PaperSwapExecutor({ initialSolBalance: cfg.strategy?.paperSolBalance ?? 1.0 });
+    log('info', '📝 PAPER TRADING MODE — no real trades will execute',
+      { virtualSol: swap.virtualSolBalance, apiBase: cfg.api.baseUrl });
+  } else {
+    swap = new SwapExecutor({
+      keypair:     wallet.keypair,
+      connection:  wallet.connection,
+      jupApiKey:   JUP_API_KEY,
+      slippageBps: cfg.strategy?.slippageBps ?? 100,
+    });
+    log('info', 'Agent initialized', { address: wallet.address.slice(0, 8) + '…', apiBase: cfg.api.baseUrl });
+  }
 }
 
 function makeCtx() {
