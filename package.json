@@ -1,6 +1,6 @@
 {
   "name": "circuit-agent",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "LLM-powered Solana trading agent with Telegram, tool-use, and CIRCUIT Data API",
   "main": "agent.js",
   "type": "commonjs",
