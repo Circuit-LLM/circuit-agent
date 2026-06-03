@@ -540,6 +540,11 @@ const fmtSol = (n, d=4) => n == null ? '——' : (n >= 0 ? '+' : '') + n.toFixe
 const fmtPct = n => n == null ? '——' : (n >= 0 ? '+' : '') + n.toFixed(1) + '%';
 const fmtUsd = n => n == null ? '' : '$' + Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 const mkEl = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+// HTML-escape helper — use for any attacker-controlled value injected via innerHTML
+// (token symbols, pattern names, gate labels — all come from on-chain or peer data)
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
 function timeAgo(iso) {
   if (!iso) return '——';
   const s = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
@@ -737,7 +742,7 @@ async function loadPositions() {
     const barPct = p.pnlPct != null ? Math.min(Math.abs(p.pnlPct) / 30 * 50, 50) : 0;
     tr.innerHTML = `
       <td>
-        <div class="sym">${p.symbol}</div>
+        <div class="sym">${esc(p.symbol)}</div>
         <div class="mint">${p.mint.slice(0,8)}…${p.mint.slice(-4)}</div>
       </td>
       <td>${p.entryPrice ? p.entryPrice.toExponential(3) : '——'}</td>
@@ -799,7 +804,7 @@ async function loadTrades() {
     const pC = pnlClass(t.pnlPct);
     tr.innerHTML = `
       <td>
-        <div class="sym">${t.symbol}</div>
+        <div class="sym">${esc(t.symbol)}</div>
         <div class="mint">${(t.mint||'').slice(0,8)}…</div>
       </td>
       <td style="font-size:10px;color:var(--text3)">${fmtDate(t.entryTime)}</td>
@@ -839,16 +844,17 @@ async function loadScanner() {
     } else {
       const c = ls.topCandidate;
       const gateHtml = (c.gates?.length)
-        ? c.gates.map(g => `<span style="background:var(--c4);color:var(--red);padding:1px 5px;border:1px solid var(--red);font-size:9px;letter-spacing:1px;margin-right:4px">${g}</span>`).join('')
+        ? c.gates.map(g => `<span style="background:var(--c4);color:var(--red);padding:1px 5px;border:1px solid var(--red);font-size:9px;letter-spacing:1px;margin-right:4px">${esc(g)}</span>`).join('')
         : '<span style="color:var(--green);font-size:9px">all gates passed</span>';
       const statusColor = c.bought ? 'var(--green)' : 'var(--text3)';
+      const liq1h = c.priceChange1h != null ? (c.priceChange1h < 0 ? 'var(--green)' : 'var(--red)') : '';
       lsEl.innerHTML = `
         <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;padding:4px 0">
-          <span style="font-size:14px;font-weight:bold;color:${statusColor}">${c.symbol}</span>
-          <span style="font-size:11px;color:var(--c2)">${c.score}/100</span>
-          <span style="font-size:10px;color:var(--text3);letter-spacing:1px">${c.pattern ?? '?'}</span>
-          ${c.liquidity != null ? `<span style="font-size:10px;color:var(--text3)">liq $${Math.round((c.liquidity||0)/1000)}k</span>` : ''}
-          ${c.priceChange1h != null ? `<span style="font-size:10px;color:${c.priceChange1h<0?'var(--green)':'var(--red)'}">1h ${c.priceChange1h>0?'+':''}${c.priceChange1h.toFixed(1)}%</span>` : ''}
+          <span style="font-size:14px;font-weight:bold;color:${statusColor}">${esc(c.symbol)}</span>
+          <span style="font-size:11px;color:var(--c2)">${+c.score}/100</span>
+          <span style="font-size:10px;color:var(--text3);letter-spacing:1px">${esc(c.pattern ?? '?')}</span>
+          ${c.liquidity != null ? `<span style="font-size:10px;color:var(--text3)">liq $${Math.round(+c.liquidity/1000)}k</span>` : ''}
+          ${c.priceChange1h != null ? `<span style="font-size:10px;color:${liq1h}">1h ${+c.priceChange1h>0?'+':''}${(+c.priceChange1h).toFixed(1)}%</span>` : ''}
         </div>
         <div style="margin-top:6px;font-size:10px;letter-spacing:1px;color:var(--text3)">${c.bought ? '✓ BOUGHT' : 'GATE FAILURES:'}</div>
         <div style="margin-top:4px">${gateHtml}</div>`;
