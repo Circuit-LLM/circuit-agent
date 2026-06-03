@@ -187,6 +187,7 @@ a:hover{color:var(--c);text-decoration:underline}
     <span class="hdr-bal">SOL&nbsp;<span id="hdr-sol">——</span></span>
     <span class="hdr-bal">CIRC&nbsp;<span id="hdr-circ">——</span></span>
     <span class="hdr-bal" id="hdr-sol-usd" style="color:var(--text3)"></span>
+    <span id="hdr-context-blind" style="display:none;font-size:9px;letter-spacing:1.5px;color:#ff4444;border:1px solid #ff444466;padding:2px 6px;margin-left:4px">⚠ BLIND</span>
     <a href="https://circuitllm.xyz" target="_blank" class="hdr-ext">circuitllm.xyz ↗</a>
     <a href="https://circuitllm.xyz/data" target="_blank" class="hdr-ext">OPS Terminal ↗</a>
   </div>
@@ -246,6 +247,7 @@ a:hover{color:var(--c);text-decoration:underline}
           <tr><td class="k">swarm signals</td><td class="v" id="ov-signals">——</td></tr>
           <tr><td class="k">market regime</td><td class="v" id="ov-regime">——</td></tr>
           <tr><td class="k">fear &amp; greed</td><td class="v" id="ov-fg">——</td></tr>
+          <tr><td class="k">context</td><td class="v" id="ov-context">——</td></tr>
           <tr><td class="k">registered</td><td class="v d" id="ov-created">——</td></tr>
         </table>
       </div>
@@ -259,6 +261,20 @@ a:hover{color:var(--c);text-decoration:underline}
         </div>
       </div>
     </div>
+  </div>
+
+  <div class="sec-hdr" style="margin-top:12px"><span>//</span>&nbsp;SESSION STRATEGY</div>
+  <div class="box">
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <span style="font-size:10px;letter-spacing:1.5px;color:var(--text3)">MODE</span>
+      <span id="ov-strat-mode" style="font-size:13px;font-weight:bold;letter-spacing:1px">——</span>
+      <span style="color:var(--border);margin:0 4px">|</span>
+      <span style="font-size:10px;letter-spacing:1.5px;color:var(--text3)">PATTERNS</span>
+      <span id="ov-strat-patterns" style="font-size:11px;color:var(--c2)">——</span>
+      <span style="color:var(--border);margin:0 4px">|</span>
+      <span id="ov-strat-expires" style="font-size:10px;letter-spacing:1px;color:var(--text3)">——</span>
+    </div>
+    <div id="ov-strat-goal" style="margin-top:8px;font-size:11px;color:var(--text2);line-height:1.5;padding:6px 0;border-top:1px solid var(--border2)">——</div>
   </div>
 
 </div>
@@ -374,6 +390,12 @@ a:hover{color:var(--c);text-decoration:underline}
         </table>
       </div>
     </div>
+  </div>
+
+  <div class="sec-hdr" style="margin-top:12px"><span>//</span>&nbsp;LAST SCAN DETAIL</div>
+  <div class="box" id="sc-last-scan-box">
+    <div class="box-hdr">TOP CANDIDATE <span class="box-hdr-r" id="sc-last-ts">——</span></div>
+    <div id="sc-last-scan"><div class="empty dim">no scan data yet</div></div>
   </div>
 
   <div class="sec-hdr" style="margin-top:12px"><span>//</span>&nbsp;SCAN SIGNALS (from swarm)</div>
@@ -624,6 +646,43 @@ async function loadStatus() {
   if (d.fearGreed?.value) set('ov-fg', `${d.fearGreed.value} — ${d.fearGreed.label}`);
   set('ov-regime', '——');
 
+  // Context health — warn if sol or fearGreed is null
+  const hasSol = d.sol != null;
+  const hasFg  = d.fearGreed?.value != null;
+  const isBlind = !hasSol || !hasFg;
+  const blind = document.getElementById('hdr-context-blind');
+  if (blind) blind.style.display = isBlind ? 'inline-block' : 'none';
+  set('ov-context', isBlind
+    ? `⚠ PARTIAL${!hasSol ? ' (no SOL price)' : ''}${!hasFg ? ' (no F&G)' : ''}`
+    : `✓ LIVE  SOL $${d.sol?.price ?? '?'}  F&G ${d.fearGreed?.value}`);
+
+  // Session strategy
+  const st = d.strategy;
+  if (st) {
+    const modeColors = { active: 'var(--green)', selective: 'var(--c2)', watchonly: 'var(--text3)' };
+    const modeEl = document.getElementById('ov-strat-mode');
+    if (modeEl) {
+      modeEl.textContent = (st.mode ?? '——').toUpperCase();
+      modeEl.style.color = modeColors[st.mode?.toLowerCase()] ?? 'var(--text2)';
+    }
+    set('ov-strat-patterns', st.patternFilter?.length ? st.patternFilter.join(', ') : 'ALL PATTERNS');
+    const expiresEl = document.getElementById('ov-strat-expires');
+    if (expiresEl) {
+      if (st.expired) {
+        expiresEl.textContent = 'EXPIRED — waiting for agent-loop';
+        expiresEl.style.color = 'var(--red)';
+      } else if (st.expiresInMs != null) {
+        const mins = Math.round(st.expiresInMs / 60000);
+        expiresEl.textContent = `expires in ${mins}min`;
+        expiresEl.style.color = mins < 10 ? 'var(--c2)' : 'var(--text3)';
+      }
+    }
+    set('ov-strat-goal', st.sessionGoal ?? '——');
+    // Update scanner mode/pattern to reflect LIVE session strategy (not config defaults)
+    set('sc-mode', st.mode?.toUpperCase() ?? '——');
+    set('sc-patterns', st.patternFilter?.length ? st.patternFilter.join(', ') : 'ALL PATTERNS');
+  }
+
   // Scanner config for overview
   if (_config) updateScannerPanel();
 }
@@ -768,6 +827,33 @@ async function loadScanner() {
   if (!d) return;
   _config = d.config;
   updateScannerPanel();
+
+  // Last scan detail — top rejected candidate with gate failures
+  const ls = await api('/api/last-scan');
+  const lsEl = $('sc-last-scan');
+  if (ls && lsEl) {
+    const ts = ls.ts ? timeAgo(ls.ts) : '——';
+    set('sc-last-ts', ts);
+    if (!ls.topCandidate) {
+      lsEl.innerHTML = `<div class="empty dim">no candidates from scan (${ls.totalFromScan ?? 0} returned, ${ls.passedFilter ?? 0} passed filter)</div>`;
+    } else {
+      const c = ls.topCandidate;
+      const gateHtml = (c.gates?.length)
+        ? c.gates.map(g => `<span style="background:var(--c4);color:var(--red);padding:1px 5px;border:1px solid var(--red);font-size:9px;letter-spacing:1px;margin-right:4px">${g}</span>`).join('')
+        : '<span style="color:var(--green);font-size:9px">all gates passed</span>';
+      const statusColor = c.bought ? 'var(--green)' : 'var(--text3)';
+      lsEl.innerHTML = `
+        <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;padding:4px 0">
+          <span style="font-size:14px;font-weight:bold;color:${statusColor}">${c.symbol}</span>
+          <span style="font-size:11px;color:var(--c2)">${c.score}/100</span>
+          <span style="font-size:10px;color:var(--text3);letter-spacing:1px">${c.pattern ?? '?'}</span>
+          ${c.liquidity != null ? `<span style="font-size:10px;color:var(--text3)">liq $${Math.round((c.liquidity||0)/1000)}k</span>` : ''}
+          ${c.priceChange1h != null ? `<span style="font-size:10px;color:${c.priceChange1h<0?'var(--green)':'var(--red)'}">1h ${c.priceChange1h>0?'+':''}${c.priceChange1h.toFixed(1)}%</span>` : ''}
+        </div>
+        <div style="margin-top:6px;font-size:10px;letter-spacing:1px;color:var(--text3)">${c.bought ? '✓ BOUGHT' : 'GATE FAILURES:'}</div>
+        <div style="margin-top:4px">${gateHtml}</div>`;
+    }
+  }
 
   // Scan quality feed from swarm
   const sf = await api('/api/swarm');

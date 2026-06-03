@@ -21,7 +21,6 @@ yarn-error.log*
 package-lock.json
 
 # Local guides and notes (not for distribution)
-walkthrough.md
 
 # OS
 .DS_Store

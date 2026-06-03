@@ -8,7 +8,7 @@ You only need to include the keys you want to change:
 // config/agent.local.json
 {
   "llm": {
-    "model": "x-ai/grok-4.1-fast",
+    "model": "google/gemini-2.5-flash-lite",
     "openrouterKey": "sk-or-..."
   },
   "strategy": {
@@ -63,7 +63,7 @@ You only need to include the keys you want to change:
 ```json
 {
   "llm": {
-    "model": "x-ai/grok-4.1-fast",
+    "model": "google/gemini-2.5-flash-lite",
     "provider": "openrouter",   // "openrouter" or "ollama"
     "baseUrl": "",              // Custom base URL (overrides provider default)
     "openrouterKey": ""         // Or set OPENROUTER_API_KEY env var

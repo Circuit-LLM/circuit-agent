@@ -1,19 +1,20 @@
 # Architecture
 
-circuit-agent is an autonomous Solana trading agent built around four parallel loops and a queue-based LLM processor.
+circuit-agent is an autonomous Solana trading agent built around five parallel loops and a queue-based LLM processor.
 
 ---
 
-## The Four Loops
+## The Five Loops
 
 ```
 auto-scanner  (every 5 min)   scan → score → rug-check → buy best candidate
 position-mon  (every 10s)     fetch prices → check stops → auto-sell on trigger
 heartbeat     (every 5 min)   build status → alert exceptions → registry ping
+agent-loop    (every 90 min)  LLM sets session strategy (mode, patterns, buy cap)
 reflect       (every 4h)      review trades → tune config → share swarm insights
 ```
 
-None of these loops require the LLM. The LLM is only invoked for Telegram chat, exception escalation, and the reflect cycle.
+The scanner, monitor, and heartbeat are fully deterministic — no LLM in the hot path. The agent-loop calls the LLM once every 90 minutes to set session strategy. Reflect calls the LLM every 4 hours for deep self-improvement. Telegram chat and exception escalation also use the LLM on demand, all sharing the same queue.
 
 ---
 
