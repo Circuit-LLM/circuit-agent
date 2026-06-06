@@ -1,14 +1,15 @@
 'use strict';
 
 // Drop-in replacement for @solana/buffer-layout-utils 0.2.0
-// Replaces bigint-buffer (vulnerable C native addon) with native Node.js BigInt.
-// Requires Node.js >= 18. All exports are API-compatible with the original.
+// Uses native Node.js BigInt (Node >= 18) instead of the bigint-buffer C native addon.
+// Eliminates GHSA-3gc7-fjrx-p6mg from the dependency tree while maintaining
+// full API compatibility with the original package.
 
 const { blob, u8 } = require('@solana/buffer-layout');
 const { PublicKey } = require('@solana/web3.js');
 const BigNumber = require('bignumber.js');
 
-// ── Native BigInt helpers (replaces bigint-buffer) ─────────────────────────
+// ── Native BigInt helpers ────────────────────────────────────────────────────
 
 function toBigIntLE(buf) {
   const b = Buffer.isBuffer(buf) ? buf : Buffer.from(buf);
@@ -17,6 +18,14 @@ function toBigIntLE(buf) {
   let result = 0n;
   for (let i = b.length - 1; i >= 0; i--) result = (result << 8n) | BigInt(b[i]);
   return result;
+}
+
+function toBufferLE(val, length) {
+  const buf = Buffer.alloc(length);
+  if (length === 8) { buf.writeBigUInt64LE(BigInt.asUintN(64, val), 0); return buf; }
+  let v = BigInt.asUintN(length * 8, val);
+  for (let i = 0; i < length; i++) { buf[i] = Number(v & 0xFFn); v >>= 8n; }
+  return buf;
 }
 
 function toBigIntBE(buf) {
@@ -28,30 +37,22 @@ function toBigIntBE(buf) {
   return result;
 }
 
-function toBufferLE(bigInt, length) {
+function toBufferBE(val, length) {
   const buf = Buffer.alloc(length);
-  if (length === 8) { buf.writeBigUInt64LE(BigInt.asUintN(64, bigInt), 0); return buf; }
-  let v = BigInt.asUintN(length * 8, bigInt);
-  for (let i = 0; i < length; i++) { buf[i] = Number(v & 0xFFn); v >>= 8n; }
-  return buf;
-}
-
-function toBufferBE(bigInt, length) {
-  const buf = Buffer.alloc(length);
-  if (length === 8) { buf.writeBigUInt64BE(BigInt.asUintN(64, bigInt), 0); return buf; }
-  let v = BigInt.asUintN(length * 8, bigInt);
+  if (length === 8) { buf.writeBigUInt64BE(BigInt.asUintN(64, val), 0); return buf; }
+  let v = BigInt.asUintN(length * 8, val);
   for (let i = length - 1; i >= 0; i--) { buf[i] = Number(v & 0xFFn); v >>= 8n; }
   return buf;
 }
 
-// ── encodeDecode helper ─────────────────────────────────────────────────────
+// ── encodeDecode ─────────────────────────────────────────────────────────────
 
 const encodeDecode = (layout) => ({
   decode: layout.decode.bind(layout),
   encode: layout.encode.bind(layout),
 });
 
-// ── bigInt / bigIntBE layout factories ─────────────────────────────────────
+// ── bigInt / bigIntBE layout factories ───────────────────────────────────────
 
 const bigInt = (length) => (property) => {
   const layout = blob(length, property);
@@ -69,18 +70,7 @@ const bigIntBE = (length) => (property) => {
   return layout;
 };
 
-// ── Pre-made bigint layouts ─────────────────────────────────────────────────
-
-const u64    = bigInt(8);
-const u64be  = bigIntBE(8);
-const u128   = bigInt(16);
-const u128be = bigIntBE(16);
-const u192   = bigInt(24);
-const u192be = bigIntBE(24);
-const u256   = bigInt(32);
-const u256be = bigIntBE(32);
-
-// ── bool layout ────────────────────────────────────────────────────────────
+// ── bool layout ──────────────────────────────────────────────────────────────
 
 const bool = (property) => {
   const layout = u8(property);
@@ -90,7 +80,7 @@ const bool = (property) => {
   return layout;
 };
 
-// ── publicKey layout ───────────────────────────────────────────────────────
+// ── publicKey layout ─────────────────────────────────────────────────────────
 
 const publicKey = (property) => {
   const layout = blob(32, property);
@@ -100,27 +90,32 @@ const publicKey = (property) => {
   return layout;
 };
 
-// ── decimal / WAD ──────────────────────────────────────────────────────────
+// ── decimal / WAD ─────────────────────────────────────────────────────────────
 
 const WAD = new BigNumber('1e+18');
 
 const decimal = (property) => {
-  const layout = u128(property);
+  const layout = bigInt(16)(property);
   const { encode, decode } = encodeDecode(layout);
   layout.decode = (buffer, offset) => new BigNumber(decode(buffer, offset).toString()).div(WAD);
   layout.encode = (val, buffer, offset) => encode(BigInt(val.times(WAD).integerValue().toString()), buffer, offset);
   return layout;
 };
 
-// ── Exports ────────────────────────────────────────────────────────────────
+// ── Exports ───────────────────────────────────────────────────────────────────
 
 module.exports = {
   encodeDecode,
-  bigInt, bigIntBE,
-  u64, u64be,
-  u128, u128be,
-  u192, u192be,
-  u256, u256be,
+  bigInt,
+  bigIntBE,
+  u64:    bigInt(8),
+  u64be:  bigIntBE(8),
+  u128:   bigInt(16),
+  u128be: bigIntBE(16),
+  u192:   bigInt(24),
+  u192be: bigIntBE(24),
+  u256:   bigInt(32),
+  u256be: bigIntBE(32),
   bool,
   publicKey,
   WAD,

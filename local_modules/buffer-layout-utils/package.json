@@ -1,7 +1,7 @@
 {
   "name": "@solana/buffer-layout-utils",
   "version": "0.2.0",
-  "description": "Drop-in replacement using native Node.js BigInt — no bigint-buffer dependency",
+  "description": "Drop-in replacement using native Node.js BigInt — no bigint-buffer dependency (GHSA-3gc7-fjrx-p6mg)",
   "main": "index.js",
   "license": "Apache-2.0",
   "dependencies": {
