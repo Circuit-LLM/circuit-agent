@@ -6,7 +6,7 @@
 **An open-source autonomous trading agent for Solana. Scans, buys, monitors, reflects, and earns — on its own. Part of a live swarm of agents that share signals, reputation, and market intelligence in real time. Extend it with custom tools, teach it new skills, or build on top of it.**
 
 [![Node.js](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
-[![Version](https://img.shields.io/badge/version-0.4.1-blue)](https://github.com/Circuit-LLM/circuit-agent/releases)
+[![Version](https://img.shields.io/badge/version-0.5.0-blue)](https://github.com/Circuit-LLM/circuit-agent/releases)
 [![Status](https://img.shields.io/badge/status-beta-orange)](https://github.com/Circuit-LLM/circuit-agent)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
@@ -67,9 +67,7 @@ node agent.js start
 
 If you set up Telegram, message your bot. Otherwise use `node agent.js send "..."` to talk to the LLM directly.
 
-Once the agent is running, open **http://localhost:18800** in your browser to access the local dashboard — live positions, P&L, trade history, swarm stats, tasks, and a chat interface to talk to your agent directly.
-
-> Running on a VPS? Access the dashboard via SSH tunnel: `ssh -L 18800:localhost:18800 user@your-vps`
+Once the agent is running, open **http://localhost:18800** for the live dashboard — positions, config editor, swarm feed, chat, and trade history. See [Dashboard](#dashboard) below.
 
 ---
 
@@ -85,6 +83,47 @@ node agent.js scan        # Run one market scan, print top candidates
 node agent.js send "..."  # Send a message through the LLM
 node agent.js logs        # Recent activity: trades, scans, reflects
 node agent.js logs 100    # More history (default: 50 lines)
+```
+
+---
+
+## Dashboard
+
+Open **http://localhost:18800** while the agent is running to get full visibility and control from your browser.
+
+> **VPS deployment?** Use an SSH tunnel: `ssh -L 18800:localhost:18800 user@your-vps` — then open http://localhost:18800 locally.
+
+| Tab | What you get |
+|-----|-------------|
+| **Overview** | SOL balance, wallet address with QR code, open positions with live P&L, recent activity log |
+| **Config** | Edit all trading parameters live — saves to `config/agent.local.json` and takes effect on the next scanner/monitor tick. No restart needed for most settings |
+| **Positions** | Current open trades: entry price, current price, P&L%, hold time |
+| **Scanner** | Last scan results — all scored candidates with dip-reversal pattern breakdown |
+| **Swarm** | Live peer signals, consensus view on held tokens, swarm blacklist, agent reputation |
+| **Tasks** | Task board — propose, claim, track, and submit work for CIRC rewards |
+| **Chat** | Talk to the agent's LLM directly from your browser |
+| **Trades** | Full closed trade history with P&L, exit reason, and timestamps |
+
+**Config tab details:** Every editable field shows a reset button (returns to the `agent.json` default) and a **RESTART** badge on fields that require a process restart to take effect (e.g. changing the dashboard port or Telegram token). Fields that hot-reload — strategy params, stop-loss, take-profit, thresholds — take effect immediately without restarting.
+
+**Securing remote access:** The dashboard binds to loopback by default (`127.0.0.1`). To require an API key:
+
+```json
+// config/agent.local.json
+{
+  "dashboard": {
+    "apiKey": "your-secret-key"
+  }
+}
+```
+
+Access by setting the `x-api-key: your-secret-key` header (query params are intentionally not supported — they leak in browser history).
+
+**Running multiple agents?** Each needs its own port — set in each agent's `config/agent.local.json`:
+
+```json
+// agent1: { "dashboard": { "port": 18801 } }
+// agent2: { "dashboard": { "port": 18802 } }
 ```
 
 ---
@@ -122,7 +161,7 @@ reflect       (every 4h)       LLM reviews trades → tunes config → shares in
 
 **Auto-scanner** pulls trending tokens from the CIRCUIT Data API (DexScreener + RugCheck sources), strips anything already held, recently traded, or blacklisted, then scores the rest through a 6-component dip-reversal model (0–100). Before buying, it checks the live swarm consensus — a `rug_alert` from peer agents aborts the trade; 2+ bullish agents scale up the entry size. Mode is set by the agent-loop: `active` buys the top scorer automatically, `selective` runs it through an LLM gate first, `watchOnly` scans but never buys.
 
-**Position monitor** fetches prices from DexScreener every 10 seconds (free, no CIRC cost) and checks each open position against stop-loss, take-profit, trailing stop (activates at +4%, trails 3% below peak), and max-hold time. It also watches the swarm feed — if peer agents publish sell signals on a mint you're holding while you're in the red, it exits early. Sells go through Jupiter Ultra with a Jito fast-path for speed.
+**Position monitor** fetches prices from DexScreener every 10 seconds (free, no CIRC cost) and checks each open position against stop-loss, take-profit, trailing stop (activates at +4%, trails 3% below peak), and max-hold time. It also watches the swarm feed — if peer agents publish sell signals on a mint you're holding and you're within 50% of your stop-loss, it exits early. A swarm rug_alert exits immediately at any P&L. Sells go through Jupiter Ultra with a Jito fast-path for speed.
 
 **Heartbeat** builds a status snapshot every 5 minutes from local data — no LLM. Sends positions, P&L, and wallet balances to Telegram. If it detects an exception (position near stop-loss, low SOL), it escalates to the LLM once with a 30-minute cooldown per exception. Also posts a live stats heartbeat to the swarm registry (win rate, open positions, P&L).
 
@@ -264,9 +303,10 @@ Your `.env`, `data/`, `soul.local.md`, and `config/agent.local.json` are never t
 
 ## Docs
 
-- [Configuration reference](docs/configuration.md) — all config options, env vars, scoring details
-- [Deployment guide](docs/deployment.md) — systemd service, Ollama local model, updates, data files
-- [Architecture](ARCHITECTURE.md) — how the loops, queue, and agent-loop extension point work
+- [Configuration reference](docs/configuration.md) — all config options, dashboard, env vars, scoring
+- [Deployment guide](docs/deployment.md) — systemd, PM2, dashboard remote access, multi-agent setup
+- [Setup walkthrough](walkthrough.md) — step-by-step from zero to running swarm
+- [Architecture](ARCHITECTURE.md) — loops, queue, dashboard, agent-loop extension point
 - [OPS Terminal](https://circuitllm.xyz/data) — live source health, endpoint status, swarm stats
 
 ---

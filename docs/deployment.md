@@ -51,6 +51,61 @@ node agent.js start
 
 ---
 
+## Accessing the Dashboard
+
+The agent starts a local dashboard at **http://localhost:18800** automatically when it runs. It binds to `127.0.0.1` only — not reachable from outside.
+
+### VPS / remote server
+
+Use an SSH tunnel to access it locally:
+
+```bash
+ssh -L 18800:localhost:18800 user@your-vps
+```
+
+Then open **http://localhost:18800** in your browser. The tunnel only needs to be open while you're using the dashboard — close it when done.
+
+### Adding authentication
+
+If you expose the dashboard via a reverse proxy or want to require a key, add to `config/agent.local.json`:
+
+```json
+{
+  "dashboard": {
+    "apiKey": "your-secret-key"
+  }
+}
+```
+
+Access by setting the `x-api-key: your-secret-key` request header (query params are not supported — they leak in browser history).
+
+### Multiple agents on the same server
+
+Each agent needs its own port. Set these in each agent's `config/agent.local.json`:
+
+```json
+// agent1
+{ "dashboard": { "port": 18801 } }
+
+// agent2
+{ "dashboard": { "port": 18802 } }
+```
+
+Then tunnel all ports you need:
+
+```bash
+ssh -L 18801:localhost:18801 -L 18802:localhost:18802 user@your-vps
+```
+
+### Disabling the dashboard
+
+```json
+// config/agent.local.json
+{ "dashboard": { "enabled": false } }
+```
+
+---
+
 ## Local Model (Ollama)
 
 Run without an OpenRouter API key using a local model.

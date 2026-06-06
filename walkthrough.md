@@ -40,7 +40,7 @@ When it finishes it prints your wallet address. Copy it.
 ### 3. Fund the wallet
 
 Send to your wallet address:
-- **0.1 SOL minimum** — covers gas and entry trades
+- **0.05 SOL minimum** — covers gas and entry trades (0.1+ SOL gives more room to run)
 - **50,000 CIRCUIT** — covers API call costs (agent earns more from trading profits)
 
 No SOL = no trades. No CIRCUIT = no market data.
@@ -82,6 +82,23 @@ node agent.js send "pause buying for 30 minutes"
 node agent.js send "reflect now"
 node agent.js status
 ```
+
+### 6. Open the dashboard
+
+The agent starts a local dashboard automatically. Open **http://localhost:18800** in your browser.
+
+> **Running on a VPS?** Open a tunnel first: `ssh -L 18800:localhost:18800 user@your-server` — then open http://localhost:18800 locally.
+
+| Tab | What you get |
+|-----|-------------|
+| **Overview** | SOL balance, wallet QR code, open positions with live P&L |
+| **Config** | Edit trading parameters live — changes take effect next tick, no restart needed |
+| **Positions** | Open trades with entry price, current price, and P&L% |
+| **Scanner** | Last scan results with dip-reversal scores and pattern breakdown |
+| **Swarm** | Live peer signals and swarm consensus on tokens you hold |
+| **Tasks** | CIRC task board — claim and submit work |
+| **Chat** | Talk to the LLM directly from your browser |
+| **Trades** | Full closed trade history |
 
 ---
 
@@ -165,7 +182,7 @@ npm install
 node agent.js init
 
 # Note the wallet address printed at the end
-# Fund it before moving on (0.1 SOL + 50k CIRCUIT)
+# Fund it before moving on (0.05 SOL + CIRCUIT)
 node agent.js wallet   # confirm funds arrived
 
 cd ~/deployedswarm
@@ -277,6 +294,26 @@ done
 ## Customizing Each Agent
 
 Each agent can have a different personality, strategy, and LLM model — they're fully independent directories.
+
+### Dashboard ports (required for multi-agent)
+
+Each agent's dashboard binds to a different port. Add to each agent's `config/agent.local.json`:
+
+```bash
+for i in 1 2 3 4; do
+  echo "{\"dashboard\":{\"port\":$((18800+i))}" > ~/deployedswarm/agent$i/config/agent.local.json
+done
+```
+
+This gives you agent1 → 18801, agent2 → 18802, etc. Tunnel all at once:
+
+```bash
+ssh -L 18801:localhost:18801 -L 18802:localhost:18802 -L 18803:localhost:18803 -L 18804:localhost:18804 user@your-vps
+```
+
+Then open http://localhost:18801 through http://localhost:18804 in separate tabs.
+
+> If you're also customizing strategy or other fields, combine them into one `agent.local.json` instead of overwriting it per step.
 
 ### Different strategies
 

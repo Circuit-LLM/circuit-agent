@@ -1,6 +1,6 @@
 {
   "name": "circuit-agent",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "LLM-powered Solana trading agent with Telegram, tool-use, and CIRCUIT Data API",
   "main": "agent.js",
   "type": "commonjs",
@@ -18,7 +18,8 @@
     "bs58": "^6.0.0",
     "grammy": "^1.41.1",
     "node-fetch": "^3.3.2",
-    "openai": "^6.27.0"
+    "openai": "^6.27.0",
+    "qrcode": "^1.5.4"
   },
   "engines": {
     "node": ">=18"

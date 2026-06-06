@@ -145,6 +145,59 @@ a:hover{color:var(--c);text-decoration:underline}
 /* ── Config ── */
 .cfg-group{margin-bottom:16px}
 .cfg-group-title{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--c3);padding:4px 12px;background:var(--bg2);border-bottom:1px solid var(--border2)}
+.cfg-input{font-family:'Courier New',monospace;font-size:12px;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:3px 8px;outline:none;min-width:80px;max-width:180px}
+.cfg-input:focus{border-color:var(--c3)}
+.cfg-input.dirty{border-color:var(--amber)!important;background:rgba(255,149,0,.08)!important}
+.cfg-input.saved{border-color:var(--green)!important;background:rgba(122,204,96,.08)!important}
+.cfg-input.error{border-color:var(--red)!important;background:rgba(224,68,68,.08)!important}
+.cfg-checkbox{width:14px;height:14px;cursor:pointer;accent-color:var(--c);vertical-align:middle}
+.cfg-checkbox-wrap{display:flex;align-items:center;gap:6px;justify-content:flex-end}
+.cfg-pattern-wrap{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+.cfg-pattern-item{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text2);cursor:pointer;user-select:none}
+.cfg-pattern-item input{width:12px;height:12px;accent-color:var(--c);cursor:pointer}
+.cfg-pattern-item.dirty{color:var(--amber)}
+.cfg-field-error{font-size:9px;color:var(--red);display:block;margin-top:2px;text-align:right;min-height:14px}
+.cfg-reset{font-size:9px;color:var(--text3);cursor:pointer;background:none;border:none;font-family:inherit;padding:0 0 0 8px;text-decoration:underline;opacity:.6}
+.cfg-reset:hover{color:var(--amber);opacity:1}
+.cfg-restart-badge{font-size:8px;padding:1px 4px;border:1px solid var(--amber2);color:var(--amber);margin-left:6px;letter-spacing:1px;vertical-align:middle;display:inline-block}
+.cfg-save-bar{position:fixed;bottom:0;left:0;right:0;background:var(--bg1);border-top:1px solid var(--border);padding:10px 20px;display:none;align-items:center;gap:10px;z-index:300}
+.cfg-save-bar.visible{display:flex}
+.cfg-save-bar-msg{color:var(--text3);font-size:11px;flex:1}
+.cfg-save-bar-msg strong{color:var(--amber)}
+.cfg-btn{font-family:'Courier New',monospace;font-size:10px;letter-spacing:1px;padding:5px 16px;cursor:pointer;border:1px solid}
+.cfg-btn-save{border-color:var(--green);background:var(--green3);color:var(--green)}
+.cfg-btn-save:hover{background:var(--green2)}
+.cfg-btn-save:disabled{opacity:.4;cursor:default}
+.cfg-btn-discard{border-color:var(--border);background:transparent;color:var(--text3)}
+.cfg-btn-discard:hover{border-color:var(--c3);color:var(--text2)}
+.cfg-restart-warn{background:rgba(255,149,0,.07);border:1px solid var(--amber2);padding:8px 12px;font-size:10px;color:var(--amber);letter-spacing:.5px;margin-bottom:12px;display:none}
+.cfg-restart-warn.visible{display:block}
+.cfg-unit{font-size:10px;color:var(--text3);margin-left:4px}
+
+/* ── Wallet ── */
+.wallet-wrap{display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap}
+.wallet-qr-box{flex-shrink:0;border:1px solid var(--c4);background:var(--bg);padding:4px;position:relative;width:164px}
+.wallet-qr-box img{display:block;width:156px;height:156px;image-rendering:pixelated}
+.wallet-qr-box::after{content:'SCAN TO FUND';position:absolute;bottom:0;left:0;right:0;text-align:center;font-size:7px;letter-spacing:2px;color:var(--c3);padding:2px 0;background:var(--bg1);border-top:1px solid var(--c4)}
+.wallet-qr-placeholder{width:156px;height:156px;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--text3);letter-spacing:1px}
+.wallet-details{flex:1;min-width:220px}
+.wallet-addr-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border2)}
+.wallet-addr-full{font-family:'Courier New',monospace;font-size:11px;color:var(--c2);letter-spacing:.5px;word-break:break-all;flex:1;line-height:1.5}
+.copy-btn{font-family:'Courier New',monospace;font-size:8px;letter-spacing:1.5px;padding:3px 8px;border:1px solid var(--c4);background:var(--c5);color:var(--c3);cursor:pointer;flex-shrink:0;transition:all .15s;white-space:nowrap}
+.copy-btn:hover{border-color:var(--c3);color:var(--c);background:var(--c4)}
+.copy-btn.copied{border-color:var(--green);color:var(--green);background:var(--green3)}
+.wallet-kv{width:100%;border-collapse:collapse}
+.wallet-kv tr{border-bottom:1px solid var(--border2)}
+.wallet-kv tr:last-child{border-bottom:none}
+.wallet-kv td{padding:5px 0;vertical-align:middle}
+.wallet-kv .wk{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);width:1%;white-space:nowrap;padding-right:16px}
+.wallet-kv .wv{font-size:13px;font-weight:bold;color:var(--text);text-align:right}
+.wallet-kv .wv-sub{font-size:10px;color:var(--text3);margin-left:6px;font-weight:normal}
+.wallet-kv .wv.sol-val{color:var(--c)}
+.wallet-kv .wv.circ-val{color:var(--blue)}
+.wallet-kv .wv.portfolio-val{color:var(--green)}
+.wallet-kv .wv.warn{color:var(--amber)}
+.wallet-network-badge{display:inline-block;font-size:8px;padding:1px 6px;border:1px solid var(--c4);color:var(--c3);letter-spacing:1.5px;margin-top:2px}
 
 /* ── Tasks ── */
 .task-card{padding:10px 12px;border-bottom:1px solid var(--border2)}
@@ -187,6 +240,7 @@ a:hover{color:var(--c);text-decoration:underline}
     <span class="hdr-bal">SOL&nbsp;<span id="hdr-sol">——</span></span>
     <span class="hdr-bal">CIRC&nbsp;<span id="hdr-circ">——</span></span>
     <span class="hdr-bal" id="hdr-sol-usd" style="color:var(--text3)"></span>
+    <span class="hdr-bal" id="hdr-portfolio" style="display:none;color:var(--green);font-weight:bold"></span>
     <span id="hdr-context-blind" style="display:none;font-size:9px;letter-spacing:1.5px;color:#ff4444;border:1px solid #ff444466;padding:2px 6px;margin-left:4px">⚠ BLIND</span>
     <a href="https://circuitllm.xyz" target="_blank" class="hdr-ext">circuitllm.xyz ↗</a>
     <a href="https://circuitllm.xyz/data" target="_blank" class="hdr-ext">OPS Terminal ↗</a>
@@ -231,6 +285,46 @@ a:hover{color:var(--c);text-decoration:underline}
       <div class="stat-label">Total P&amp;L (SOL)</div>
       <div class="stat-val" id="ov-pnl">——</div>
       <div class="stat-sub" id="ov-pnl-sub">——</div>
+    </div>
+  </div>
+
+  <div class="sec-hdr" style="margin-top:16px"><span>//</span>&nbsp;WALLET</div>
+  <div class="box" id="wallet-box">
+    <div class="box-hdr">SOLANA WALLET
+      <span class="box-hdr-r" id="wallet-refresh-ts">——</span>
+    </div>
+    <div style="padding:14px 16px">
+      <div class="wallet-wrap">
+        <div class="wallet-qr-box" id="wallet-qr-wrap">
+          <div class="wallet-qr-placeholder dim">generating…</div>
+        </div>
+        <div class="wallet-details">
+          <div class="wallet-addr-row">
+            <span class="wallet-addr-full" id="wallet-addr-full">——</span>
+            <button class="copy-btn" id="wallet-copy-btn" onclick="copyWalletAddress()">COPY</button>
+          </div>
+          <table class="wallet-kv">
+            <tr>
+              <td class="wk">SOL</td>
+              <td class="wv sol-val" id="wk-sol">——<span class="wv-sub" id="wk-sol-usd"></span></td>
+            </tr>
+            <tr>
+              <td class="wk">CIRCUIT</td>
+              <td class="wv circ-val" id="wk-circ">——<span class="wv-sub" id="wk-circ-sub"></span></td>
+            </tr>
+            <tr>
+              <td class="wk">Portfolio</td>
+              <td class="wv portfolio-val" id="wk-portfolio">——</td>
+            </tr>
+            <tr>
+              <td class="wk">Network</td>
+              <td class="wv" style="text-align:right">
+                <span class="wallet-network-badge">SOLANA MAINNET</span>
+              </td>
+            </tr>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -510,13 +604,27 @@ a:hover{color:var(--c);text-decoration:underline}
 <div id="tab-config" class="tab-panel">
 
   <div style="margin-top:4px;margin-bottom:8px;font-size:10px;color:var(--text3);padding:6px 0">
-    Live configuration — edit <code style="color:var(--c2)">config/agent.local.json</code> to override defaults.
+    Edit settings below — changes are saved to <code style="color:var(--c2)">config/agent.local.json</code> and take effect on the next agent cycle.
+    Read-only fields require direct file edits or restart.
   </div>
+
+  <div id="cfg-restart-warn" class="cfg-restart-warn">
+    ⚠ One or more changes require an agent restart to take effect.
+    &nbsp; Restart via PM2: <code style="color:var(--c2)">pm2 restart &lt;agent-name&gt;</code>
+  </div>
+
   <div id="config-sections"><div class="empty dim">loading…</div></div>
 
 </div>
 
 </div><!-- /main -->
+
+<!-- ═══════════════════ CONFIG SAVE BAR ═══════════════════ -->
+<div id="cfg-save-bar" class="cfg-save-bar">
+  <span class="cfg-save-bar-msg"><strong id="cfg-dirty-count">0</strong> unsaved change(s)</span>
+  <button class="cfg-btn cfg-btn-discard" onclick="discardConfig()">DISCARD</button>
+  <button id="cfg-save-btn" class="cfg-btn cfg-btn-save" onclick="saveConfig()">SAVE CHANGES</button>
+</div>
 
 <script>
 // ── State ─────────────────────────────────────────────────────────────────────
@@ -608,6 +716,121 @@ async function api(path, opts={}) {
     if (!r.ok) return null;
     return r.json();
   } catch { return null; }
+}
+
+// Returns response body even on error status — needed for config write error messages.
+async function apiPost(path, data) {
+  try {
+    const r = await fetch(path, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+      signal: AbortSignal.timeout(10000),
+    });
+    return r.json();
+  } catch { return null; }
+}
+
+async function apiDelete(path) {
+  try {
+    const r = await fetch(path, { method: 'DELETE', signal: AbortSignal.timeout(10000) });
+    return r.json();
+  } catch { return null; }
+}
+
+// ── WALLET ────────────────────────────────────────────────────────────────────
+let _walletData = null;
+
+async function loadWallet() {
+  const d = await api('/api/wallet');
+  if (!d) return;
+  _walletData = d;
+
+  const addr = d.address ?? '——';
+  set('wallet-addr-full', addr);
+  set('wallet-refresh-ts', new Date().toLocaleTimeString());
+
+  // SOL
+  const solEl = $('wk-sol');
+  if (solEl) {
+    solEl.childNodes[0].textContent = d.sol != null ? d.sol.toFixed(5) + ' SOL' : '——';
+    const sub = $('wk-sol-usd');
+    if (sub) sub.textContent = d.solUsd != null ? '  ≈ ' + fmtUsd(d.solUsd) : '';
+    if (d.sol != null) solEl.className = 'wv sol-val' + (d.sol < 0.02 ? ' warn' : '');
+  }
+
+  // CIRC
+  const circEl = $('wk-circ');
+  if (circEl) {
+    circEl.childNodes[0].textContent = d.circ != null ? Math.round(d.circ).toLocaleString() + ' CIRC' : '——';
+    const sub = $('wk-circ-sub');
+    if (sub) {
+      // rough estimate: each x402 call costs ~60 CIRC
+      const calls = d.circ != null ? Math.floor(d.circ / 60) : null;
+      sub.textContent = calls != null ? `  ≈ ${calls.toLocaleString()} API calls` : '';
+    }
+    if (d.circ != null) circEl.className = 'wv circ-val' + (d.circ < 1000 ? ' warn' : '');
+  }
+
+  // Portfolio total
+  const portEl = $('wk-portfolio');
+  if (portEl) {
+    if (d.portfolioUsd != null) {
+      portEl.textContent = fmtUsd(d.portfolioUsd) + ' USD total';
+      portEl.className = 'wv portfolio-val';
+    } else {
+      portEl.textContent = d.sol != null ? d.sol.toFixed(5) + ' SOL' : '——';
+      portEl.className = 'wv';
+    }
+  }
+
+  // Header portfolio badge
+  const hdrPort = $('hdr-portfolio');
+  if (hdrPort && d.portfolioUsd != null) {
+    hdrPort.textContent = fmtUsd(d.portfolioUsd);
+    hdrPort.style.display = 'inline';
+    hdrPort.title = 'Total portfolio value (SOL + open positions)';
+  }
+
+  // QR code — load the SVG image
+  if (d.hasQr) {
+    const wrap = $('wallet-qr-wrap');
+    if (wrap && !wrap.querySelector('img')) {
+      const img = document.createElement('img');
+      img.src = '/api/wallet/qr';
+      img.alt = 'Wallet QR';
+      img.style.cssText = 'display:block;width:156px;height:156px;image-rendering:pixelated';
+      img.onerror = () => { img.replaceWith(mkEl('div','wallet-qr-placeholder','QR unavailable')); };
+      wrap.innerHTML = '';
+      wrap.appendChild(img);
+    }
+  } else {
+    const wrap = $('wallet-qr-wrap');
+    if (wrap) wrap.innerHTML = '<div class="wallet-qr-placeholder">no wallet</div>';
+  }
+}
+
+function copyWalletAddress() {
+  const addr = _walletData?.address ?? $('wallet-addr-full')?.textContent;
+  if (!addr || addr === '——') return;
+  navigator.clipboard.writeText(addr).then(() => {
+    const btn = $('wallet-copy-btn');
+    if (!btn) return;
+    btn.textContent = 'COPIED!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'COPY'; btn.classList.remove('copied'); }, 2000);
+  }).catch(() => {
+    // Fallback for non-HTTPS contexts (dashboard served over HTTP)
+    const ta = document.createElement('textarea');
+    ta.value = addr;
+    ta.style.cssText = 'position:fixed;opacity:0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    const btn = $('wallet-copy-btn');
+    if (btn) { btn.textContent = 'COPIED!'; btn.classList.add('copied'); setTimeout(() => { btn.textContent = 'COPY'; btn.classList.remove('copied'); }, 2000); }
+  });
 }
 
 // ── OVERVIEW ──────────────────────────────────────────────────────────────────
@@ -1112,45 +1335,299 @@ function chatKeydown(e) {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
 }
 
-// ── CONFIG ────────────────────────────────────────────────────────────────────
+// ── CONFIG (editable settings) ─────────────────────────────────────────────────
+// Client-side mirror of the backend FIELD_SPEC — drives input rendering.
+const FIELD_SPEC_FE = {
+  strategy: {
+    stopLossPct:             { type:'number',  min:-50,       max:-0.5,       step:0.5,    unit:'%'   },
+    takeProfitPct:           { type:'number',  min:1,         max:500,        step:1,      unit:'%'   },
+    maxHoldMinutes:          { type:'integer', min:1,         max:480,        step:1,      unit:'min' },
+    entryBudgetSol:          { type:'number',  min:0.001,     max:5,          step:0.001,  unit:'SOL' },
+    minScanScore:            { type:'integer', min:0,         max:100,        step:1               },
+    maxOpenPositions:        { type:'integer', min:1,         max:20,         step:1               },
+    trailingStopActivatePct: { type:'number',  min:0,         max:100,        step:0.5,    unit:'%'   },
+    trailingStopDistancePct: { type:'number',  min:0.5,       max:20,         step:0.5,    unit:'%'   },
+    buyCooldownMinutes:      { type:'integer', min:0,         max:1440,       step:1,      unit:'min' },
+    paperTrading:            { type:'boolean'                                                       },
+    scanIntervalMs:          { type:'integer', min:60000,     max:3600000,    step:60000,  unit:'ms'  },
+  },
+  risk: {
+    maxEntry1hDropPct:       { type:'number',  min:-90,       max:-1,         step:1,      unit:'%'   },
+    safeOnly:                { type:'boolean'                                                       },
+  },
+  agentLoop: {
+    intervalMs:              { type:'integer', min:900000,    max:86400000,   step:60000,  unit:'ms'  },
+    patternFilter:           { type:'array',   allowed:['SHALLOW-DIP','DIP-BUY','REVERSAL','DEEP-REVERSAL'] },
+  },
+  survival: {
+    minSolWarning:           { type:'number',  min:0.001,     max:10,         step:0.001,  unit:'SOL' },
+    minSolPause:             { type:'number',  min:0.001,     max:5,          step:0.001,  unit:'SOL' },
+    circuitReinvestPct:      { type:'number',  min:0,         max:1,          step:0.05             },
+  },
+  reflect: {
+    intervalMs:              { type:'integer', min:3600000,   max:604800000,  step:3600000, unit:'ms' },
+    autoApply:               { type:'boolean'                                                       },
+  },
+  heartbeat: {
+    intervalMs:              { type:'integer', min:60000,     max:86400000,   step:60000,  unit:'ms'  },
+    contextRefreshMs:        { type:'integer', min:60000,     max:86400000,   step:60000,  unit:'ms'  },
+  },
+  llm: {
+    model:                   { type:'string',  maxLen:100,    restart:true                           },
+  },
+  swarm: {
+    autoPublish:             { type:'boolean'                                                       },
+    minReputationToFollow:   { type:'integer', min:0,         max:100,        step:1               },
+    consensusBoostFactor:    { type:'number',  min:1,         max:5,          step:0.1             },
+  },
+};
+
+const RESTART_FIELDS_FE = new Set([
+  'llm.model', 'llm.provider',
+  'heartbeat.intervalMs', 'heartbeat.contextRefreshMs',
+  'reflect.intervalMs',
+]);
+
+let _dirty    = new Map(); // 'section.key' → {section, key, value}
+let _cfgBusy  = false;
+
+function _cfgId(section, key) { return `cfg-${section}-${key}`; }
+
+function _markDirty(section, key, value) {
+  _dirty.set(`${section}.${key}`, { section, key, value });
+  const bar = $('cfg-save-bar');
+  if (bar) bar.classList.add('visible');
+  set('cfg-dirty-count', _dirty.size);
+}
+
+function _clearDirty() {
+  _dirty.clear();
+  const bar = $('cfg-save-bar');
+  if (bar) bar.classList.remove('visible');
+}
+
+async function saveConfig() {
+  if (_cfgBusy || !_dirty.size) return;
+  _cfgBusy = true;
+  const saveBtn = $('cfg-save-btn');
+  if (saveBtn) saveBtn.disabled = true;
+
+  let anyRestart = false;
+  for (const { section, key, value } of _dirty.values()) {
+    const inpEl  = $(_cfgId(section, key));
+    const errEl  = $(`cfg-err-${section}-${key}`);
+    if (errEl) errEl.textContent = '';
+
+    const r = await apiPost('/api/config', { section, key, value });
+    if (!r || r.error) {
+      if (inpEl) { inpEl.classList.remove('dirty'); inpEl.classList.add('error'); }
+      if (errEl) errEl.textContent = r?.error || 'save failed';
+      _cfgBusy = false;
+      if (saveBtn) saveBtn.disabled = false;
+      return; // Stop on first error, let user fix it
+    }
+
+    if (inpEl) {
+      inpEl.classList.remove('dirty');
+      inpEl.classList.add('saved');
+      setTimeout(() => inpEl && inpEl.classList.remove('saved'), 1800);
+    }
+    if (r.needsRestart) anyRestart = true;
+    if (r.config) _config = r.config;
+    _dirty.delete(`${section}.${key}`);
+  }
+
+  _cfgBusy = false;
+  if (saveBtn) saveBtn.disabled = false;
+  _clearDirty();
+  if (anyRestart) {
+    const warn = $('cfg-restart-warn');
+    if (warn) warn.classList.add('visible');
+  }
+  updateScannerPanel();
+}
+
+async function discardConfig() {
+  _clearDirty();
+  const warn = $('cfg-restart-warn');
+  if (warn) warn.classList.remove('visible');
+  await loadConfig();
+}
+
+async function resetConfigField(section, key) {
+  const r = await apiDelete(`/api/config?section=${encodeURIComponent(section)}&key=${encodeURIComponent(key)}`);
+  if (!r) return;
+  if (r.config) _config = r.config;
+  _dirty.delete(`${section}.${key}`);
+  if (!_dirty.size) _clearDirty();
+  else set('cfg-dirty-count', _dirty.size);
+  updateScannerPanel();
+  // Re-render the form so inputs show base defaults
+  await loadConfig();
+}
+
 async function loadConfig() {
   const d = await api('/api/config');
   if (!d) return;
   _config = d.config;
+  _dirty.clear();
+  const bar = $('cfg-save-bar');
+  if (bar) bar.classList.remove('visible');
+
   const el = $('config-sections');
   el.innerHTML = '';
+
   const GROUPS = [
-    ['strategy', 'Strategy'],
-    ['swarm', 'Swarm'],
-    ['llm', 'LLM'],
-    ['heartbeat', 'Heartbeat'],
-    ['reflect', 'Reflect'],
+    ['strategy',  'Strategy'],
+    ['risk',      'Risk'],
     ['agentLoop', 'Agent Loop'],
+    ['survival',  'Survival'],
+    ['heartbeat', 'Heartbeat'],
+    ['reflect',   'Reflect'],
+    ['llm',       'LLM'],
+    ['swarm',     'Swarm'],
     ['dashboard', 'Dashboard'],
-    ['risk', 'Risk'],
-    ['survival', 'Survival'],
   ];
-  GROUPS.forEach(([key, label]) => {
-    const group = d.config[key];
+
+  GROUPS.forEach(([section, label]) => {
+    const group = d.config[section];
     if (!group || typeof group !== 'object') return;
     const wrap = mkEl('div','cfg-group');
     wrap.appendChild(mkEl('div','cfg-group-title', '// '+label.toUpperCase()));
     const table = mkEl('table','kv');
-    Object.entries(group).forEach(([k, v]) => {
-      if (k.startsWith('_')) return;
-      const tr = document.createElement('tr');
-      const td1 = mkEl('td','k', k);
+
+    Object.entries(group).forEach(([key, curVal]) => {
+      if (key.startsWith('_')) return;
+      const spec   = FIELD_SPEC_FE[section]?.[key];
+      const isRestart = spec?.restart || RESTART_FIELDS_FE.has(`${section}.${key}`);
+
+      const tr  = document.createElement('tr');
+      const td1 = mkEl('td','k');
+      td1.textContent = key;
+      if (isRestart) td1.appendChild(mkEl('span','cfg-restart-badge','RESTART'));
+
       const td2 = mkEl('td','v');
-      const display = Array.isArray(v) ? v.join(', ') : v === null ? 'null' : String(v);
-      td2.textContent = display;
-      if (typeof v === 'boolean') td2.className = v ? 'v g' : 'v r';
-      else if (typeof v === 'number') td2.className = 'v c';
+      td2.style.padding = '4px 12px';
+
+      if (!spec) {
+        // Read-only — render as plain text (same as before)
+        const display = Array.isArray(curVal) ? curVal.join(', ') : curVal === null ? 'null' : String(curVal);
+        td2.textContent = display;
+        if (typeof curVal === 'boolean') td2.className = curVal ? 'v g' : 'v r';
+        else if (typeof curVal === 'number') td2.className = 'v c';
+
+      } else if (spec.type === 'boolean') {
+        const id   = _cfgId(section, key);
+        const wrap2 = mkEl('div','cfg-checkbox-wrap');
+        const cb   = document.createElement('input');
+        cb.type    = 'checkbox';
+        cb.className = 'cfg-checkbox';
+        cb.id      = id;
+        cb.checked = !!curVal;
+        const lbl  = document.createElement('label');
+        lbl.htmlFor  = id;
+        lbl.textContent = cb.checked ? 'enabled' : 'disabled';
+        lbl.style.cssText = 'font-size:11px;color:var(--text2);cursor:pointer';
+        cb.addEventListener('change', () => {
+          lbl.textContent = cb.checked ? 'enabled' : 'disabled';
+          _markDirty(section, key, cb.checked);
+        });
+        const rst = mkEl('button','cfg-reset','reset');
+        rst.onclick = () => resetConfigField(section, key);
+        rst.title = 'Revert to base default';
+        wrap2.appendChild(cb); wrap2.appendChild(lbl); wrap2.appendChild(rst);
+        td2.appendChild(wrap2);
+
+      } else if (spec.type === 'array' && spec.allowed) {
+        const curArr  = Array.isArray(curVal) ? curVal : [];
+        const patWrap = mkEl('div','cfg-pattern-wrap');
+        spec.allowed.forEach(pattern => {
+          const item = mkEl('label','cfg-pattern-item');
+          const cb   = document.createElement('input');
+          cb.type    = 'checkbox';
+          cb.checked = curArr.includes(pattern);
+          cb.dataset.pattern = pattern;
+          cb.addEventListener('change', () => {
+            const allCbs = patWrap.querySelectorAll('input[type=checkbox]');
+            const newArr = [...allCbs].filter(c => c.checked).map(c => c.dataset.pattern);
+            // Mark the whole group dirty
+            patWrap.querySelectorAll('.cfg-pattern-item').forEach(it => it.classList.toggle('dirty', true));
+            _markDirty(section, key, newArr);
+          });
+          item.appendChild(cb);
+          item.appendChild(document.createTextNode(pattern));
+          patWrap.appendChild(item);
+        });
+        const errSpan = mkEl('span','cfg-field-error');
+        errSpan.id = `cfg-err-${section}-${key}`;
+        const rst = mkEl('button','cfg-reset','reset');
+        rst.onclick = () => resetConfigField(section, key);
+        rst.title = 'Revert to base default';
+        td2.appendChild(patWrap);
+        const metaRow = document.createElement('div');
+        metaRow.style.textAlign = 'right';
+        metaRow.appendChild(errSpan); metaRow.appendChild(rst);
+        td2.appendChild(metaRow);
+
+      } else if (spec.type === 'string') {
+        const id  = _cfgId(section, key);
+        const inp = document.createElement('input');
+        inp.type  = 'text';
+        inp.className = 'cfg-input';
+        inp.id    = id;
+        inp.value = curVal ?? '';
+        inp.maxLength = spec.maxLen ?? 200;
+        inp.addEventListener('input', () => {
+          inp.classList.add('dirty'); inp.classList.remove('error','saved');
+          _markDirty(section, key, inp.value);
+        });
+        const errSpan = mkEl('span','cfg-field-error');
+        errSpan.id = `cfg-err-${section}-${key}`;
+        const rst = mkEl('button','cfg-reset','reset');
+        rst.onclick = () => resetConfigField(section, key);
+        const wrap2 = document.createElement('div'); wrap2.style.textAlign = 'right';
+        wrap2.appendChild(inp);
+        wrap2.appendChild(rst); wrap2.appendChild(errSpan);
+        td2.appendChild(wrap2);
+
+      } else {
+        // number / integer
+        const id  = _cfgId(section, key);
+        const inp = document.createElement('input');
+        inp.type  = 'number';
+        inp.className = 'cfg-input';
+        inp.id    = id;
+        inp.value = curVal ?? '';
+        if (spec.min  != null) inp.min  = spec.min;
+        if (spec.max  != null) inp.max  = spec.max;
+        if (spec.step != null) inp.step = spec.step;
+        else inp.step = spec.type === 'integer' ? 1 : 'any';
+        inp.addEventListener('input', () => {
+          inp.classList.add('dirty'); inp.classList.remove('error','saved');
+          const parsed = spec.type === 'integer'
+            ? parseInt(inp.value, 10)
+            : parseFloat(inp.value);
+          if (!isNaN(parsed)) _markDirty(section, key, parsed);
+        });
+        const errSpan = mkEl('span','cfg-field-error');
+        errSpan.id = `cfg-err-${section}-${key}`;
+        const rst = mkEl('button','cfg-reset','reset');
+        rst.onclick = () => resetConfigField(section, key);
+        const wrap2 = document.createElement('div'); wrap2.style.textAlign = 'right';
+        wrap2.appendChild(inp);
+        if (spec.unit) wrap2.appendChild(mkEl('span','cfg-unit',spec.unit));
+        wrap2.appendChild(rst); wrap2.appendChild(errSpan);
+        td2.appendChild(wrap2);
+      }
+
       tr.appendChild(td1); tr.appendChild(td2);
       table.appendChild(tr);
     });
+
     wrap.appendChild(table);
     el.appendChild(wrap);
   });
+
   updateScannerPanel();
 }
 
@@ -1185,11 +1662,13 @@ async function init() {
   if (cfgData) { _config = cfgData.config; }
   await loadStatus();
   await loadActivity();
+  loadWallet(); // async, non-blocking — wallet + QR can load in background
   connectSSE();
 
   // Auto-refresh cycles
   setInterval(loadStatus,   30000);
   setInterval(loadActivity, 20000);
+  setInterval(loadWallet,  120000); // wallet balances refresh every 2 min
 
   setInterval(() => {
     if (_activeTab === 'positions') loadPositions();
