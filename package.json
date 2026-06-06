@@ -10,7 +10,8 @@
     "setup": "node agent.js setup",
     "wallet": "node agent.js wallet",
     "status": "node agent.js status",
-    "scan": "node agent.js scan"
+    "scan": "node agent.js scan",
+    "postinstall": "node scripts/postinstall.js"
   },
   "dependencies": {
     "@solana/spl-token": "^0.4.14",
@@ -25,6 +26,7 @@
     "node": ">=18"
   },
   "overrides": {
-    "uuid": ">=11.1.1"
+    "uuid": ">=11.1.1",
+    "@solana/buffer-layout-utils": "file:./local_modules/buffer-layout-utils"
   }
 }
