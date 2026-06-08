@@ -14,12 +14,15 @@
     "stopLossPct": -6,
     "takeProfitPct": 25,
     "maxHoldMinutes": 45,
-    "trailingStopActivatePct": 4,
+    "trailingStopActivatePct": 2,
     "trailingStopDistancePct": 3,
     "buyCooldownMinutes": 60,
     "paperTrading": false,
     "paperSolBalance": 1.0,
-    "_strategy_note": "buyCooldownMinutes: skip re-entry on the same mint for this many minutes after closing a position. paperTrading: true enables paper mode — no real swaps, free data sources only. paperSolBalance: starting virtual SOL for paper mode."
+    "deadMoneyMinutes": 15,
+    "deadMoneyRangePct": 1.5,
+    "deadMoneyMinHoldMinutes": 8,
+    "_strategy_note": "buyCooldownMinutes: skip re-entry on the same mint for this many minutes after closing a position. paperTrading: true enables paper mode — no real swaps, free data sources only. paperSolBalance: starting virtual SOL for paper mode. deadMoneyMinutes/deadMoneyRangePct/deadMoneyMinHoldMinutes: exit early if pnl stays within ±deadMoneyRangePct for deadMoneyMinutes (after holding at least deadMoneyMinHoldMinutes)."
   },
   "circuit": {
     "minCircuitBalance": 5000,

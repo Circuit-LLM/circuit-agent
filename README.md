@@ -6,7 +6,7 @@
 **An open-source autonomous trading agent for Solana. Scans, buys, monitors, reflects, and earns — on its own. Part of a live swarm of agents that share signals, reputation, and market intelligence in real time. Extend it with custom tools, teach it new skills, or build on top of it.**
 
 [![Node.js](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
-[![Version](https://img.shields.io/badge/version-0.5.3-blue)](https://github.com/Circuit-LLM/circuit-agent/releases)
+[![Version](https://img.shields.io/badge/version-0.5.4-blue)](https://github.com/Circuit-LLM/circuit-agent/releases)
 [![Status](https://img.shields.io/badge/status-beta-orange)](https://github.com/Circuit-LLM/circuit-agent)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
@@ -312,6 +312,12 @@ Your `.env`, `data/`, `soul.local.md`, and `config/agent.local.json` are never t
 ---
 
 ## Changelog
+
+### v0.5.4
+- **Dead-money early exit** — positions that stay flat within ±1.5% for 15+ minutes after the first 8 minutes of holding are exited automatically (`reason: dead-money`). Genuine reversals move decisively within the first 10-15 minutes; a position stuck at breakeven is occupying a slot with no purpose. This converts slow max-hold bleed into fast flat exits and frees position slots sooner.
+- **Trailing stop activation lowered to 2%** — trailing stop now activates once a position peaks at +2% (was +4%). More winning trades get downside protection before they retrace. Configurable via `trailingStopActivatePct`.
+- **Entry bar raised to score 68** — `minScanScore` raised from 62 to 68 across all swarm agents. In low-conviction market conditions (F&G < 40), holding out for stronger setups produces better outcomes than trading more frequently on marginal scores.
+- **Dead-money config keys added** — `deadMoneyMinutes` (default 15), `deadMoneyRangePct` (default 1.5), `deadMoneyMinHoldMinutes` (default 8) in `config/agent.json`. All configurable without a restart (config hot-reloads on every monitor tick).
 
 ### v0.5.3
 - **Security hardening** — comprehensive audit pass addressing 10 findings across the builder, monitor, scanner, dashboard, memory, and pre-buy gate modules.
