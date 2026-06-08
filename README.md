@@ -6,7 +6,7 @@
 **An open-source autonomous trading agent for Solana. Scans, buys, monitors, reflects, and earns — on its own. Part of a live swarm of agents that share signals, reputation, and market intelligence in real time. Extend it with custom tools, teach it new skills, or build on top of it.**
 
 [![Node.js](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
-[![Version](https://img.shields.io/badge/version-0.5.1-blue)](https://github.com/Circuit-LLM/circuit-agent/releases)
+[![Version](https://img.shields.io/badge/version-0.5.2-blue)](https://github.com/Circuit-LLM/circuit-agent/releases)
 [![Status](https://img.shields.io/badge/status-beta-orange)](https://github.com/Circuit-LLM/circuit-agent)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
@@ -308,6 +308,28 @@ Your `.env`, `data/`, `soul.local.md`, and `config/agent.local.json` are never t
 - [Setup walkthrough](walkthrough.md) — step-by-step from zero to running swarm
 - [Architecture](ARCHITECTURE.md) — loops, queue, dashboard, agent-loop extension point
 - [OPS Terminal](https://circuitllm.xyz/data) — live source health, endpoint status, swarm stats
+
+---
+
+## Changelog
+
+### v0.5.2
+- **Race condition fixes** — three concurrent execution paths (position monitor, auto-scanner, and LLM tools) could race on swap execution. A new `trade-lock.js` module provides process-wide per-mint locks shared across all three paths, preventing duplicate sell and buy transactions from landing on-chain.
+- **Trade history accuracy** — LLM-triggered sells (`sell_token` tool) were writing `holdMinutes: NaN` to trade history due to a missing `exitTime` field. Fixed.
+- **TP confirmation gate on partial sells** — the 2-tick take-profit confirmation guard was not being reset after a partial sell, causing the gate to be bypassed on the next attempt. Fixed.
+- **Heartbeat phantom P&L** — the 5-minute heartbeat was falling back to USD price as if it were a SOL price for USDC-quoted tokens, producing massively inflated P&L in status messages. Removed the unsafe fallback.
+- **Peak tracking** — concurrent monitor ticks could race on disk writes to the peak P&L field. Replaced with an in-memory cache flushed to disk under the sell lock only.
+- **Session buy counter** — concurrent buys of different tokens could both read and increment the same session buy count, allowing the `maxBuysThisSession` cap to be exceeded. Replaced with a module-level atomic counter.
+
+### v0.5.1
+- Phantom P&L fix — monitor now fetches WSOL in the same DexScreener batch as held positions and converts USD-pair prices to SOL terms. Eliminates false take-profit triggers caused by ~64× inflated P&L readings for non-SOL-quoted pairs.
+- Price-stale emergency exit — positions with no DexScreener price data for 30+ consecutive ticks (~5 min) now trigger an emergency exit. Prevents positions from being held indefinitely when a token rugs or delists.
+- Trailing stop `minHoldBeforeTpMinutes` guard — suppresses take-profit for the first N minutes after entry to absorb DexScreener price lag on fresh buys.
+- Entry pattern + score tracked through to trade history for pattern-level analytics.
+- Swarm recent-buy coordination — scanner now checks the swarm feed before buying and skips mints purchased by any swarm peer in the last 30 minutes.
+
+### v0.5.0
+- Initial public release. Auto-scanner, position monitor, agent-loop, reflect, heartbeat, Telegram, dashboard, swarm signals, task board.
 
 ---
 
