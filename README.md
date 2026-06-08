@@ -6,7 +6,7 @@
 **An open-source autonomous trading agent for Solana. Scans, buys, monitors, reflects, and earns — on its own. Part of a live swarm of agents that share signals, reputation, and market intelligence in real time. Extend it with custom tools, teach it new skills, or build on top of it.**
 
 [![Node.js](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
-[![Version](https://img.shields.io/badge/version-0.5.2-blue)](https://github.com/Circuit-LLM/circuit-agent/releases)
+[![Version](https://img.shields.io/badge/version-0.5.3-blue)](https://github.com/Circuit-LLM/circuit-agent/releases)
 [![Status](https://img.shields.io/badge/status-beta-orange)](https://github.com/Circuit-LLM/circuit-agent)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
@@ -312,6 +312,19 @@ Your `.env`, `data/`, `soul.local.md`, and `config/agent.local.json` are never t
 ---
 
 ## Changelog
+
+### v0.5.3
+- **Security hardening** — comprehensive audit pass addressing 10 findings across the builder, monitor, scanner, dashboard, memory, and pre-buy gate modules.
+  - `config/agent.local.json`, `soul.local.md`, `config/system-prompt.md` added to write blocklist — all three are hot-loaded into every LLM call and were writable attack vectors.
+  - `CIRCUIT_RPC_URL` (embeds Helius API key) stripped from child process env in `run_script` and `bash` tools.
+  - Pre-buy gate now fails closed on timeout or API error — a gate that approves on failure is not a gate.
+  - Swarm `rug_alert` exits now require RugCheck re-verification before acting; `_getSwarmSignals` applies `minReputationToFollow` threshold (default 40) to filter zero-rep agents.
+  - `send_token` tool gains a per-round guard matching the existing `buy_token` pattern.
+  - Dashboard POST body capped at 64 KB.
+  - `save_note` and `save_memory` content truncated at the persistence layer (key: 80, value: 500, category: 30 chars) — both inject into every system prompt.
+  - `install_package` regex tightened to reject local filesystem paths (`./foo`, `../bar`, `/absolute`).
+  - `read_file` sensitive-directory blocklist (`~/.ssh`, `~/.aws`, `~/.gnupg`, `~/.kube`, `~/.config/gcloud`) with symlink resolution via `fs.realpathSync` to prevent bypass.
+- **PM2 restart loop fix** — PID guard now waits up to 3s for the previous process to exit before declaring a conflict, eliminating the 7-restart startup loop that occurred on every `pm2 restart`.
 
 ### v0.5.2
 - **Race condition fixes** — three concurrent execution paths (position monitor, auto-scanner, and LLM tools) could race on swap execution. A new `trade-lock.js` module provides process-wide per-mint locks shared across all three paths, preventing duplicate sell and buy transactions from landing on-chain.

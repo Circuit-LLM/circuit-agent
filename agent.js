@@ -344,13 +344,25 @@ async function cmdStart() {
   if (fs.existsSync(PID_FILE)) {
     const existingPid = parseInt(fs.readFileSync(PID_FILE, 'utf8').trim(), 10);
     if (existingPid && existingPid !== process.pid) {
-      try {
-        process.kill(existingPid, 0); // throws if process doesn't exist
+      // Under PM2, the manager kills the old process and spawns the new one nearly
+      // simultaneously. The old process may still be running its SIGTERM handler
+      // when we check, causing spurious "already running" errors and PM2 restart loops.
+      // Wait up to 3s for the old process to exit before giving up.
+      let alive = true;
+      for (let attempt = 0; attempt < 6; attempt++) {
+        try {
+          process.kill(existingPid, 0); // throws ESRCH if process is gone
+          await new Promise(r => setTimeout(r, 500));
+        } catch {
+          alive = false;
+          break;
+        }
+      }
+      if (alive) {
         console.error(`ERROR: Agent is already running (PID ${existingPid}). Stop it first or delete data/agent.pid.`);
         process.exit(1);
-      } catch {
-        // Stale PID file — process is gone, proceed
       }
+      // Process is gone — stale PID file, proceed
     }
   }
   fs.writeFileSync(PID_FILE, String(process.pid));
