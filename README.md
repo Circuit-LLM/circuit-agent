@@ -6,7 +6,7 @@
 **An open-source autonomous trading agent for Solana. Scans, buys, monitors, reflects, and earns — on its own. Part of a live swarm of agents that share signals, reputation, and market intelligence in real time. Extend it with custom tools, teach it new skills, or build on top of it.**
 
 [![Node.js](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
-[![Version](https://img.shields.io/badge/version-0.5.5-blue)](https://github.com/Circuit-LLM/circuit-agent/releases)
+[![Version](https://img.shields.io/badge/version-0.5.6-blue)](https://github.com/Circuit-LLM/circuit-agent/releases)
 [![Status](https://img.shields.io/badge/status-beta-orange)](https://github.com/Circuit-LLM/circuit-agent)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
@@ -312,6 +312,11 @@ Your `.env`, `data/`, `soul.local.md`, and `config/agent.local.json` are never t
 ---
 
 ## Changelog
+
+### v0.5.6
+- **L1 — Dead-letter queue cleanup**: Files in `data/queue/dead-letter/` are now purged after 7 days. Cleanup runs once at startup and then daily via a non-blocking `setInterval`. Previously these files accumulated indefinitely on long-running agents.
+- **L2 — Log rotation keeps 3 backups**: `processor.log` now rotates to `.1` → `.2` → `.3` (30 MB total history) instead of overwriting a single `.1` backup. Trade reasoning from the prior session is no longer lost after two log rotations.
+- **L3 — `bignumber.js` pinned to exact version**: `local_modules/buffer-layout-utils/package.json` previously declared `"bignumber.js": "^9.0.1"` (range), placing it outside `npm audit` scope. Pinned to `"9.3.1"` — the exact version currently installed — to document the audited state and remove semver range uncertainty.
 
 ### v0.5.5
 Second security audit pass — 10 additional findings across builder tools, agent init, scanner, and dashboard.
