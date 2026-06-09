@@ -6,7 +6,7 @@
 **An open-source autonomous trading agent for Solana. Scans, buys, monitors, reflects, and earns — on its own. Part of a live swarm of agents that share signals, reputation, and market intelligence in real time. Extend it with custom tools, teach it new skills, or build on top of it.**
 
 [![Node.js](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
-[![Version](https://img.shields.io/badge/version-0.5.4-blue)](https://github.com/Circuit-LLM/circuit-agent/releases)
+[![Version](https://img.shields.io/badge/version-0.5.5-blue)](https://github.com/Circuit-LLM/circuit-agent/releases)
 [![Status](https://img.shields.io/badge/status-beta-orange)](https://github.com/Circuit-LLM/circuit-agent)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
@@ -312,6 +312,19 @@ Your `.env`, `data/`, `soul.local.md`, and `config/agent.local.json` are never t
 ---
 
 ## Changelog
+
+### v0.5.5
+Second security audit pass — 10 additional findings across builder tools, agent init, scanner, and dashboard.
+
+- **C1 — bash blocklist expanded**: Added bypass-vector patterns missed in v0.5.3: `python3`/`node`/`awk` .env reads, `curl --data @file` exfiltration, download-then-execute (`curl -o … && bash`), `rm -rf ~` home-wipe, and `crontab` persistence backdoor. Prior blocklist only covered `cat`/`grep` and pipe-to-shell.
+- **C2 — write_file sensitive-dir protection**: `write_file` now applies the same `BLOCKED_READ_DIRS` check added to `read_file` in v0.5.3. Previously an LLM could write to `~/.ssh/authorized_keys` to add an SSH backdoor even though reading that path was blocked. Shell config files (`.bashrc`, `.zshrc`, `.gitconfig`, `.npmrc`, `.netrc`, etc.) directly under `HOME_ROOT` are also blocked.
+- **C3 — install_package runs with `--ignore-scripts`**: npm lifecycle scripts (`preinstall`/`postinstall`) execute arbitrary code at install time. Adding `--ignore-scripts` prevents a malicious package from immediately exfiltrating secrets or modifying local modules on install.
+- **H2 — reputation filter now enforced in auto-scanner recent-buy path**: `minReputationToFollow` was applied in `monitor.js` (v0.5.3) but not in `auto-scanner.js`. A zero-rep agent could publish `buy_signal` entries to suppress legitimate buys via the recent-buy filter. The same reputation threshold is now applied before adding a mint to `recentlyBought`.
+- **H3 — keypair no longer passed as CLI argument during init**: `node agent.js init` previously called `setup-wizard.js --keypair <base58>`, exposing the private key in `/proc/<pid>/cmdline` for the duration of setup. The keypair is now passed via `CIRCUIT_SETUP_KEYPAIR` environment variable (readable only by the process owner at `/proc/<pid>/environ`) and deleted immediately on consumption.
+- **M1 — `.env.example` corrected**: Variable was documented as `HELIUS_RPC_URL`; the runtime reads `CIRCUIT_RPC_URL`. A user copying `.env.example` verbatim would silently use the public RPC with no Helius key.
+- **M2 — `CIRCUIT_API_URL` override validated**: The env var now requires `https://` or `http://localhost` — an `http://` non-localhost URL would redirect all CIRCUIT payments to an attacker's server. Unsafe values are rejected with a startup warning.
+- **M3 — `.env` parser strips inline comments**: `KEY=value # comment` previously stored `value # comment` as the key value, causing silent authentication failures for keys with trailing comments.
+- **M4 — `/api/chat` rate-limited at 10 req/min per IP**: Prevents QUEUE_INCOMING flood from rapid-fire chat commands, each of which can instruct the LLM to execute trades.
 
 ### v0.5.4
 - **Dead-money early exit** — positions that stay flat within ±1.5% for 15+ minutes after the first 8 minutes of holding are exited automatically (`reason: dead-money`). Genuine reversals move decisively within the first 10-15 minutes; a position stuck at breakeven is occupying a slot with no purpose. This converts slow max-hold bleed into fast flat exits and frees position slots sooner.
