@@ -6,7 +6,7 @@
 **An open-source autonomous trading agent for Solana. Scans, buys, monitors, reflects, and earns — on its own. Part of a live swarm of agents that share signals, reputation, and market intelligence in real time. Extend it with custom tools, teach it new skills, or build on top of it.**
 
 [![Node.js](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
-[![Version](https://img.shields.io/badge/version-0.5.1-blue)](https://github.com/Circuit-LLM/circuit-agent/releases)
+[![Version](https://img.shields.io/badge/version-0.5.9-blue)](https://github.com/Circuit-LLM/circuit-agent/releases)
 [![Status](https://img.shields.io/badge/status-beta-orange)](https://github.com/Circuit-LLM/circuit-agent)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
@@ -308,6 +308,65 @@ Your `.env`, `data/`, `soul.local.md`, and `config/agent.local.json` are never t
 - [Setup walkthrough](walkthrough.md) — step-by-step from zero to running swarm
 - [Architecture](ARCHITECTURE.md) — loops, queue, dashboard, agent-loop extension point
 - [OPS Terminal](https://circuitllm.xyz/data) — live source health, endpoint status, swarm stats
+
+---
+
+## Changelog
+
+### v0.5.6
+- **L1 — Dead-letter queue cleanup**: Files in `data/queue/dead-letter/` are now purged after 7 days. Cleanup runs once at startup and then daily via a non-blocking `setInterval`. Previously these files accumulated indefinitely on long-running agents.
+- **L2 — Log rotation keeps 3 backups**: `processor.log` now rotates to `.1` → `.2` → `.3` (30 MB total history) instead of overwriting a single `.1` backup. Trade reasoning from the prior session is no longer lost after two log rotations.
+- **L3 — `bignumber.js` pinned to exact version**: `local_modules/buffer-layout-utils/package.json` previously declared `"bignumber.js": "^9.0.1"` (range), placing it outside `npm audit` scope. Pinned to `"9.3.1"` — the exact version currently installed — to document the audited state and remove semver range uncertainty.
+
+### v0.5.5
+Second security audit pass — 10 additional findings across builder tools, agent init, scanner, and dashboard.
+
+- **C1 — bash blocklist expanded**: Added bypass-vector patterns missed in v0.5.3: `python3`/`node`/`awk` .env reads, `curl --data @file` exfiltration, download-then-execute (`curl -o … && bash`), `rm -rf ~` home-wipe, and `crontab` persistence backdoor. Prior blocklist only covered `cat`/`grep` and pipe-to-shell.
+- **C2 — write_file sensitive-dir protection**: `write_file` now applies the same `BLOCKED_READ_DIRS` check added to `read_file` in v0.5.3. Previously an LLM could write to `~/.ssh/authorized_keys` to add an SSH backdoor even though reading that path was blocked. Shell config files (`.bashrc`, `.zshrc`, `.gitconfig`, `.npmrc`, `.netrc`, etc.) directly under `HOME_ROOT` are also blocked.
+- **C3 — install_package runs with `--ignore-scripts`**: npm lifecycle scripts (`preinstall`/`postinstall`) execute arbitrary code at install time. Adding `--ignore-scripts` prevents a malicious package from immediately exfiltrating secrets or modifying local modules on install.
+- **H2 — reputation filter now enforced in auto-scanner recent-buy path**: `minReputationToFollow` was applied in `monitor.js` (v0.5.3) but not in `auto-scanner.js`. A zero-rep agent could publish `buy_signal` entries to suppress legitimate buys via the recent-buy filter. The same reputation threshold is now applied before adding a mint to `recentlyBought`.
+- **H3 — keypair no longer passed as CLI argument during init**: `node agent.js init` previously called `setup-wizard.js --keypair <base58>`, exposing the private key in `/proc/<pid>/cmdline` for the duration of setup. The keypair is now passed via `CIRCUIT_SETUP_KEYPAIR` environment variable (readable only by the process owner at `/proc/<pid>/environ`) and deleted immediately on consumption.
+- **M1 — `.env.example` corrected**: Variable was documented as `HELIUS_RPC_URL`; the runtime reads `CIRCUIT_RPC_URL`. A user copying `.env.example` verbatim would silently use the public RPC with no Helius key.
+- **M2 — `CIRCUIT_API_URL` override validated**: The env var now requires `https://` or `http://localhost` — an `http://` non-localhost URL would redirect all CIRCUIT payments to an attacker's server. Unsafe values are rejected with a startup warning.
+- **M3 — `.env` parser strips inline comments**: `KEY=value # comment` previously stored `value # comment` as the key value, causing silent authentication failures for keys with trailing comments.
+- **M4 — `/api/chat` rate-limited at 10 req/min per IP**: Prevents QUEUE_INCOMING flood from rapid-fire chat commands, each of which can instruct the LLM to execute trades.
+
+### v0.5.4
+- **Dead-money early exit** — positions that stay flat within ±1.5% for 15+ minutes after the first 8 minutes of holding are exited automatically (`reason: dead-money`). Genuine reversals move decisively within the first 10-15 minutes; a position stuck at breakeven is occupying a slot with no purpose. This converts slow max-hold bleed into fast flat exits and frees position slots sooner.
+- **Trailing stop activation lowered to 2%** — trailing stop now activates once a position peaks at +2% (was +4%). More winning trades get downside protection before they retrace. Configurable via `trailingStopActivatePct`.
+- **Entry bar raised to score 68** — `minScanScore` raised from 62 to 68 across all swarm agents. In low-conviction market conditions (F&G < 40), holding out for stronger setups produces better outcomes than trading more frequently on marginal scores.
+- **Dead-money config keys added** — `deadMoneyMinutes` (default 15), `deadMoneyRangePct` (default 1.5), `deadMoneyMinHoldMinutes` (default 8) in `config/agent.json`. All configurable without a restart (config hot-reloads on every monitor tick).
+
+### v0.5.3
+- **Security hardening** — comprehensive audit pass addressing 10 findings across the builder, monitor, scanner, dashboard, memory, and pre-buy gate modules.
+  - `config/agent.local.json`, `soul.local.md`, `config/system-prompt.md` added to write blocklist — all three are hot-loaded into every LLM call and were writable attack vectors.
+  - `CIRCUIT_RPC_URL` (embeds Helius API key) stripped from child process env in `run_script` and `bash` tools.
+  - Pre-buy gate now fails closed on timeout or API error — a gate that approves on failure is not a gate.
+  - Swarm `rug_alert` exits now require RugCheck re-verification before acting; `_getSwarmSignals` applies `minReputationToFollow` threshold (default 40) to filter zero-rep agents.
+  - `send_token` tool gains a per-round guard matching the existing `buy_token` pattern.
+  - Dashboard POST body capped at 64 KB.
+  - `save_note` and `save_memory` content truncated at the persistence layer (key: 80, value: 500, category: 30 chars) — both inject into every system prompt.
+  - `install_package` regex tightened to reject local filesystem paths (`./foo`, `../bar`, `/absolute`).
+  - `read_file` sensitive-directory blocklist (`~/.ssh`, `~/.aws`, `~/.gnupg`, `~/.kube`, `~/.config/gcloud`) with symlink resolution via `fs.realpathSync` to prevent bypass.
+- **PM2 restart loop fix** — PID guard now waits up to 3s for the previous process to exit before declaring a conflict, eliminating the 7-restart startup loop that occurred on every `pm2 restart`.
+
+### v0.5.2
+- **Race condition fixes** — three concurrent execution paths (position monitor, auto-scanner, and LLM tools) could race on swap execution. A new `trade-lock.js` module provides process-wide per-mint locks shared across all three paths, preventing duplicate sell and buy transactions from landing on-chain.
+- **Trade history accuracy** — LLM-triggered sells (`sell_token` tool) were writing `holdMinutes: NaN` to trade history due to a missing `exitTime` field. Fixed.
+- **TP confirmation gate on partial sells** — the 2-tick take-profit confirmation guard was not being reset after a partial sell, causing the gate to be bypassed on the next attempt. Fixed.
+- **Heartbeat phantom P&L** — the 5-minute heartbeat was falling back to USD price as if it were a SOL price for USDC-quoted tokens, producing massively inflated P&L in status messages. Removed the unsafe fallback.
+- **Peak tracking** — concurrent monitor ticks could race on disk writes to the peak P&L field. Replaced with an in-memory cache flushed to disk under the sell lock only.
+- **Session buy counter** — concurrent buys of different tokens could both read and increment the same session buy count, allowing the `maxBuysThisSession` cap to be exceeded. Replaced with a module-level atomic counter.
+
+### v0.5.1
+- Phantom P&L fix — monitor now fetches WSOL in the same DexScreener batch as held positions and converts USD-pair prices to SOL terms. Eliminates false take-profit triggers caused by ~64× inflated P&L readings for non-SOL-quoted pairs.
+- Price-stale emergency exit — positions with no DexScreener price data for 30+ consecutive ticks (~5 min) now trigger an emergency exit. Prevents positions from being held indefinitely when a token rugs or delists.
+- Trailing stop `minHoldBeforeTpMinutes` guard — suppresses take-profit for the first N minutes after entry to absorb DexScreener price lag on fresh buys.
+- Entry pattern + score tracked through to trade history for pattern-level analytics.
+- Swarm recent-buy coordination — scanner now checks the swarm feed before buying and skips mints purchased by any swarm peer in the last 30 minutes.
+
+### v0.5.0
+- Initial public release. Auto-scanner, position monitor, agent-loop, reflect, heartbeat, Telegram, dashboard, swarm signals, task board.
 
 ---
 

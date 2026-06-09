@@ -25,7 +25,9 @@ const envPath = path.join(__dirname, '.env');
 if (fs.existsSync(envPath)) {
   for (const line of fs.readFileSync(envPath, 'utf8').split('\n')) {
     const m = line.match(/^([A-Z_][A-Z0-9_]*)\s*=\s*(.+)$/);
-    if (m && !process.env[m[1]]) process.env[m[1]] = m[2].trim().replace(/^['"]|['"]$/g, '');
+    // Strip inline comments before quote removal — otherwise `KEY=value # comment`
+    // stores "value # comment" as the key, causing silent auth failures.
+    if (m && !process.env[m[1]]) process.env[m[1]] = m[2].trim().replace(/\s+#.*$/, '').replace(/^['"]|['"]$/g, '');
   }
 }
 
@@ -42,8 +44,19 @@ const RPC_URL      = process.env.CIRCUIT_RPC_URL     || 'https://api.mainnet-bet
 const INTERNAL_KEY = process.env.CIRCUIT_INTERNAL_KEY || '';
 const JUP_API_KEY  = process.env.JUPITER_API_KEY    || '';
 const TG_TOKEN     = process.env.TELEGRAM_BOT_TOKEN || cfg.telegram?.token || '';
-// CIRCUIT_API_URL env var overrides config (useful for self-hosted / localhost deployments)
-if (process.env.CIRCUIT_API_URL) cfg.api.baseUrl = process.env.CIRCUIT_API_URL;
+// CIRCUIT_API_URL env var overrides config (useful for self-hosted / localhost deployments).
+// Validate before applying — an http:// non-localhost URL would redirect all CIRCUIT
+// payments to an attacker's server, exposing tx signatures for replay.
+if (process.env.CIRCUIT_API_URL) {
+  const _override = process.env.CIRCUIT_API_URL;
+  const _isHttps     = _override.startsWith('https://');
+  const _isLocalhost = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?(\/|$)/.test(_override);
+  if (_isHttps || _isLocalhost) {
+    cfg.api.baseUrl = _override;
+  } else {
+    console.warn(`WARNING: CIRCUIT_API_URL="${_override}" rejected — must be https:// or http://localhost. Using config default.`);
+  }
+}
 
 // ── Modules ───────────────────────────────────────────────────────────────────
 
@@ -250,9 +263,16 @@ function runWizard(keypair, address) {
   // Prefer Node.js wizard (works on Windows/macOS/Linux)
   if (fs.existsSync(jsWizard)) {
     const args = [jsWizard];
-    if (keypair) args.push('--keypair', keypair);
     if (address) args.push('--address', address);
-    const r = spawnSync(process.execPath, args, { stdio: 'inherit' });
+    // Pass keypair via env var rather than --keypair CLI arg.
+    // CLI args are visible in /proc/<pid>/cmdline for the process lifetime,
+    // exposing the base58 private key to any local user who reads /proc.
+    // Environment variables are stored in /proc/<pid>/environ (mode 0400,
+    // readable only by the process owner) — significantly narrower exposure.
+    const wizardEnv = keypair
+      ? { ...process.env, CIRCUIT_SETUP_KEYPAIR: keypair }
+      : process.env;
+    const r = spawnSync(process.execPath, args, { stdio: 'inherit', env: wizardEnv });
     if (r.error || r.status !== 0) {
       console.error('\nSetup wizard did not complete cleanly.');
       if (keypair) {
@@ -344,13 +364,25 @@ async function cmdStart() {
   if (fs.existsSync(PID_FILE)) {
     const existingPid = parseInt(fs.readFileSync(PID_FILE, 'utf8').trim(), 10);
     if (existingPid && existingPid !== process.pid) {
-      try {
-        process.kill(existingPid, 0); // throws if process doesn't exist
+      // Under PM2, the manager kills the old process and spawns the new one nearly
+      // simultaneously. The old process may still be running its SIGTERM handler
+      // when we check, causing spurious "already running" errors and PM2 restart loops.
+      // Wait up to 3s for the old process to exit before giving up.
+      let alive = true;
+      for (let attempt = 0; attempt < 6; attempt++) {
+        try {
+          process.kill(existingPid, 0); // throws ESRCH if process is gone
+          await new Promise(r => setTimeout(r, 500));
+        } catch {
+          alive = false;
+          break;
+        }
+      }
+      if (alive) {
         console.error(`ERROR: Agent is already running (PID ${existingPid}). Stop it first or delete data/agent.pid.`);
         process.exit(1);
-      } catch {
-        // Stale PID file — process is gone, proceed
       }
+      // Process is gone — stale PID file, proceed
     }
   }
   fs.writeFileSync(PID_FILE, String(process.pid));

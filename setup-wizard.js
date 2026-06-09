@@ -64,8 +64,15 @@ function stepHeader(step, total, title) {
 
 let keypairArg = '', addressArg = '';
 for (let i = 2; i < process.argv.length; i++) {
+  // --keypair is kept for backwards compatibility (manual invocations, setup-wizard.sh)
+  // but agent.js init now passes the key via CIRCUIT_SETUP_KEYPAIR env var to avoid
+  // exposing the base58 private key in /proc/<pid>/cmdline.
   if (process.argv[i] === '--keypair') keypairArg = process.argv[++i] ?? '';
   if (process.argv[i] === '--address') addressArg = process.argv[++i] ?? '';
+}
+if (!keypairArg && process.env.CIRCUIT_SETUP_KEYPAIR) {
+  keypairArg = process.env.CIRCUIT_SETUP_KEYPAIR;
+  delete process.env.CIRCUIT_SETUP_KEYPAIR; // consume immediately — don't leave in env
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
