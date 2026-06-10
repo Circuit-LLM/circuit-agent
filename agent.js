@@ -98,7 +98,7 @@ function initModules() {
 
   const paperMode = cfg.strategy?.paperTrading === true;
   if (paperMode) {
-    swap = new PaperSwapExecutor({ initialSolBalance: cfg.strategy?.paperSolBalance ?? 1.0 });
+    swap = new PaperSwapExecutor({ initialSolBalance: cfg.strategy?.paperSolBalance ?? 1.0, baseUrl: cfg.api.baseUrl });
     log('info', '📝 PAPER TRADING MODE — no real trades will execute',
       { virtualSol: swap.virtualSolBalance, apiBase: cfg.api.baseUrl });
   } else {
