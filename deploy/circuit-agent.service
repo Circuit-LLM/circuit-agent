@@ -32,6 +32,8 @@
 Description=circuit-agent — autonomous Solana trading agent
 After=network-online.target
 Wants=network-online.target
+StartLimitIntervalSec=120
+StartLimitBurst=5
 
 [Service]
 Type=simple
@@ -39,12 +41,8 @@ WorkingDirectory=/home/YOUR_USER/circuit-agent
 ExecStart=/usr/bin/node agent.js start
 Restart=always
 RestartSec=10
-# Prevent a crash loop from hammering the network — back off after 5 rapid restarts
-StartLimitIntervalSec=120
-StartLimitBurst=5
 StandardOutput=journal
 StandardError=journal
-# Graceful shutdown — agent catches SIGTERM and saves state before exiting
 KillSignal=SIGTERM
 TimeoutStopSec=30
 

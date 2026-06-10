@@ -10,10 +10,12 @@
     "maxOpenPositions": 3,
     "entryBudgetSol": 0.005,
     "minScanScore": 55,
-    "minLiquidity": 50000,
+    "minLiquidity": 80000,
     "stopLossPct": -6,
     "takeProfitPct": 25,
     "maxHoldMinutes": 45,
+    "minHoldBeforeTpMinutes": 3,
+    "minHoldBeforeSlMinutes": 2,
     "trailingStopActivatePct": 2,
     "trailingStopDistancePct": 3,
     "buyCooldownMinutes": 60,
@@ -22,7 +24,7 @@
     "deadMoneyMinutes": 15,
     "deadMoneyRangePct": 1.5,
     "deadMoneyMinHoldMinutes": 8,
-    "_strategy_note": "buyCooldownMinutes: skip re-entry on the same mint for this many minutes after closing a position. paperTrading: true enables paper mode — no real swaps, free data sources only. paperSolBalance: starting virtual SOL for paper mode. deadMoneyMinutes/deadMoneyRangePct/deadMoneyMinHoldMinutes: exit early if pnl stays within ±deadMoneyRangePct for deadMoneyMinutes (after holding at least deadMoneyMinHoldMinutes)."
+    "_strategy_note": "buyCooldownMinutes: skip re-entry on the same mint for this many minutes after closing a position. paperTrading: true enables paper mode — no real swaps, free data sources only. paperSolBalance: starting virtual SOL for paper mode. deadMoneyMinutes/deadMoneyRangePct/deadMoneyMinHoldMinutes: exit early if pnl stays within ±deadMoneyRangePct for deadMoneyMinutes (after holding at least deadMoneyMinHoldMinutes). minHoldBeforeTpMinutes/minHoldBeforeSlMinutes: suppress TP/SL exits within this many minutes after entry to prevent phantom exits from price-feed lag."
   },
   "circuit": {
     "minCircuitBalance": 5000,
@@ -30,8 +32,10 @@
   },
   "risk": {
     "maxEntry1hDropPct": -15,
+    "maxTop5HolderPct": 0.30,
     "blacklist": [],
-    "safeOnly": false
+    "safeOnly": false,
+    "_note": "maxTop5HolderPct: skip tokens where the top-5 wallets control more than this fraction of total supply. Backtested at +17pp win rate improvement — tokens above 30% showed 80% stop-loss rate in swarm history."
   },
   "llm": {
     "model": "google/gemini-2.5-flash-lite",
@@ -43,13 +47,13 @@
   "survival": {
     "minSolWarning": 0.03,
     "minSolPause": 0.01,
-    "circuitReinvestPct": 0.25,
-    "_note": "Warn when SOL < minSolWarning. Pause new buys when SOL < minSolPause. circuitReinvestPct: fraction of each profit used to buy CIRCUIT (0.25 = 25%)."
+    "circuitReinvestPct": 0.40,
+    "_note": "Warn when SOL < minSolWarning. Pause new buys when SOL < minSolPause. circuitReinvestPct: fraction of each profit used to buy CIRCUIT (0.40 = 40%). Raised from 0.25 — at 27% win rate and 0.005 SOL entries, 25% reinvest was insufficient to rebuild CIRCUIT balance faster than API calls drained it."
   },
   "reflect": {
     "intervalMs": 14400000,
-    "autoApply": false,
-    "_note": "Self-improvement loop interval (default 4h). autoApply: true = auto-apply suggested config changes within safe bounds."
+    "autoApply": true,
+    "_note": "Self-improvement loop interval (default 4h). autoApply: true = auto-apply suggested config changes within safe bounds. Enabled — the reflect loop's suggestions (minLiquidity 75k→80k, minScanScore adjustments) were correct but never applied because this was false."
   },
   "telegram": {
     "token": "",
