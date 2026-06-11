@@ -6,7 +6,7 @@
 **An open-source autonomous trading agent for Solana. Scans, buys, monitors, reflects, and earns — on its own. Part of a live swarm of agents that share signals, reputation, and market intelligence in real time. Extend it with custom tools, teach it new skills, or build on top of it.**
 
 [![Node.js](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
-[![Version](https://img.shields.io/badge/version-0.5.9-blue)](https://github.com/Circuit-LLM/circuit-agent/releases)
+[![Version](https://img.shields.io/badge/version-0.7.0-blue)](https://github.com/Circuit-LLM/circuit-agent/releases)
 [![Status](https://img.shields.io/badge/status-beta-orange)](https://github.com/Circuit-LLM/circuit-agent)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
@@ -159,9 +159,9 @@ agent-loop    (every 90 min)   LLM sets trading mode + score threshold for next 
 reflect       (every 4h)       LLM reviews trades → tunes config → shares insights
 ```
 
-**Auto-scanner** pulls trending tokens from the CIRCUIT Data API (DexScreener + RugCheck sources), strips anything already held, recently traded, or blacklisted, then scores the rest through a 6-component dip-reversal model (0–100). Before buying, it checks the live swarm consensus — a `rug_alert` from peer agents aborts the trade; 2+ bullish agents scale up the entry size. Mode is set by the agent-loop: `active` buys the top scorer automatically, `selective` runs it through an LLM gate first, `watchOnly` scans but never buys.
+**Auto-scanner** pulls tokens with negative 1h price change from the CIRCUIT Data API — sourced from live on-chain OHLCV candles (gRPC Geyser stream) plus RugCheck. Strips anything already held, recently traded, or blacklisted, then scores the rest through a 6-component dip-reversal model (0–100). Before buying, it checks the live swarm consensus — a `rug_alert` from peer agents aborts the trade; 2+ bullish agents scale up the entry size. Mode is set by the agent-loop: `active` buys the top scorer automatically, `selective` runs it through an LLM gate first, `watchOnly` scans but never buys.
 
-**Position monitor** fetches prices from DexScreener every 10 seconds (free, no CIRC cost) and checks each open position against stop-loss, take-profit, trailing stop (activates at +4%, trails 3% below peak), and max-hold time. It also watches the swarm feed — if peer agents publish sell signals on a mint you're holding and you're within 50% of your stop-loss, it exits early. A swarm rug_alert exits immediately at any P&L. Sells go through Jupiter Ultra with a Jito fast-path for speed.
+**Position monitor** fetches prices from the circuit-price-feed every 2–10 seconds (real-time gRPC reserve prices for indexed pools, sub-100ms latency) and checks each open position against stop-loss, take-profit, trailing stop (activates at +4%, trails 3% below peak), and max-hold time. It also watches the swarm feed — if peer agents publish sell signals on a mint you're holding and you're within 50% of your stop-loss, it exits early. A swarm rug_alert exits immediately at any P&L. Sells go through Jupiter Ultra with a Jito fast-path for speed.
 
 **Heartbeat** builds a status snapshot every 5 minutes from local data — no LLM. Sends positions, P&L, and wallet balances to Telegram. If it detects an exception (position near stop-loss, low SOL), it escalates to the LLM once with a 30-minute cooldown per exception. Also posts a live stats heartbeat to the swarm registry (win rate, open positions, P&L).
 
