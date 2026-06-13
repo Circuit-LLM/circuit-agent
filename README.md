@@ -6,7 +6,7 @@
 **An open-source autonomous trading agent for Solana. Scans, buys, monitors, reflects, and earns — on its own. Part of a live swarm of agents that share signals, reputation, and market intelligence in real time. Extend it with custom tools, teach it new skills, or build on top of it.**
 
 [![Node.js](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
-[![Version](https://img.shields.io/badge/version-0.7.0-blue)](https://github.com/Circuit-LLM/circuit-agent/releases)
+[![Version](https://img.shields.io/badge/version-0.9.0-blue)](https://github.com/Circuit-LLM/circuit-agent/releases)
 [![Status](https://img.shields.io/badge/status-beta-orange)](https://github.com/Circuit-LLM/circuit-agent)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
@@ -312,6 +312,11 @@ Your `.env`, `data/`, `soul.local.md`, and `config/agent.local.json` are never t
 ---
 
 ## Changelog
+
+### v0.9.0
+- **Tick-to-tick price-spike guard** — a second spike guard now runs at all hold times (not just the first 5 minutes). If the price feed returns a value more than 5× the previous validated tick in a single 10-second window, the tick is rejected and no stops or peaks are updated. This closes a class of phantom take-profit exits on PumpSwap tokens where the entry-relative guard (Guard 1, first 5 min) had already expired but the feed still occasionally returned inflated prices.
+- **Slippage gate fails closed** — if the `/slippage` check throws or times out, the take-profit is deferred rather than proceeding. On the next tick (2 seconds) the check is retried with a clean state. Previously a failed gate would proceed to sell, which was the wrong behavior when the check itself was the signal that something was wrong with price data.
+- **PumpSwap price formula corrected (circuit-price-feed + circuit-indexer)** — `_rpcFetchPumpSwapPrice` in circuit-price-feed had inverted vault labels (`baseVault` is the token vault, `quoteVault` is WSOL) and consequently used `(token_raw / 1e9) / (WSOL_lamports / 1e6)` rather than the correct `(WSOL_lamports / 1e9) / (token_raw / 1e6)`. This produced prices ~7,000× too high for any PumpSwap-graduated token. `_poolToPriceSol` had the same inversion. Both are corrected and coin/pc reserve labels in slippage data are also fixed so AMM sell estimates remain accurate. The `pool-by-mint` TTL in circuit-indexer was also raised from 120s to 24h (pool addresses never change on-chain) to ensure the correct price path is always taken for previously-seen tokens.
 
 ### v0.5.6
 - **L1 — Dead-letter queue cleanup**: Files in `data/queue/dead-letter/` are now purged after 7 days. Cleanup runs once at startup and then daily via a non-blocking `setInterval`. Previously these files accumulated indefinitely on long-running agents.
