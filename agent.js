@@ -194,7 +194,7 @@ async function cmdInit() {
       },
       specialization: {
         domains:    ['solana-trading', 'market-analysis'],
-        tools:      ['jupiter-ultra', 'dexscreener', 'rugcheck', 'helius-das'],
+        tools:      ['jupiter-ultra', 'jupiter-price-v3', 'rugcheck', 'helius-das'],
         skills:     ['dip-reversal', 'swarm-analyst'],
         strategies: ['dip-reversal', 'trailing-stop'],
       },

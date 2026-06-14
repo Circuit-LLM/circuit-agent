@@ -25,7 +25,7 @@ agent.js                  Entry point — wires all modules together, starts loo
 │
 ├── lib/config.js         Two-file config loader (agent.json + agent.local.json deep-merge)
 │
-├── lib/auto-scanner.js   Scan loop: DexScreener trending → score candidates → pre-buy gate → Jupiter buy
+├── lib/auto-scanner.js   Scan loop: CIRCUIT Data API trending → score candidates → pre-buy gate → Jupiter buy
 │   └── lib/scoring.js        Dip-reversal 6-component scorer (score 0–100, 4 patterns)
 │   └── lib/pre-buy-gate.js   LLM approve/reject gate for 'selective' mode
 │
@@ -194,7 +194,7 @@ Skills contain trading rules, scoring criteria, and decision heuristics written 
 ```
 auto-scanner tick (every 5 min)
   │
-  ├─ api.scan() → CIRCUIT Data API → DexScreener trending
+  ├─ api.scan() → CIRCUIT Data API → Solana trending tokens (on-chain + aggregated)
   ├─ scoreDipReversal() → score 0–100, pick best candidate
   ├─ isPaused()? → skip if trading paused
   ├─ session cap reached? → skip
@@ -206,8 +206,9 @@ auto-scanner tick (every 5 min)
 
 position-monitor tick (every 10s)
   │
-  ├─ DexScreener REST → batch fetch prices (free, no CIRCUIT cost)
-  │    └─ fallback: api.tokenPrices(mints[]) → x402 if DexScreener fails
+  ├─ circuit-price-feed → batch fetch prices (reserve-based, Geyser → Redis)
+  │    ├─ cache miss: /warm → Jupiter Price API v3 → Redis (30s TTL)
+  │    └─ service down: api.tokenPrices(mints[]) → x402 fallback
   ├─ swarm sell signal check → early exit if peers sold while we're down
   ├─ for each position: check stop-loss / take-profit / trailing / maxHold
   ├─ if triggered:
