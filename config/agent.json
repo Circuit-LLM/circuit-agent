@@ -76,7 +76,8 @@
   },
   "agentLoop": {
     "intervalMs": 5400000,
-    "_note": "How often the agent reasons about and updates its session strategy (default 90 min). The LLM sets mode/patternFilter/minScore for the next window. Modes: active (auto-buy best scorer), selective (LLM gate per candidate), watchOnly (scan only, no buys)."
+    "defaultMode": "active",
+    "_note": "How often the agent reasons about and updates its session strategy (default 90 min). The LLM tunes patternFilter/minScore for the next window. defaultMode pins the trading mode (operator preference) — the LLM may still narrow patternFilter/minScore but cannot switch out of this mode; remove this key to hand mode control back to the LLM. Modes: active (auto-buy best scorer), selective (LLM gate per candidate), watchOnly (scan only, no buys)."
   },
   "dashboard": {
     "enabled": true,

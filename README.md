@@ -6,7 +6,7 @@
 **An open-source autonomous trading agent for Solana. Scans, buys, monitors, reflects, and earns — on its own. Part of a live swarm of agents that share signals, reputation, and market intelligence in real time. Extend it with custom tools, teach it new skills, or build on top of it.**
 
 [![Node.js](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
-[![Version](https://img.shields.io/badge/version-0.9.2-blue)](https://github.com/Circuit-LLM/circuit-agent/releases)
+[![Version](https://img.shields.io/badge/version-0.9.3-blue)](https://github.com/Circuit-LLM/circuit-agent/releases)
 [![Status](https://img.shields.io/badge/status-beta-orange)](https://github.com/Circuit-LLM/circuit-agent)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
@@ -312,6 +312,13 @@ Your `.env`, `data/`, `soul.local.md`, and `config/agent.local.json` are never t
 ---
 
 ## Changelog
+
+### v0.9.3
+- **Jupiter calls now use the free `lite-api.jup.ag` host** — both the monitor's stop-loss spot-check and the price-feed's fallback were calling `api.jup.ag`, which requires a paid key and returns HTTP 429 for unauthenticated requests. Every Jupiter call was silently failing, which meant the v0.9.1 stop-loss guard and the v0.9.2 universal fallback were both non-functional. Switching to `lite-api.jup.ag` makes them work.
+- **Self-contained SOL/USD oracle (circuit-price-feed)** — `lib/sol-price.js` previously polled an external node on `127.0.0.1:18910`; when that node went down the oracle silently returned null, which disabled the entire Jupiter fallback (it requires SOL/USD to convert) and left `priceUsd` null on every response. It now sources SOL/USD from Jupiter's free API (pricing wSOL directly), depending on no service outside Circuit.
+- **Jupiter price derivation no longer needs the oracle** — both the price-feed fallback and the monitor spot-check now fetch the token *and* wSOL in one call and divide (`tokenUsd / solUsd`), so SOL price is derived directly and the USD cancels. This removes a hardcoded, stale `_lastSolUsd = 155` default in the monitor (actual SOL was ~$69, a 2.25× error that corrupted the stop-guard math).
+- **Operator can pin trading mode** — new `agentLoop.defaultMode` config key. When set (e.g. `"active"`), it overrides the LLM's per-session mode choice so agents stay in the operator's chosen mode while the LLM still tunes patternFilter/minScore. The override mechanism already existed in code; this exposes it in the default config.
+- **Truthful `last_scan` snapshot** — the dashboard scan snapshot hardcoded `bought: true` for any candidate that passed the dip-reversal gates, even when it was below `minScanScore` and never actually bought. It now reflects whether the candidate cleared the score threshold.
 
 ### v0.9.2
 - **DexScreener fully removed from price resolution** — `circuit-price-feed` no longer calls DexScreener at any point. The resolution chain is now: indexer Redis (Geyser, slot-accurate) → pool-by-mint → bonding curve PDA → PumpSwap RPC → Jupiter Price API v3. Jupiter is the only external REST fallback. The indexer covers Raydium AMM v4, CLMM, CPMM, Orca Whirlpool, PumpSwap, and Pump.fun bonding curves via sub-second Geyser gRPC — DexScreener was always a staler REST-poll duplicate of data already in Redis.
