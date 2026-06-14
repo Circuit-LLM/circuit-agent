@@ -1,12 +1,12 @@
 {
-  "_comment": "circuit-agent configuration — edit these values before starting",
+  "_comment": "circuit-agent configuration \u2014 edit these values before starting",
   "api": {
     "baseUrl": "https://api.circuitllm.xyz",
     "_note": "Public CIRCUIT API. Self-hosters: change to http://localhost:18960 and set CIRCUIT_INTERNAL_KEY in .env to bypass payment."
   },
   "strategy": {
-    "scanIntervalMs": 300000,
-    "positionCheckMs": 10000,
+    "scanIntervalMs": 60000,
+    "positionCheckMs": 5000,
     "maxOpenPositions": 3,
     "entryBudgetSol": 0.005,
     "minScanScore": 55,
@@ -15,7 +15,7 @@
     "takeProfitPct": 25,
     "maxHoldMinutes": 45,
     "minHoldBeforeTpMinutes": 3,
-    "minHoldBeforeSlMinutes": 2,
+    "minHoldBeforeSlMinutes": 0,
     "trailingStopActivatePct": 2,
     "trailingStopDistancePct": 3,
     "buyCooldownMinutes": 60,
@@ -24,7 +24,7 @@
     "deadMoneyMinutes": 15,
     "deadMoneyRangePct": 1.5,
     "deadMoneyMinHoldMinutes": 8,
-    "_strategy_note": "buyCooldownMinutes: skip re-entry on the same mint for this many minutes after closing a position. paperTrading: true enables paper mode — no real swaps, free data sources only. paperSolBalance: starting virtual SOL for paper mode. deadMoneyMinutes/deadMoneyRangePct/deadMoneyMinHoldMinutes: exit early if pnl stays within ±deadMoneyRangePct for deadMoneyMinutes (after holding at least deadMoneyMinHoldMinutes). minHoldBeforeTpMinutes/minHoldBeforeSlMinutes: suppress TP/SL exits within this many minutes after entry to prevent phantom exits from price-feed lag."
+    "_strategy_note": "buyCooldownMinutes: skip re-entry on the same mint for this many minutes after closing a position. paperTrading: true enables paper mode \u2014 no real swaps, free data sources only. paperSolBalance: starting virtual SOL for paper mode. deadMoneyMinutes/deadMoneyRangePct/deadMoneyMinHoldMinutes: exit early if pnl stays within \u00b1deadMoneyRangePct for deadMoneyMinutes (after holding at least deadMoneyMinHoldMinutes). minHoldBeforeTpMinutes/minHoldBeforeSlMinutes: suppress TP/SL exits within this many minutes after entry to prevent phantom exits from price-feed lag."
   },
   "circuit": {
     "minCircuitBalance": 5000,
@@ -32,10 +32,10 @@
   },
   "risk": {
     "maxEntry1hDropPct": -15,
-    "maxTop5HolderPct": 0.30,
+    "maxTop5HolderPct": 0.3,
     "blacklist": [],
     "safeOnly": false,
-    "_note": "maxTop5HolderPct: skip tokens where the top-5 wallets control more than this fraction of total supply. Backtested at +17pp win rate improvement — tokens above 30% showed 80% stop-loss rate in swarm history."
+    "_note": "maxTop5HolderPct: skip tokens where the top-5 wallets control more than this fraction of total supply. Backtested at +17pp win rate improvement \u2014 tokens above 30% showed 80% stop-loss rate in swarm history."
   },
   "llm": {
     "model": "google/gemini-2.5-flash-lite",
@@ -47,13 +47,13 @@
   "survival": {
     "minSolWarning": 0.03,
     "minSolPause": 0.01,
-    "circuitReinvestPct": 0.40,
-    "_note": "Warn when SOL < minSolWarning. Pause new buys when SOL < minSolPause. circuitReinvestPct: fraction of each profit used to buy CIRCUIT (0.40 = 40%). Raised from 0.25 — at 27% win rate and 0.005 SOL entries, 25% reinvest was insufficient to rebuild CIRCUIT balance faster than API calls drained it."
+    "circuitReinvestPct": 0.4,
+    "_note": "Warn when SOL < minSolWarning. Pause new buys when SOL < minSolPause. circuitReinvestPct: fraction of each profit used to buy CIRCUIT (0.40 = 40%). Raised from 0.25 \u2014 at 27% win rate and 0.005 SOL entries, 25% reinvest was insufficient to rebuild CIRCUIT balance faster than API calls drained it."
   },
   "reflect": {
     "intervalMs": 14400000,
     "autoApply": true,
-    "_note": "Self-improvement loop interval (default 4h). autoApply: true = auto-apply suggested config changes within safe bounds. Enabled — the reflect loop's suggestions (minLiquidity 75k→80k, minScanScore adjustments) were correct but never applied because this was false."
+    "_note": "Self-improvement loop interval (default 4h). autoApply: true = auto-apply suggested config changes within safe bounds. Enabled \u2014 the reflect loop's suggestions (minLiquidity 75k\u219280k, minScanScore adjustments) were correct but never applied because this was false."
   },
   "telegram": {
     "token": "",
@@ -72,18 +72,18 @@
     "consensusBoostFactor": 1.2,
     "consensusBoostMinScore": null,
     "blacklistVerifyTopN": 5,
-    "_note": "autoPublish: emit buy/sell signals automatically on trade execution. minReputationToFollow: only factor signals from agents above this reputation score (0-100). consensusBoostFactor: scale entry size when swarm consensus agrees (e.g. 1.2 = 20% larger). consensusBoostMinScore: independent score must reach this before the boost applies (null = minScanScore+10). blacklistVerifyTopN: re-verify swarm blacklist entries against RugCheck for the top N scored candidates before filtering — prevents hallucinated blacklist entries from silently dropping good trades."
+    "_note": "autoPublish: emit buy/sell signals automatically on trade execution. minReputationToFollow: only factor signals from agents above this reputation score (0-100). consensusBoostFactor: scale entry size when swarm consensus agrees (e.g. 1.2 = 20% larger). consensusBoostMinScore: independent score must reach this before the boost applies (null = minScanScore+10). blacklistVerifyTopN: re-verify swarm blacklist entries against RugCheck for the top N scored candidates before filtering \u2014 prevents hallucinated blacklist entries from silently dropping good trades."
   },
   "agentLoop": {
     "intervalMs": 5400000,
     "defaultMode": "active",
-    "_note": "How often the agent reasons about and updates its session strategy (default 90 min). The LLM tunes patternFilter/minScore for the next window. defaultMode pins the trading mode (operator preference) — the LLM may still narrow patternFilter/minScore but cannot switch out of this mode; remove this key to hand mode control back to the LLM. Modes: active (auto-buy best scorer), selective (LLM gate per candidate), watchOnly (scan only, no buys)."
+    "_note": "How often the agent reasons about and updates its session strategy (default 90 min). The LLM tunes patternFilter/minScore for the next window. defaultMode pins the trading mode (operator preference) \u2014 the LLM may still narrow patternFilter/minScore but cannot switch out of this mode; remove this key to hand mode control back to the LLM. Modes: active (auto-buy best scorer), selective (LLM gate per candidate), watchOnly (scan only, no buys)."
   },
   "dashboard": {
     "enabled": true,
     "port": 18800,
     "apiKey": "",
     "allowCors": "",
-    "_note": "Local web dashboard at http://localhost:18800 (loopback only — use SSH tunnel for remote access). apiKey: require x-api-key header on all API routes. allowCors: explicit origin to allow (e.g. 'http://localhost:3000') — leave empty to disable CORS entirely."
+    "_note": "Local web dashboard at http://localhost:18800 (loopback only \u2014 use SSH tunnel for remote access). apiKey: require x-api-key header on all API routes. allowCors: explicit origin to allow (e.g. 'http://localhost:3000') \u2014 leave empty to disable CORS entirely."
   }
 }
