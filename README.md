@@ -6,7 +6,7 @@
 **An open-source autonomous trading agent for Solana. Scans, buys, monitors, reflects, and earns — on its own. Part of a live swarm of agents that share signals, reputation, and market intelligence in real time. Extend it with custom tools, teach it new skills, or build on top of it.**
 
 [![Node.js](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
-[![Version](https://img.shields.io/badge/version-0.9.0-blue)](https://github.com/Circuit-LLM/circuit-agent/releases)
+[![Version](https://img.shields.io/badge/version-0.10.0-blue)](https://github.com/Circuit-LLM/circuit-agent/releases)
 [![Status](https://img.shields.io/badge/status-beta-orange)](https://github.com/Circuit-LLM/circuit-agent)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
@@ -312,6 +312,11 @@ Your `.env`, `data/`, `soul.local.md`, and `config/agent.local.json` are never t
 ---
 
 ## Changelog
+
+### v0.10.0
+- **Jupiter stop-loss guard** — before executing any stop-loss or trailing-stop, the monitor calls Jupiter Price API v3 for an independent on-chain price (~150-300ms). If Jupiter shows the position is above the stop-loss threshold, the exit is deferred one tick and `_lastGoodPrice` is updated to the Jupiter price so Guard 2 (tick-spike) anchors to the verified value. Forced exits (swarm-exit, lp-drain, swarm-rug) bypass this check — speed is critical there. This eliminates false stop-outs from any price source, not just bonding curve phantoms.
+- **Graduated token phantom fix (circuit-price-feed)** — `_poolToPriceSol` now returns `null` for bonding curve records with `complete=true`. Graduated tokens no longer receive a stale frozen-reserve price; instead the resolution chain falls through to the PumpSwap RPC path (path 2.6) or Jupiter. Additionally, if `pool-by-mint` was previously poisoned with the bonding curve PDA address (from before this fix), it is cleared on graduation detection so the next call does not hit the failed PumpSwap owner check. Path 2.6 now also skips its RPC call when `poolAccount === bcAddress` to avoid a wasted RPC round-trip.
+- **In-process price velocity gate (circuit-price-feed)** — after resolving a price from any non-indexer source, the result is compared against the last validated price for that mint. If the deviation exceeds 15%, Jupiter is called as a cross-reference. If Jupiter agrees with the historical price but the new price is the outlier, Jupiter's price is returned instead and the anomaly is logged. Indexer-sourced prices (Geyser, slot-accurate) are trusted unconditionally. The gate fails open if Jupiter is unavailable.
 
 ### v0.9.0
 - **Tick-to-tick price-spike guard** — a second spike guard now runs at all hold times (not just the first 5 minutes). If the price feed returns a value more than 5× the previous validated tick in a single 10-second window, the tick is rejected and no stops or peaks are updated. This closes a class of phantom take-profit exits on PumpSwap tokens where the entry-relative guard (Guard 1, first 5 min) had already expired but the feed still occasionally returned inflated prices.
