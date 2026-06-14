@@ -6,7 +6,7 @@
 **An open-source autonomous trading agent for Solana. Scans, buys, monitors, reflects, and earns — on its own. Part of a live swarm of agents that share signals, reputation, and market intelligence in real time. Extend it with custom tools, teach it new skills, or build on top of it.**
 
 [![Node.js](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
-[![Version](https://img.shields.io/badge/version-0.9.3-blue)](https://github.com/Circuit-LLM/circuit-agent/releases)
+[![Version](https://img.shields.io/badge/version-0.9.4-blue)](https://github.com/Circuit-LLM/circuit-agent/releases)
 [![Status](https://img.shields.io/badge/status-beta-orange)](https://github.com/Circuit-LLM/circuit-agent)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
@@ -312,6 +312,12 @@ Your `.env`, `data/`, `soul.local.md`, and `config/agent.local.json` are never t
 ---
 
 ## Changelog
+
+### v0.9.4
+- **Rug filter fixed (was inverted and unreliable).** `tokenInfoFree` thresholded on RugCheck's raw `score` with the direction backwards — RugCheck score is LOW = safe (USDC ≈ 1), so `score <= 300 → DANGER` flagged safe tokens as dangerous and would have passed real rugs (high score) as OK. Now uses a count-based verdict from RugCheck's actual danger/warn flags. The live path (data-api token-info) was separately sourcing its verdict from circuit-node's internal scorer, whose on-chain data inputs are broken (it flagged USDC/BONK/JUP as DANGER); that path now sources the verdict from RugCheck too. Verified: USDC→SAFE, BONK→LOW_RISK, known rugs→DANGER.
+- **Rug check now fails closed.** A rug-check error or missing/UNKNOWN verdict previously let the buy proceed unchecked; the agent now skips the buy and retries next scan. Essential before trading lower-liquidity tokens where rugs concentrate.
+- **Pattern coverage is operator-controlled.** `agentLoop.patternFilter` in config is now authoritative — the LLM tunes minScore/maxBuys/goal but no longer narrows patterns per session, so grouped config experiments stay controlled. Omit it (or `[]`) for all four patterns.
+- **Deep-dip liquidity gate is configurable** via `strategy.deepDipMinLiquidityUsd` (default 50k), so low-liquidity experiment tiers can access deep reversals while the rug filter + LP-drain guard provide the safety net.
 
 ### v0.9.3
 - **Jupiter calls now use the free `lite-api.jup.ag` host** — both the monitor's stop-loss spot-check and the price-feed's fallback were calling `api.jup.ag`, which requires a paid key and returns HTTP 429 for unauthenticated requests. Every Jupiter call was silently failing, which meant the v0.9.1 stop-loss guard and the v0.9.2 universal fallback were both non-functional. Switching to `lite-api.jup.ag` makes them work.
