@@ -18,14 +18,18 @@
 
 ---
 
+**[What it does](#what-it-does)** · **[Quick Start](#quick-start)** · **[CLI](#cli-commands)** · **[Dashboard](#dashboard)** · **[Telegram](#telegram-commands)** · **[How it works](#how-it-works)** · **[Config](#configuration)** · **[Skills](#skills)** · **[Swarm](#swarm)** · **[CIRC](#circ-token-economy)** · **[Build a specialist →](BUILDING.md)**
+
+---
+
 ## What it does
 
-- **Scans and trades** — dip-reversal scoring runs every 5 minutes, buys the best candidate, monitors stops every 10s. No LLM in the hot path — deterministic and fast.
+- **Scans and trades** — dip-reversal scoring runs every 60 seconds, buys the best candidate, monitors stops every few seconds. No LLM in the hot path — deterministic and fast.
 - **Self-tunes** — every 4 hours it reviews its own trade history, adjusts config within safe bounds, stores lessons, and shares insights to the swarm.
 - **Participates in a live swarm** — buy/sell signals, shared rug blacklists, coordinated exits, and a reputation system built from signal accuracy. Every agent gets smarter as the swarm grows.
 - **Talks to you** — full Telegram interface: ask questions, request trades, check positions, trigger scans. Or skip Telegram and use the CLI.
 - **Funds itself** — 25% of each winning trade auto-buys CIRC to pay for its own API calls. A profitable agent is a self-sustaining one.
-- **Extensible** — add tools, write skills, or drop in custom scripts. The agent can write and run its own code via the `builder` skill. Fork it, extend it, build something different on top of it.
+- **Extensible** — add tools, write skills, or drop in custom scripts. The agent can write and run its own code via the `builder` skill. Fork it, extend it, build a purpose-built specialist on top of it — **[BUILDING.md](BUILDING.md)** is the full guide.
 
 ---
 
@@ -152,8 +156,8 @@ Join the community on [Telegram →](https://t.me/circuitllm)
 Five loops run in parallel. The LLM is only in the loop when it needs to be:
 
 ```
-auto-scanner  (every 5 min)    Scan → filter → score → swarm check → buy
-position mon  (every 10s)      Price fetch → stops → swarm exit check → sell
+auto-scanner  (every 60s)      Scan → filter → score → swarm check → buy
+position mon  (every ~5s)      Price fetch → stops → swarm exit check → sell
 heartbeat     (every 5 min)    Status → exception detect → LLM only if needed
 agent-loop    (every 90 min)   LLM sets trading mode + score threshold for next window
 reflect       (every 4h)       LLM reviews trades → tunes config → shares insights
@@ -161,7 +165,7 @@ reflect       (every 4h)       LLM reviews trades → tunes config → shares in
 
 **Auto-scanner** pulls tokens with negative 1h price change from the CIRCUIT Data API — sourced from live on-chain OHLCV candles (gRPC Geyser stream) plus RugCheck. Strips anything already held, recently traded, or blacklisted, then scores the rest through a 6-component dip-reversal model (0–100). Before buying, it checks the live swarm consensus — a `rug_alert` from peer agents aborts the trade; 2+ bullish agents scale up the entry size. Mode is set by the agent-loop: `active` buys the top scorer automatically, `selective` runs it through an LLM gate first, `watchOnly` scans but never buys.
 
-**Position monitor** fetches prices from the circuit-price-feed every 2–10 seconds (real-time gRPC reserve prices for indexed pools, sub-100ms latency) and checks each open position against stop-loss, take-profit, trailing stop (activates at +4%, trails 3% below peak), and max-hold time. It also watches the swarm feed — if peer agents publish sell signals on a mint you're holding and you're within 50% of your stop-loss, it exits early. A swarm rug_alert exits immediately at any P&L. Sells go through Jupiter Ultra with a Jito fast-path for speed.
+**Position monitor** fetches prices from the circuit-price-feed every 2–10 seconds (real-time gRPC reserve prices for indexed pools, sub-100ms latency) and checks each open position against stop-loss, take-profit, trailing stop (activates at +2%, trails 3% below peak), and max-hold time. It also watches the swarm feed — if peer agents publish sell signals on a mint you're holding and you're within 50% of your stop-loss, it exits early. A swarm rug_alert exits immediately at any P&L. Sells go through Jupiter Ultra with a Jito fast-path for speed.
 
 **Heartbeat** builds a status snapshot every 5 minutes from local data — no LLM. Sends positions, P&L, and wallet balances to Telegram. If it detects an exception (position near stop-loss, low SOL), it escalates to the LLM once with a 30-minute cooldown per exception. Also posts a live stats heartbeat to the swarm registry (win rate, open positions, P&L).
 
@@ -216,6 +220,7 @@ The agent loads specialized knowledge on demand. Ask it to `load skill <name>` i
 | `momentum-trading` | Breakout entries, trend following |
 | `scalping` | Sub-10min trades, tight stops |
 | `exit-strategy` | Partial exits, managing winners |
+| `position-management` | Managing open positions, deciding when to exit |
 | `risk-management` | Position sizing, portfolio heat, drawdown rules |
 | `market-analysis` | Regime reading, Fear & Greed, sector rotation |
 | `yield-farming` | LST staking, Kamino lending, LP awareness |
@@ -223,6 +228,10 @@ The agent loads specialized knowledge on demand. Ask it to `load skill <name>` i
 | `swarm-analyst` | Reading swarm signals and consensus |
 | `survival` | CIRC economics, runway management |
 | `builder` | Writing and running custom scripts |
+| `infisical` | *Optional* — secrets via Infisical vault instead of `.env` |
+| `playwright` | *Optional* — browser automation for web research tasks |
+
+→ **Want to specialize your agent around one of these?** See **[BUILDING.md](BUILDING.md)** — recipes, configs, and skill stacks for purpose-built agents.
 
 ---
 
@@ -303,6 +312,7 @@ Your `.env`, `data/`, `soul.local.md`, and `config/agent.local.json` are never t
 
 ## Docs
 
+- [**Building specialist agents**](BUILDING.md) — recipes, configs, and skill stacks for purpose-built agents (scalper, conservative, degen, yield, analyst, rug-hunter, and your own)
 - [Configuration reference](docs/configuration.md) — all config options, dashboard, env vars, scoring
 - [Deployment guide](docs/deployment.md) — systemd, PM2, dashboard remote access, multi-agent setup
 - [Setup walkthrough](walkthrough.md) — step-by-step from zero to running swarm
