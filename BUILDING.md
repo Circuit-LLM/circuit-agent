@@ -86,10 +86,12 @@ The dip-reversal scorer classifies every setup into one of four patterns by dip 
 
 | Pattern | 1h drop | Character |
 |---|---|---|
-| `SHALLOW-DIP` | shallow (0 to −3%) | mild pullback, frequent |
-| `DIP-BUY` | moderate (−3 to −8%) | the sweet spot |
-| `REVERSAL` | deeper | bigger bounce needed to confirm |
-| `DEEP-REVERSAL` | deepest | falling-knife risk, strict gates |
+| `SHALLOW-DIP` | 0 to −3% | mild pullback, frequent |
+| `DIP-BUY` | −3 to −5% | moderate dip |
+| `REVERSAL` | −5 to −10% | deeper — needs a bigger bounce to confirm |
+| `DEEP-REVERSAL` | below −10% | falling-knife risk, strictest gates |
+
+*(Boundaries from `lib/scoring.js`. The scorer's depth "sweet spot" for points is −3 to −8%, which straddles `DIP-BUY` and the shallow end of `REVERSAL`.)*
 
 `patternFilter: []` (or omit) = trade all four. Narrow it to focus a specialist — e.g. `["SHALLOW-DIP","DIP-BUY"]` for a conservative agent that avoids deep knives.
 

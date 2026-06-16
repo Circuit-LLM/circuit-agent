@@ -7,8 +7,8 @@ circuit-agent is an autonomous Solana trading agent built around five parallel l
 ## The Five Loops
 
 ```
-auto-scanner  (every 5 min)   scan → score → rug-check → buy best candidate
-position-mon  (every 10s)     fetch prices → check stops → auto-sell on trigger
+auto-scanner  (every 60s)     scan → score → rug-check → buy best candidate
+position-mon  (every ~5s)     fetch prices → check stops → auto-sell on trigger
 heartbeat     (every 5 min)   build status → alert exceptions → registry ping
 agent-loop    (every 90 min)  LLM sets session strategy (mode, patterns, buy cap)
 reflect       (every 4h)      review trades → tune config → share swarm insights
@@ -192,7 +192,7 @@ Skills contain trading rules, scoring criteria, and decision heuristics written 
 ## Data Flow: One Trade
 
 ```
-auto-scanner tick (every 5 min)
+auto-scanner tick (every 60s)
   │
   ├─ api.scan() → CIRCUIT Data API → Solana trending tokens (on-chain + aggregated)
   ├─ scoreDipReversal() → score 0–100, pick best candidate
@@ -204,7 +204,7 @@ auto-scanner tick (every 5 min)
   ├─ positions.openPosition() → write data/positions.json
   └─ api.swarmPublish('buy_signal') → alert swarm peers
 
-position-monitor tick (every 10s)
+position-monitor tick (every ~5s)
   │
   ├─ circuit-price-feed → batch fetch prices (reserve-based, Geyser → Redis)
   │    ├─ cache miss: /warm → Jupiter Price API v3 → Redis (30s TTL)
@@ -282,7 +282,7 @@ Reputation is built from signal accuracy. Agents with higher reputation get more
 
 **FIELD_SPEC allowlist:** Only fields declared in `dashboard.js`'s `FIELD_SPEC` object are writable via `/api/config POST`. Secrets (`AGENT_KEYPAIR`, RPC URL, API keys) are read-only through the dashboard. The spec also carries metadata: `type`, `min`/`max` bounds, `requiresRestart` (shown as a badge in the UI), and `label`.
 
-**Config hot-reload:** The scanner and monitor call `loadConfig()` at the top of every tick — they read `agent.local.json` fresh each cycle. This means most config changes via the dashboard (stop-loss, take-profit, score threshold, liquidity floor) take effect within 5–10 seconds without a restart. Fields that require restart (e.g. dashboard port, Telegram token, RPC URL) are flagged in FIELD_SPEC and shown with a **RESTART** badge in the Config tab.
+**Config hot-reload:** The scanner and monitor call `loadConfig()` at the top of every tick — they read `agent.local.json` fresh each cycle. This means most config changes via the dashboard take effect on the next tick without a restart — monitor-side fields (stop-loss, take-profit, trailing) within ~5 seconds, scanner-side fields (score threshold, liquidity floor) within ~60 seconds. Fields that require restart (e.g. dashboard port, Telegram token, RPC URL) are flagged in FIELD_SPEC and shown with a **RESTART** badge in the Config tab.
 
 **Security:** The server binds to `127.0.0.1` only (loopback — not reachable from the network). For remote access, use an SSH tunnel. Optionally set `dashboard.apiKey` in `config/agent.local.json` to require an `x-api-key` header on all API routes (header-only — no query param, to prevent key leakage in browser history).
 

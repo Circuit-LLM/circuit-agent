@@ -68,8 +68,8 @@ node agent.js start
 ```
 
 Five loops start in parallel:
-- **Auto-scanner** — every 5 min: scan → score → rug check → buy best candidate
-- **Position monitor** — every 10s: check stops → auto-sell on trigger
+- **Auto-scanner** — every 60s: scan → score → rug check → buy best candidate
+- **Position monitor** — every ~5s: check stops → auto-sell on trigger
 - **Heartbeat** — every 5 min: build status → exception alerts → registry ping
 - **Agent-loop** — every 90 min: LLM sets session mode, pattern filters, buy cap
 - **Reflect** — every 4h: review trades → tune config → share insights to swarm

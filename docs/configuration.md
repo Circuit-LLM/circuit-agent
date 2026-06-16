@@ -28,16 +28,16 @@ You only need to include the keys you want to change:
 ```json
 {
   "strategy": {
-    "scanIntervalMs": 300000,      // Scan frequency (default 5 min)
-    "positionCheckMs": 10000,      // Monitor check interval (default 10s)
+    "scanIntervalMs": 60000,       // Scan frequency (default 60s)
+    "positionCheckMs": 5000,       // Monitor check interval (default 5s)
     "maxOpenPositions": 3,         // Max simultaneous positions
     "entryBudgetSol": 0.005,       // SOL per trade entry
     "minScanScore": 55,            // Min dip-reversal score to buy (0–100)
-    "minLiquidity": 50000,         // Min pool liquidity in USD
+    "minLiquidity": 80000,         // Min pool liquidity in USD
     "stopLossPct": -6,             // Hard stop-loss %
     "takeProfitPct": 25,           // Take-profit %
     "maxHoldMinutes": 45,          // Max hold before forced exit
-    "trailingStopActivatePct": 4,  // Trailing stop activates at +4%
+    "trailingStopActivatePct": 2,  // Trailing stop activates at +2%
     "trailingStopDistancePct": 3,  // Trails 3% below peak
     "buyCooldownMinutes": 60,      // Minimum re-entry cooldown on same mint after exit (loss-weighted — see note below)
     "paperTrading": false,         // true = paper mode: no real swaps, free-tier data only
