@@ -6,7 +6,7 @@
 **An open-source autonomous trading agent for Solana. Scans, buys, monitors, reflects, and earns — on its own. Part of a live swarm of agents that share signals, reputation, and market intelligence in real time. Extend it with custom tools, teach it new skills, or build on top of it.**
 
 [![Node.js](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
-[![Version](https://img.shields.io/badge/version-0.9.4-blue)](https://github.com/Circuit-LLM/circuit-agent/releases)
+[![Version](https://img.shields.io/badge/version-0.9.6-blue)](https://github.com/Circuit-LLM/circuit-agent/releases)
 [![Status](https://img.shields.io/badge/status-beta-orange)](https://github.com/Circuit-LLM/circuit-agent)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
@@ -322,6 +322,15 @@ Your `.env`, `data/`, `soul.local.md`, and `config/agent.local.json` are never t
 ---
 
 ## Changelog
+
+### v0.9.6
+- **Sustained-reversal entry gate.** Entries now require the 5-minute bounce to *hold* — a higher low plus an advancing close across candles — rather than firing on a single-candle spike. This restores the implicit confirmation that the v0.9.5 speed-up removed (a one-candle dead-cat bounce no longer triggers a buy before it fades). Tunable via `strategy.requireSustainedBounce` (default true).
+- **Candidate dilution fix in `scanFree`.** ~50 dexLosers seed mints (many of them dead crashes) were prepended and the result cropped to the first N, so dead tokens filled every evaluated slot and live dip setups never reached the scorer. The scan now budgets for seeds *plus* a full active slice and returns the complete scored set, so alive candidates are actually scored. Gates, safety checks, and buy logic are unchanged — this only widens what gets considered.
+- **Monitor phantom-price hardening.** An absolute peak ceiling (`MAX_PLAUSIBLE_GAIN_PCT`) stops gradual phantom-price inflation from corrupting peak tracking and the trade record (observed peaks of +6,573% and +98,998% from feed glitches); protective max-hold/stop checks still run so a stuck-phantom position can't be orphaned. Take-profit now gets the same Jupiter cross-check that stop-loss and trailing-stop already had — a phantom high can no longer trigger a take-profit that sells at the real (low) price.
+
+### v0.9.5
+- **Real-time scan source + faster reaction loop.** The primary scan source is now the sub-second on-chain Geyser price-feed (`scanFree`) rather than the ~5-minute-lagged paid aggregate, and `scanIntervalMs` dropped from 5 min to 60s. `dexLosers` (live dipping mints) now seeds the scan universe. Paid `scan()` is kept as a fallback only when the live feed is sparse. *(Note: shortening the loop and the data lag also removed an implicit dead-cat-bounce filter — addressed by the sustained-reversal gate in v0.9.6.)*
+- **Depth-scaled bounce gate + entry-quality fixes.** A deeper 1h drop (REVERSAL/DEEP-REVERSAL territory) now requires a stronger 5m bounce (≥3%) before entry; shallower dips require ≥1.5%. Corrupt-candle price data is rejected at entry, and the drop-depth score was re-centered on the −3 to −8% sweet spot so the deepest falling knives no longer earn the most points.
 
 ### v0.9.4
 - **Rug filter fixed (was inverted and unreliable).** `tokenInfoFree` thresholded on RugCheck's raw `score` with the direction backwards — RugCheck score is LOW = safe (USDC ≈ 1), so `score <= 300 → DANGER` flagged safe tokens as dangerous and would have passed real rugs (high score) as OK. Now uses a count-based verdict from RugCheck's actual danger/warn flags. The live path (data-api token-info) was separately sourcing its verdict from circuit-node's internal scorer, whose on-chain data inputs are broken (it flagged USDC/BONK/JUP as DANGER); that path now sources the verdict from RugCheck too. Verified: USDC→SAFE, BONK→LOW_RISK, known rugs→DANGER.
