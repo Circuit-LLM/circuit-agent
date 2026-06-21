@@ -24,7 +24,13 @@
     "deadMoneyMinutes": 15,
     "deadMoneyRangePct": 1.5,
     "deadMoneyMinHoldMinutes": 8,
-    "_strategy_note": "buyCooldownMinutes: skip re-entry on the same mint for this many minutes after closing a position. paperTrading: true enables paper mode \u2014 no real swaps, free data sources only. paperSolBalance: starting virtual SOL for paper mode. deadMoneyMinutes/deadMoneyRangePct/deadMoneyMinHoldMinutes: exit early if pnl stays within \u00b1deadMoneyRangePct for deadMoneyMinutes (after holding at least deadMoneyMinHoldMinutes). minHoldBeforeTpMinutes/minHoldBeforeSlMinutes: suppress TP/SL exits within this many minutes after entry to prevent phantom exits from price-feed lag."
+    "requireEntryConfirm": true,
+    "entryConfirmMaxFadePct": 1.0,
+    "bounceScoreMode": "modest",
+    "requireFreshBounce": false,
+    "hardStopMultiple": 1.6,
+    "_strategy_note": "buyCooldownMinutes: skip re-entry on the same mint for this many minutes after closing a position. paperTrading: true enables paper mode \u2014 no real swaps, free data sources only. paperSolBalance: starting virtual SOL for paper mode. deadMoneyMinutes/deadMoneyRangePct/deadMoneyMinHoldMinutes: exit early if pnl stays within \u00b1deadMoneyRangePct for deadMoneyMinutes (after holding at least deadMoneyMinHoldMinutes). minHoldBeforeTpMinutes/minHoldBeforeSlMinutes: suppress TP/SL exits within this many minutes after entry to prevent phantom exits from price-feed lag.",
+    "_tuning_note_2026_06_18": "S1 requireEntryConfirm: re-read live price right before buy, abort if it faded > entryConfirmMaxFadePct below the scan price (kills stale-bounce fills, the 73%-never-green root cause). S3 bounceScoreMode 'modest' stops rewarding big (exhausted) 5m bounces; 'magnitude' = legacy curve. S2 requireFreshBounce (default false): gate on the 1m turn still advancing \u2014 left OFF to collect bounceFresh vs outcomes first (see entryConditions in trade_history). S5 hardStopMultiple: below stopLossPct*this, exit immediately without the Jupiter-defer that let fast dumps gap to -10%."
   },
   "circuit": {
     "minCircuitBalance": 5000,
@@ -72,7 +78,9 @@
     "consensusBoostFactor": 1.2,
     "consensusBoostMinScore": null,
     "blacklistVerifyTopN": 5,
-    "_note": "autoPublish: emit buy/sell signals automatically on trade execution. minReputationToFollow: only factor signals from agents above this reputation score (0-100). consensusBoostFactor: scale entry size when swarm consensus agrees (e.g. 1.2 = 20% larger). consensusBoostMinScore: independent score must reach this before the boost applies (null = minScanScore+10). blacklistVerifyTopN: re-verify swarm blacklist entries against RugCheck for the top N scored candidates before filtering \u2014 prevents hallucinated blacklist entries from silently dropping good trades."
+    "diversityWindow": 3,
+    "diversityScoreBand": 8,
+    "_note": "autoPublish: emit buy/sell signals automatically on trade execution. minReputationToFollow: only factor signals from agents above this reputation score (0-100). consensusBoostFactor: scale entry size when swarm consensus agrees (e.g. 1.2 = 20% larger). consensusBoostMinScore: independent score must reach this before the boost applies (null = minScanScore+10). blacklistVerifyTopN: re-verify swarm blacklist entries against RugCheck for the top N scored candidates before filtering \u2014 prevents hallucinated blacklist entries from silently dropping good trades. S6 diversityWindow: each agent deterministically picks from the top-N candidates within diversityScoreBand points of the best (and above minScanScore), seeded by agentId, so the swarm spreads across tokens instead of all piling into scored[0] (\u22641 disables). diversityScoreBand: score points below the top still eligible for diversity selection."
   },
   "agentLoop": {
     "intervalMs": 5400000,
