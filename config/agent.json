@@ -48,6 +48,13 @@
     "provider": "openrouter",
     "baseUrl": "",
     "openrouterKey": "",
+    "x402Inference": {
+      "enabled": false,
+      "gatewayUrl": "http://localhost:18970/v1",
+      "model": "Qwen/Qwen2.5-32B-Instruct-AWQ",
+      "maxTokens": 250,
+      "_note": "When enabled, tool-FREE calls (task-review, reflect) run on the Circuit 32B engine via REAL x402 CIRC payment instead of OpenRouter. Tool-USING calls (processor/agent-loop) stay on OpenRouter — the engine has no function-calling. gatewayUrl: http://localhost:18970/v1 on the VPS, or https://inference.circuitllm.xyz/v1 remote. Costs CIRC per call + ~11 tok/s, so use only for non-time-critical reasoning."
+    },
     "_note": "provider: 'openrouter' (cloud) or 'ollama' (local). baseUrl overrides provider default. openrouterKey or OPENROUTER_API_KEY env var."
   },
   "survival": {
