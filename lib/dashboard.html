@@ -1084,23 +1084,27 @@ async function loadScanner() {
     }
   }
 
-  // Scan quality feed from swarm
-  const sf = await api('/api/swarm');
-  if (sf?.feed?.length) {
-    const el = $('sc-feed');
-    el.innerHTML = '';
-    const scans = sf.feed.filter(s => s.type === 'scan_quality').slice(0, 15);
-    if (!scans.length) { el.innerHTML = '<div class="empty">no scan signals yet</div>'; }
-    scans.forEach(s => {
-      const row = mkEl('div','activity-row');
-      const ts  = mkEl('span','activity-ts', timeAgo(s.publishedAt));
-      const lbl = document.createElement('span');
-      lbl.className = 'activity-label';
-      const d2 = s.data ?? {};
-      lbl.textContent = `${d2.candidates ?? '?'} scanned · ${d2.passed ?? '?'} passed · top score ${d2.topScore ?? '?'} (${d2.topPattern ?? '?'})`;
-      row.appendChild(ts); row.appendChild(lbl);
-      el.appendChild(row);
-    });
+  // Scan quality feed from swarm. Always replace the "loading…" placeholder — even when the feed is
+  // empty or the fetch fails — so it shows real state instead of hanging on "loading…" forever.
+  const sf = await api('/api/swarm').catch(() => null);
+  const el = $('sc-feed');
+  if (el) {
+    const scans = (sf?.feed || []).filter(s => s.type === 'scan_quality').slice(0, 15);
+    if (!scans.length) {
+      el.innerHTML = '<div class="empty">no scan signals yet</div>';
+    } else {
+      el.innerHTML = '';
+      scans.forEach(s => {
+        const row = mkEl('div','activity-row');
+        const ts  = mkEl('span','activity-ts', timeAgo(s.publishedAt));
+        const lbl = document.createElement('span');
+        lbl.className = 'activity-label';
+        const d2 = s.data ?? {};
+        lbl.textContent = `${d2.candidates ?? '?'} scanned · ${d2.passed ?? '?'} passed · top score ${d2.topScore ?? '?'} (${d2.topPattern ?? '?'})`;
+        row.appendChild(ts); row.appendChild(lbl);
+        el.appendChild(row);
+      });
+    }
     set('sc-feed-ts', new Date().toLocaleTimeString());
   }
 }
