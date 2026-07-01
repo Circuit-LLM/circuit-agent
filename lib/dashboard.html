@@ -22,35 +22,69 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 a{color:var(--c2);text-decoration:none}
 a:hover{color:var(--c);text-decoration:underline}
 
-/* ── Header ── */
-#header{height:44px;background:var(--bg1);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:200}
-.hdr-left{display:flex;align-items:center;gap:12px}
-.hdr-logo{display:flex;align-items:center;gap:8px}
-.hdr-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:blink 2s step-end infinite}
+.hdr-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:blink 2s step-end infinite;flex-shrink:0}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
-.hdr-title{color:var(--c);font-size:13px;font-weight:bold;letter-spacing:3px}
-.hdr-subtitle{color:var(--text3);font-size:10px;letter-spacing:1px}
-.hdr-addr{font-size:10px;color:var(--text3);letter-spacing:.5px;font-family:monospace}
-.hdr-right{display:flex;align-items:center;gap:16px;font-size:11px}
-.hdr-bal{color:var(--text2)}
-.hdr-bal span{color:var(--c)}
-.hdr-badge{font-size:9px;padding:2px 7px;border:1px solid var(--c3);color:var(--c2);letter-spacing:1px;border-radius:0}
-.hdr-badge.paper{border-color:var(--amber2);color:var(--amber)}
-.hdr-ext{font-size:10px;padding:2px 8px;border:1px solid var(--border);color:var(--text3)}
-.hdr-ext:hover{border-color:var(--c3);color:var(--c2);background:var(--c5)}
 
-/* ── Tabs ── */
-#tabs{background:var(--bg2);border-bottom:1px solid var(--border);display:flex;padding:0 20px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
-#tabs::-webkit-scrollbar{display:none}
-.tab{font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:11px 14px;cursor:pointer;color:var(--text3);border-bottom:2px solid transparent;transition:all .15s;user-select:none;white-space:nowrap;flex-shrink:0}
-.tab:hover{color:var(--text2)}
-.tab.active{color:var(--c);border-bottom-color:var(--c)}
-.tab-badge{font-size:9px;background:var(--c4);color:var(--c2);padding:1px 5px;border-radius:0;margin-left:4px}
+/* ── Shell: command sidebar + content ── */
+#shell{display:flex;min-height:100vh;position:relative;z-index:1}
+#sidebar{width:216px;flex-shrink:0;background:var(--bg1);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;transition:width .16s ease}
+#sidebar::-webkit-scrollbar{display:none}
+body.sb-collapsed #sidebar{width:52px}
+
+.sb-brand{display:flex;align-items:center;gap:8px;height:44px;padding:0 14px;border-bottom:1px solid var(--border);flex-shrink:0}
+.sb-brand-name{color:var(--c);font-size:12px;font-weight:bold;letter-spacing:2px;white-space:nowrap;overflow:hidden;flex:1}
+.sb-collapse{cursor:pointer;color:var(--text3);font-size:15px;padding:2px 5px;user-select:none;line-height:1}
+.sb-collapse:hover{color:var(--c)}
+body.sb-collapsed .sb-brand-name{display:none}
+body.sb-collapsed .sb-brand{justify-content:center;padding:0}
+
+/* vitals */
+.sb-vitals{padding:13px 14px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:10px}
+.sb-mode{display:inline-flex;align-items:center;gap:6px;font-size:9px;letter-spacing:2px;padding:3px 9px;border:1px solid var(--c3);color:var(--c2);width:fit-content}
+.sb-mode.paper{border-color:var(--amber2);color:var(--amber)}
+.sb-vital{display:flex;flex-direction:column;gap:1px;min-width:0}
+.sb-vital .lbl{font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3)}
+.sb-vital .val{font-size:15px;color:var(--text);font-weight:bold;font-variant-numeric:tabular-nums;line-height:1.1}
+.sb-vital .val.pos{color:var(--green)}.sb-vital .val.neg{color:var(--red)}
+.sb-vital-row{display:flex;gap:16px}
+.sb-addr{font-size:9px;color:var(--text3);font-family:monospace;word-break:break-all}
+body.sb-collapsed .sb-vitals{display:none}
+.sb-mini{display:none}
+body.sb-collapsed .sb-mini{display:flex;justify-content:center;padding:11px 0;border-bottom:1px solid var(--border)}
+
+/* nav */
+.sb-nav-wrap{display:flex;flex-direction:column;padding:8px 0;flex:1}
+.sb-nav{display:flex;align-items:center;gap:12px;padding:9px 16px;cursor:pointer;color:var(--text3);border-left:2px solid transparent;transition:background .12s,color .12s;user-select:none;white-space:nowrap}
+.sb-nav:hover{color:var(--text2);background:var(--bg2)}
+.sb-nav.active{color:var(--c);border-left-color:var(--c);background:var(--c5)}
+.sb-ico{font-size:15px;width:18px;text-align:center;flex-shrink:0}
+.sb-label{font-size:11px;letter-spacing:1.5px;text-transform:uppercase}
+.sb-badge{font-size:9px;background:var(--c4);color:var(--c2);padding:1px 5px;margin-left:auto}
+body.sb-collapsed .sb-label,body.sb-collapsed .sb-badge{display:none}
+body.sb-collapsed .sb-nav{justify-content:center;padding:11px 0;gap:0}
+
+.sb-foot{padding:10px 14px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:6px}
+.sb-foot a{font-size:9px;color:var(--text3);letter-spacing:.5px}
+.sb-foot a:hover{color:var(--c2)}
+body.sb-collapsed .sb-foot{display:none}
+
+/* content column + topbar */
+#content{flex:1;min-width:0;display:flex;flex-direction:column}
+#topbar{height:44px;flex-shrink:0;background:var(--bg1);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:100}
+.tb-title{color:var(--c);font-size:12px;font-weight:bold;letter-spacing:3px}
+.tb-right{display:flex;align-items:center;gap:14px;font-size:11px;color:var(--text3)}
 
 /* ── Layout ── */
-#main{max-width:1280px;margin:0 auto;padding:20px 20px 80px;position:relative;z-index:1}
+#main{max-width:1200px;margin:0 auto;width:100%;padding:20px 20px 80px;position:relative;z-index:1}
 .tab-panel{display:none}
 .tab-panel.active{display:block}
+
+@media(max-width:760px){
+  #sidebar,body.sb-collapsed #sidebar{width:52px}
+  .sb-label,.sb-vitals,.sb-brand-name,.sb-foot{display:none}
+  .sb-nav{justify-content:center;padding:11px 0;gap:0}
+  .sb-brand{justify-content:center;padding:0}
+}
 
 /* ── Common ── */
 .box{border:1px solid var(--border);background:var(--bg1)}
@@ -100,6 +134,24 @@ a:hover{color:var(--c);text-decoration:underline}
 .data-table .neg{color:var(--red)}
 .data-table .neu{color:var(--text3)}
 .data-table .badge{font-size:9px;padding:1px 5px;border:1px solid;display:inline-block}
+/* ── Scanner candidate table ─────────────────────────────────────────────── */
+.scan-table-wrap{max-height:440px;overflow-y:auto;scrollbar-width:thin}
+.scan-table{width:100%}
+.scan-table th{position:sticky;top:0;z-index:1;background:var(--bg2)}
+.scan-table td.tok{text-align:left;white-space:nowrap}
+.scan-table .sym{color:var(--c2);font-weight:bold}
+.scan-table .mint{color:var(--text3);font-size:9px;font-family:monospace;margin-left:6px}
+.scan-table .geyser{color:var(--c);font-size:9px;margin-left:5px}
+.scan-table td.score{color:var(--c2);font-weight:bold}
+.scan-table tr.scan-row-pass td{background:var(--green3)}
+.scan-table tr.scan-row-pass td.tok{border-left:2px solid var(--green)}
+.scan-table td.st{text-align:left;max-width:250px}
+.scan-table .scan-pass{color:var(--green);font-size:9px;letter-spacing:1px;font-weight:bold}
+.scan-table .scan-reason{color:var(--red);font-size:9px;white-space:normal;line-height:1.35;display:inline-block}
+.conf{font-size:8px;letter-spacing:1px;padding:1px 5px;border:1px solid;display:inline-block;white-space:nowrap}
+.conf-high{color:var(--green);border-color:var(--green2)}
+.conf-thin{color:var(--amber);border-color:var(--amber2)}
+.conf-stale{color:var(--red);border-color:var(--red2)}
 .badge-sl{color:var(--red);border-color:var(--red2)}
 .badge-tp{color:var(--green);border-color:var(--green2)}
 .badge-ts{color:var(--amber);border-color:var(--amber2)}
@@ -137,6 +189,19 @@ a:hover{color:var(--c);text-decoration:underline}
 #chat-send:hover{background:var(--c4)}
 #chat-send:disabled{opacity:.4;cursor:default}
 .chat-thinking{color:var(--text3);font-size:11px;padding:4px 12px;animation:flicker 1.2s ease-in-out infinite}
+/* chat header: inference-source toggle + model + running spend */
+.chat-hdr-r{display:flex;align-items:center;gap:10px}
+.chat-src-toggle{display:inline-flex;border:1px solid var(--border);overflow:hidden}
+.chat-src{font-family:inherit;font-size:9px;letter-spacing:.5px;text-transform:none;padding:3px 9px;background:transparent;color:var(--text3);cursor:pointer;border:none;border-right:1px solid var(--border)}
+.chat-src:last-child{border-right:none}
+.chat-src:hover{color:var(--text2)}
+.chat-src.on{background:var(--c5);color:var(--c)}
+.chat-model{font-size:10px;color:var(--text3);text-transform:none;letter-spacing:0}
+.chat-spend{font-size:9px;color:var(--amber);text-transform:none;letter-spacing:0}
+/* paid-inference badge under an x402 agent reply */
+.chat-paid{display:inline-flex;align-items:center;gap:5px;font-size:8px;letter-spacing:.5px;color:var(--amber);border:1px solid var(--amber2);padding:1px 5px;margin-top:4px}
+.chat-paid a{color:var(--amber);text-decoration:underline}
+.chat-src-note{font-size:9px;color:var(--text3);padding:2px 12px 0}
 
 /* ── Swarm ── */
 .rep-bar-wrap{width:80px;height:5px;background:var(--border2);position:relative}
@@ -173,6 +238,66 @@ a:hover{color:var(--c);text-decoration:underline}
 .cfg-restart-warn{background:rgba(255,149,0,.07);border:1px solid var(--amber2);padding:8px 12px;font-size:10px;color:var(--amber);letter-spacing:.5px;margin-bottom:12px;display:none}
 .cfg-restart-warn.visible{display:block}
 .cfg-unit{font-size:10px;color:var(--text3);margin-left:4px}
+
+/* ── Config v2 — card grid + big controls ── */
+#config-sections{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px;align-items:start}
+.cfg-card{border:1px solid var(--border);background:var(--bg1)}
+.cfg-card-title{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--c2);padding:9px 14px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.cfg-card-title::before{content:'▚';color:var(--c3);font-size:9px}
+.cfg-card-body{padding:2px 14px 8px}
+.cfg-item{padding:12px 0;border-bottom:1px solid var(--border2)}
+.cfg-item:last-child{border-bottom:none}
+.cfg-item-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.cfg-item-label{font-size:11px;color:var(--text2);letter-spacing:.5px;font-family:monospace}
+.cfg-item-head .cfg-reset{margin-left:auto}
+.cfg-item .cfg-field-error{text-align:left;margin-top:6px}
+/* slider */
+.cfg-slider-wrap{display:flex;align-items:center;gap:12px}
+.cfg-slider{-webkit-appearance:none;appearance:none;flex:1;height:6px;background:var(--c5);border:1px solid var(--border);outline:none;cursor:pointer}
+.cfg-slider::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;background:var(--c);border:1px solid var(--bg);cursor:pointer;box-shadow:0 0 4px rgba(255,224,0,.4)}
+.cfg-slider::-moz-range-thumb{width:16px;height:16px;background:var(--c);border:1px solid var(--bg);cursor:pointer;border-radius:0}
+.cfg-slider.dirty{background:rgba(255,149,0,.18)}
+.cfg-slider.dirty::-webkit-slider-thumb{background:var(--amber)}
+.cfg-slider.saved::-webkit-slider-thumb{background:var(--green)}
+.cfg-slider.error::-webkit-slider-thumb{background:var(--red)}
+.cfg-readout{font-size:20px;font-weight:bold;color:var(--c);font-variant-numeric:tabular-nums;min-width:58px;text-align:right;line-height:1}
+.cfg-readout .u{font-size:10px;color:var(--text3);font-weight:normal;margin-left:3px}
+.cfg-slider.dirty ~ .cfg-readout{color:var(--amber)}
+.cfg-minmax{display:flex;justify-content:space-between;font-size:8px;color:var(--text3);margin-top:4px}
+/* stepper */
+.cfg-stepper{display:flex;align-items:stretch}
+.cfg-step{width:36px;background:var(--bg2);border:1px solid var(--border);color:var(--c2);font-size:18px;cursor:pointer;font-family:inherit;line-height:1;user-select:none;flex-shrink:0}
+.cfg-step:hover{background:var(--c5);border-color:var(--c3);color:var(--c)}
+.cfg-step:active{background:var(--c4)}
+.cfg-num{width:100%;text-align:center;font-family:inherit;font-size:17px;font-weight:bold;background:var(--bg2);border:1px solid var(--border);border-left:none;border-right:none;color:var(--text);padding:7px 4px;outline:none;-moz-appearance:textfield;font-variant-numeric:tabular-nums}
+.cfg-num::-webkit-outer-spin-button,.cfg-num::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.cfg-num:focus{border-color:var(--c3);color:var(--c)}
+.cfg-num.dirty{color:var(--amber);box-shadow:inset 0 0 0 1px var(--amber2)}
+.cfg-num.saved{color:var(--green);box-shadow:inset 0 0 0 1px var(--green2)}
+.cfg-num.error{color:var(--red);box-shadow:inset 0 0 0 1px var(--red2)}
+.cfg-sub{font-size:9px;color:var(--text3);margin-top:5px;text-align:center;letter-spacing:.5px}
+/* toggle switch */
+.cfg-switch-row{display:flex;align-items:center;gap:12px}
+.cfg-switch{position:relative;display:inline-block;width:46px;height:24px;flex-shrink:0;cursor:pointer}
+.cfg-toggle{opacity:0;width:0;height:0;position:absolute}
+.cfg-track{position:absolute;inset:0;background:var(--bg3);border:1px solid var(--border);transition:.16s}
+.cfg-track::before{content:'';position:absolute;width:16px;height:16px;left:3px;top:3px;background:var(--text3);transition:.16s}
+.cfg-toggle:checked + .cfg-track{background:var(--green3);border-color:var(--green2)}
+.cfg-toggle:checked + .cfg-track::before{transform:translateX(22px);background:var(--green)}
+.cfg-toggle.dirty + .cfg-track{border-color:var(--amber)}
+.cfg-toggle.saved + .cfg-track{border-color:var(--green)}
+.cfg-switch-lbl{font-size:11px;letter-spacing:1px;color:var(--text3)}
+.cfg-switch-lbl.on{color:var(--green)}
+/* pills (segmented) */
+.cfg-pills{display:flex;gap:6px;flex-wrap:wrap}
+.cfg-pill{font-family:inherit;font-size:10px;letter-spacing:.5px;padding:6px 11px;border:1px solid var(--border);background:var(--bg2);color:var(--text3);cursor:pointer}
+.cfg-pill:hover{border-color:var(--c3);color:var(--text2)}
+.cfg-pill.on{border-color:var(--c);color:var(--c);background:var(--c5)}
+/* text */
+.cfg-text{width:100%;font-family:inherit;font-size:13px;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:7px 10px;outline:none}
+.cfg-text:focus{border-color:var(--c3)}
+.cfg-text.dirty{border-color:var(--amber)}.cfg-text.saved{border-color:var(--green)}.cfg-text.error{border-color:var(--red)}
+.cfg-ro{font-size:13px;color:var(--text3)}
 
 /* ── Wallet ── */
 .wallet-wrap{display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap}
@@ -224,40 +349,61 @@ a:hover{color:var(--c);text-decoration:underline}
 </head>
 <body>
 
-<!-- ═══════════════════ HEADER ═══════════════════ -->
-<div id="header">
-  <div class="hdr-left">
-    <div class="hdr-logo">
+<script>try{if(localStorage.getItem('sbCollapsed')==='1')document.body.classList.add('sb-collapsed')}catch(e){}</script>
+
+<!-- ═══════════════════ SHELL ═══════════════════ -->
+<div id="shell">
+
+  <!-- ─── COMMAND SIDEBAR ─── -->
+  <aside id="sidebar">
+    <div class="sb-brand">
       <div class="hdr-dot" id="status-dot"></div>
-      <div>
-        <div class="hdr-title">CIRCUIT&nbsp;AGENT</div>
+      <span class="sb-brand-name">CIRCUIT</span>
+      <span class="sb-collapse" id="sb-collapse" onclick="toggleSidebar()" title="Collapse / expand (⌘\\)">‹</span>
+    </div>
+
+    <div class="sb-mini"><div class="hdr-dot" style="animation:none;background:var(--c)"></div></div>
+
+    <div class="sb-vitals">
+      <span class="sb-mode" id="hdr-mode">LIVE</span>
+      <div class="sb-vital">
+        <span class="lbl">Portfolio</span>
+        <span class="val pos" id="hdr-portfolio" style="display:none">——</span>
+      </div>
+      <div class="sb-vital-row">
+        <div class="sb-vital"><span class="lbl">SOL</span><span class="val" id="hdr-sol">——</span></div>
+        <div class="sb-vital"><span class="lbl">CIRC</span><span class="val" id="hdr-circ">——</span></div>
+      </div>
+      <span id="hdr-sol-usd" style="font-size:9px;color:var(--text3)"></span>
+      <div class="sb-vital"><span class="lbl">Wallet</span><span class="sb-addr" id="hdr-addr">——</span></div>
+    </div>
+
+    <nav class="sb-nav-wrap">
+      <div class="sb-nav active" data-tab="overview"  onclick="switchTab('overview')"><span class="sb-ico">▤</span><span class="sb-label">Overview</span></div>
+      <div class="sb-nav"        data-tab="positions" onclick="switchTab('positions')"><span class="sb-ico">◎</span><span class="sb-label">Positions</span><span class="sb-badge" id="tab-pos-count">0</span></div>
+      <div class="sb-nav"        data-tab="trades"    onclick="switchTab('trades')"><span class="sb-ico">⇄</span><span class="sb-label">Trades</span></div>
+      <div class="sb-nav"        data-tab="scanner"   onclick="switchTab('scanner')"><span class="sb-ico">⌕</span><span class="sb-label">Scanner</span></div>
+      <div class="sb-nav"        data-tab="swarm"     onclick="switchTab('swarm')"><span class="sb-ico">⋈</span><span class="sb-label">Swarm</span></div>
+      <div class="sb-nav"        data-tab="tasks"     onclick="switchTab('tasks')"><span class="sb-ico">☰</span><span class="sb-label">Tasks</span></div>
+      <div class="sb-nav"        data-tab="chat"      onclick="switchTab('chat')"><span class="sb-ico">✎</span><span class="sb-label">Chat</span></div>
+      <div class="sb-nav"        data-tab="config"    onclick="switchTab('config')"><span class="sb-ico">⚙</span><span class="sb-label">Config</span></div>
+    </nav>
+
+    <div class="sb-foot">
+      <a href="https://circuitllm.xyz" target="_blank">circuitllm.xyz ↗</a>
+      <a href="https://circuitllm.xyz/data" target="_blank">OPS Terminal ↗</a>
+    </div>
+  </aside>
+
+  <!-- ─── CONTENT ─── -->
+  <div id="content">
+    <div id="topbar">
+      <span class="tb-title" id="tb-title">OVERVIEW</span>
+      <div class="tb-right">
+        <span id="hdr-context-blind" style="display:none;font-size:9px;letter-spacing:1.5px;color:#ff4444;border:1px solid #ff444466;padding:2px 6px">⚠ BLIND</span>
+        <span id="tb-clock"></span>
       </div>
     </div>
-    <div class="hdr-addr" id="hdr-addr">——</div>
-    <span class="hdr-badge" id="hdr-mode">LIVE</span>
-  </div>
-  <div class="hdr-right">
-    <span class="hdr-bal">SOL&nbsp;<span id="hdr-sol">——</span></span>
-    <span class="hdr-bal">CIRC&nbsp;<span id="hdr-circ">——</span></span>
-    <span class="hdr-bal" id="hdr-sol-usd" style="color:var(--text3)"></span>
-    <span class="hdr-bal" id="hdr-portfolio" style="display:none;color:var(--green);font-weight:bold"></span>
-    <span id="hdr-context-blind" style="display:none;font-size:9px;letter-spacing:1.5px;color:#ff4444;border:1px solid #ff444466;padding:2px 6px;margin-left:4px">⚠ BLIND</span>
-    <a href="https://circuitllm.xyz" target="_blank" class="hdr-ext">circuitllm.xyz ↗</a>
-    <a href="https://circuitllm.xyz/data" target="_blank" class="hdr-ext">OPS Terminal ↗</a>
-  </div>
-</div>
-
-<!-- ═══════════════════ TABS ═══════════════════ -->
-<div id="tabs">
-  <div class="tab active" onclick="switchTab('overview')">OVERVIEW</div>
-  <div class="tab" onclick="switchTab('positions')">POSITIONS <span class="tab-badge" id="tab-pos-count">0</span></div>
-  <div class="tab" onclick="switchTab('trades')">TRADES</div>
-  <div class="tab" onclick="switchTab('scanner')">SCANNER</div>
-  <div class="tab" onclick="switchTab('swarm')">SWARM</div>
-  <div class="tab" onclick="switchTab('tasks')">TASKS</div>
-  <div class="tab" onclick="switchTab('chat')">CHAT</div>
-  <div class="tab" onclick="switchTab('config')">CONFIG</div>
-</div>
 
 <div id="main">
 
@@ -486,10 +632,10 @@ a:hover{color:var(--c);text-decoration:underline}
     </div>
   </div>
 
-  <div class="sec-hdr" style="margin-top:12px"><span>//</span>&nbsp;LAST SCAN DETAIL</div>
+  <div class="sec-hdr" style="margin-top:12px"><span>//</span>&nbsp;LAST SCAN — ALL CANDIDATES</div>
   <div class="box" id="sc-last-scan-box">
-    <div class="box-hdr">TOP CANDIDATE <span class="box-hdr-r" id="sc-last-ts">——</span></div>
-    <div id="sc-last-scan"><div class="empty dim">no scan data yet</div></div>
+    <div class="box-hdr"><span id="sc-scan-summary">no scan data yet</span> <span class="box-hdr-r" id="sc-last-ts">——</span></div>
+    <div id="sc-last-scan" class="scan-table-wrap"><div class="empty dim">no scan data yet</div></div>
   </div>
 
   <div class="sec-hdr" style="margin-top:12px"><span>//</span>&nbsp;SCAN SIGNALS (from swarm)</div>
@@ -584,12 +730,23 @@ a:hover{color:var(--c);text-decoration:underline}
 <div id="tab-chat" class="tab-panel">
 
   <div style="margin-top:4px;margin-bottom:8px;font-size:10px;color:var(--text3);padding:6px 0">
-    Communicate directly with your agent's LLM. It has full context: positions, trades, config, market state.
-    &nbsp;·&nbsp; Responses may take 10–30s depending on model.
+    Chat directly with your agent's LLM. Pick the inference source:
+    <b style="color:var(--c2)">OpenRouter</b> = full tool-use (the agent can act);
+    <b style="color:var(--amber)">Circuit&nbsp;DLLM · x402</b> = pay-per-message on the decentralized engine (CIRC), conversational only.
   </div>
 
   <div class="box" id="chat-wrap">
-    <div class="box-hdr">AGENT CHAT <span class="box-hdr-r"><span id="chat-model">——</span></span></div>
+    <div class="box-hdr">AGENT CHAT
+      <span class="box-hdr-r chat-hdr-r">
+        <span class="chat-spend" id="chat-spend" style="display:none"></span>
+        <span class="chat-src-toggle" id="chat-src-toggle">
+          <button class="chat-src on" data-src="openrouter" onclick="setChatSource('openrouter')">OpenRouter</button>
+          <button class="chat-src" data-src="circuit" onclick="setChatSource('circuit')">Circuit&nbsp;DLLM · x402</button>
+        </span>
+        <span id="chat-model" class="chat-model">——</span>
+      </span>
+    </div>
+    <div class="chat-src-note" id="chat-src-note"></div>
     <div id="chat-msgs"></div>
     <div id="chat-thinking" class="chat-thinking" style="display:none">Agent is thinking…</div>
     <div id="chat-input-row">
@@ -618,6 +775,8 @@ a:hover{color:var(--c);text-decoration:underline}
 </div>
 
 </div><!-- /main -->
+  </div><!-- /content -->
+</div><!-- /shell -->
 
 <!-- ═══════════════════ CONFIG SAVE BAR ═══════════════════ -->
 <div id="cfg-save-bar" class="cfg-save-bar">
@@ -638,6 +797,8 @@ let _config   = null;
 let _tradeFilter = 'all';
 let _taskFilter  = 'all';
 let _chatPending = false;
+let _chatSource  = null;          // 'openrouter' | 'circuit' — resolved on first chat open
+let _chatSpendCirc = 0;           // running CIRC spent on x402 chat this session
 const _sseOpenAt = Date.now();
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -688,16 +849,29 @@ let _activeTab = 'overview';
 const _loaded = {};
 
 function switchTab(id) {
-  document.querySelectorAll('.tab').forEach((t,i) => {
-    const ids = ['overview','positions','trades','scanner','swarm','tasks','chat','config'];
-    t.classList.toggle('active', ids[i] === id);
-  });
+  document.querySelectorAll('.sb-nav').forEach(t => t.classList.toggle('active', t.dataset.tab === id));
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   const panel = $('tab-'+id);
   if (panel) panel.classList.add('active');
+  const title = $('tb-title'); if (title) title.textContent = id.toUpperCase();
   _activeTab = id;
   if (!_loaded[id]) { _loaded[id] = true; loadTab(id); }
 }
+
+// Command-sidebar collapse (persisted). Restore runs inline in <body> to avoid a flash;
+// this keeps the toggle glyph + a topbar clock in sync.
+function toggleSidebar() {
+  const collapsed = document.body.classList.toggle('sb-collapsed');
+  try { localStorage.setItem('sbCollapsed', collapsed ? '1' : '0'); } catch {}
+  const btn = $('sb-collapse'); if (btn) btn.textContent = collapsed ? '›' : '‹';
+}
+(function initShell(){
+  const btn = $('sb-collapse');
+  if (btn && document.body.classList.contains('sb-collapsed')) btn.textContent = '›';
+  document.addEventListener('keydown', e => { if ((e.metaKey||e.ctrlKey) && e.key === '\\') { e.preventDefault(); toggleSidebar(); } });
+  const clk = $('tb-clock');
+  if (clk) { const tick = () => { try { clk.textContent = new Date().toLocaleTimeString(); } catch {} }; tick(); setInterval(tick, 1000); }
+})();
 
 function loadTab(id) {
   if (id === 'positions') loadPositions();
@@ -706,7 +880,7 @@ function loadTab(id) {
   if (id === 'swarm')     loadSwarm();
   if (id === 'tasks')     loadTasks();
   if (id === 'config')    loadConfig();
-  if (id === 'chat')      { loadChatHistory(); set('chat-model', _status?.model ?? '——'); }
+  if (id === 'chat')      { loadChatHistory(); initChatSource(); }
 }
 
 // ── API calls ─────────────────────────────────────────────────────────────────
@@ -1056,31 +1230,45 @@ async function loadScanner() {
   _config = d.config;
   updateScannerPanel();
 
-  // Last scan detail — top rejected candidate with gate failures
+  // Last scan — full candidate table: every scored token, honest 5m read, confidence, block reason.
   const ls = await api('/api/last-scan');
   const lsEl = $('sc-last-scan');
   if (ls && lsEl) {
-    const ts = ls.ts ? timeAgo(ls.ts) : '——';
-    set('sc-last-ts', ts);
-    if (!ls.topCandidate) {
-      lsEl.innerHTML = `<div class="empty dim">no candidates from scan (${ls.totalFromScan ?? 0} returned, ${ls.passedFilter ?? 0} passed filter)</div>`;
+    set('sc-last-ts', ls.ts ? timeAgo(ls.ts) : '——');
+    const cand = ls.candidates || [];
+    const total = ls.totalFromScan ?? cand.length;
+    const nPass = cand.filter(c => c.passed).length;
+    set('sc-scan-summary', `${total} scanned · ${nPass} passed · ${Math.max(0, total - nPass)} blocked`);
+    if (!cand.length) {
+      lsEl.innerHTML = `<div class="empty dim">no candidates from last scan (${total} returned, ${ls.passedFilter ?? 0} passed pre-filter)</div>`;
     } else {
-      const c = ls.topCandidate;
-      const gateHtml = (c.gates?.length)
-        ? c.gates.map(g => `<span style="background:var(--c4);color:var(--red);padding:1px 5px;border:1px solid var(--red);font-size:9px;letter-spacing:1px;margin-right:4px">${esc(g)}</span>`).join('')
-        : '<span style="color:var(--green);font-size:9px">all gates passed</span>';
-      const statusColor = c.bought ? 'var(--green)' : 'var(--text3)';
-      const liq1h = c.priceChange1h != null ? (c.priceChange1h < 0 ? 'var(--green)' : 'var(--red)') : '';
-      lsEl.innerHTML = `
-        <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;padding:4px 0">
-          <span style="font-size:14px;font-weight:bold;color:${statusColor}">${esc(c.symbol)}</span>
-          <span style="font-size:11px;color:var(--c2)">${+c.score}/100</span>
-          <span style="font-size:10px;color:var(--text3);letter-spacing:1px">${esc(c.pattern ?? '?')}</span>
-          ${c.liquidity != null ? `<span style="font-size:10px;color:var(--text3)">liq $${Math.round(+c.liquidity/1000)}k</span>` : ''}
-          ${c.priceChange1h != null ? `<span style="font-size:10px;color:${liq1h}">1h ${+c.priceChange1h>0?'+':''}${(+c.priceChange1h).toFixed(1)}%</span>` : ''}
-        </div>
-        <div style="margin-top:6px;font-size:10px;letter-spacing:1px;color:var(--text3)">${c.bought ? '✓ BOUGHT' : 'GATE FAILURES:'}</div>
-        <div style="margin-top:4px">${gateHtml}</div>`;
+      const pct = (v) => v == null ? '<span class="neu">—</span>'
+        : `<span class="${v>0?'pos':v<0?'neg':'neu'}">${v>0?'+':''}${(+v).toFixed(2)}%</span>`;
+      const age = (s) => s == null ? '' : (s < 90 ? `${s}s` : `${Math.round(s/60)}m`);
+      const confBadge = (c) => {
+        const cf = c.confidence || 'high';
+        const label = cf === 'stale' ? `STALE ${age(c.dataAgeSec)}` : cf === 'thin' ? 'THIN' : `LIVE ${age(c.dataAgeSec)}`;
+        return `<span class="conf conf-${cf}" title="data ${age(c.dataAgeSec)||'?'} old">${label.trim()}</span>`;
+      };
+      const rows = cand.map(c => {
+        const status = c.passed
+          ? '<span class="scan-pass">✓ PASS</span>'
+          : `<span class="scan-reason" title="${esc((c.gates||[]).join(' · '))}">${esc(c.reason || 'blocked')}</span>`;
+        const liq = c.liquidity != null ? `$${Math.round(+c.liquidity/1000)}k` : '—';
+        return `<tr class="${c.passed ? 'scan-row-pass' : ''}">
+          <td class="tok"><span class="sym">${esc(c.symbol)}</span>${c.geyser ? '<span class="geyser" title="Geyser-confirmed dip">◆</span>' : ''}<span class="mint">${esc((c.mint||'').slice(0,4))}…</span></td>
+          <td class="score">${+c.score}</td>
+          <td>${pct(c.pc5m)}</td>
+          <td>${c.txns5m ?? '—'}</td>
+          <td>${pct(c.pc1h)}</td>
+          <td>${liq}</td>
+          <td>${confBadge(c)}</td>
+          <td class="st">${status}</td>
+        </tr>`;
+      }).join('');
+      lsEl.innerHTML = `<table class="data-table scan-table">
+        <thead><tr><th>TOKEN</th><th>SCORE</th><th>5M</th><th>TXNS</th><th>1H</th><th>LIQ</th><th>DATA</th><th>STATUS / WHY BLOCKED</th></tr></thead>
+        <tbody>${rows}</tbody></table>`;
     }
   }
 
@@ -1287,15 +1475,57 @@ function loadChatHistory() {
   });
 }
 
-function appendChatMsg(role, text, ts, scroll=true) {
+function appendChatMsg(role, text, ts, scroll=true, paid=null) {
   const msgs = $('chat-msgs');
   const wrap = mkEl('div','chat-msg '+role);
   const bubble = mkEl('div','chat-bubble');
   bubble.textContent = text;
+  wrap.appendChild(bubble);
+  // Paid-inference badge for x402 (Circuit DLLM) agent replies.
+  if (paid && role === 'agent') {
+    const circ = paid.cost?.circ != null ? `${paid.cost.circ} CIRC` : 'paid';
+    const usd  = paid.cost?.usd  != null ? ` ($${(+paid.cost.usd).toFixed(4)})` : '';
+    const tx   = paid.paymentTx ? ` · <a href="https://solscan.io/tx/${esc(paid.paymentTx)}" target="_blank">tx↗</a>` : '';
+    const b = mkEl('div','chat-paid'); b.innerHTML = `⚡ x402 · ${esc(circ)}${esc(usd)}${tx}`;
+    wrap.appendChild(b);
+  }
   const meta = mkEl('div','chat-meta', (role === 'agent' ? 'Agent' : 'You') + ' · ' + (ts ? new Date(ts).toLocaleTimeString() : 'now'));
-  wrap.appendChild(bubble); wrap.appendChild(meta);
+  wrap.appendChild(meta);
   msgs.appendChild(wrap);
   if (scroll) scrollChat();
+}
+
+// ── Chat inference source (OpenRouter tool-use ⇄ Circuit DLLM x402 pay-chat) ──
+function initChatSource() {
+  if (_chatSource) { _applyChatSource(); return; }
+  let saved = null;
+  try { saved = localStorage.getItem('chatSource'); } catch {}
+  // Default: follow the agent's config — x402Inference.enabled ⇒ circuit, else openrouter.
+  _chatSource = saved || (_config?.llm?.x402Inference?.enabled ? 'circuit' : 'openrouter');
+  _applyChatSource();
+}
+function setChatSource(src) {
+  _chatSource = src === 'circuit' ? 'circuit' : 'openrouter';
+  try { localStorage.setItem('chatSource', _chatSource); } catch {}
+  _applyChatSource();
+}
+function _applyChatSource() {
+  document.querySelectorAll('.chat-src').forEach(b => b.classList.toggle('on', b.dataset.src === _chatSource));
+  const note = $('chat-src-note');
+  if (_chatSource === 'circuit') {
+    set('chat-model', (_config?.llm?.x402Inference?.model) || 'circuit');
+    if (note) note.innerHTML = '⚡ Paid per message in CIRC on the decentralized engine · conversational only (no live tool actions).';
+  } else {
+    set('chat-model', _status?.model ?? _config?.llm?.model ?? '——');
+    if (note) note.textContent = 'Full tool-use — the agent can read positions, trades and market state live.';
+  }
+  _updateChatSpend();
+}
+function _updateChatSpend() {
+  const el = $('chat-spend'); if (!el) return;
+  if (_chatSource === 'circuit' && _chatSpendCirc > 0) {
+    el.style.display = 'inline'; el.textContent = `spent ${_chatSpendCirc.toLocaleString(undefined,{maximumFractionDigits:2})} CIRC`;
+  } else { el.style.display = 'none'; }
 }
 
 function scrollChat() {
@@ -1308,18 +1538,29 @@ async function sendChat() {
   const text = input.value.trim();
   if (!text || _chatPending) return;
   input.value = '';
+  if (!_chatSource) initChatSource();
   _chatPending = true;
   $('chat-send').disabled = true;
+  $('chat-thinking').textContent = _chatSource === 'circuit' ? 'Paying CIRC · querying Circuit DLLM…' : 'Agent is thinking…';
   $('chat-thinking').style.display = 'block';
   appendChatMsg('user', text);
   const r = await api('/api/chat', {
     method: 'POST',
     headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({ message: text })
+    body: JSON.stringify({ message: text, source: _chatSource })
   });
   if (!r?.ok) {
     $('chat-thinking').style.display = 'none';
     appendChatMsg('agent', r?.error || 'Failed to send message');
+    _chatPending = false;
+    $('chat-send').disabled = false;
+    return;
+  }
+  // x402 (circuit) path returns the reply synchronously here; OpenRouter path returns via SSE.
+  if (r.reply != null) {
+    $('chat-thinking').style.display = 'none';
+    appendChatMsg('agent', r.reply, r.ts, true, { cost: r.cost, paymentTx: r.paymentTx });
+    if (r.cost?.circ != null) { _chatSpendCirc += parseFloat(r.cost.circ) || 0; _updateChatSpend(); }
     _chatPending = false;
     $('chat-send').disabled = false;
     return;
@@ -1493,143 +1734,163 @@ async function loadConfig() {
     ['dashboard', 'Dashboard'],
   ];
 
+  // A numeric field gets a drag SLIDER when it's a bounded range comfortable to drag; otherwise
+  // (money/SOL, ms durations, huge or unbounded ranges) a precise +/- STEPPER.
+  const useSlider = (spec) => {
+    if (spec.min == null || spec.max == null) return false;
+    if (spec.unit === 'SOL' || spec.unit === 'ms') return false;
+    return (spec.max - spec.min) / (spec.step || 1) <= 200;
+  };
+  const fmtNum = (v, spec) => {
+    if (v == null || v === '') return '—';
+    const n = +v;
+    if (spec.type === 'integer') return Math.round(n).toLocaleString();
+    return Math.abs(n) >= 1000 ? n.toLocaleString() : String(n);
+  };
+  const fmtMs = (ms) => {
+    ms = +ms; if (!isFinite(ms)) return '';
+    const m = ms / 60000; if (m < 60) return `= ${+m.toFixed(m % 1 ? 1 : 0)} min`;
+    const h = m / 60;     if (h < 24) return `= ${+h.toFixed(h % 1 ? 1 : 0)} h`;
+    return `= ${+(h / 24).toFixed(1)} d`;
+  };
+  const SENSITIVE = /password|secret|token|mnemonic|private|apikey|api_key/i;
+
   GROUPS.forEach(([section, label]) => {
     const group = d.config[section];
     if (!group || typeof group !== 'object') return;
-    const wrap = mkEl('div','cfg-group');
-    wrap.appendChild(mkEl('div','cfg-group-title', '// '+label.toUpperCase()));
-    const table = mkEl('table','kv');
+    const card = mkEl('div','cfg-card');
+    card.appendChild(mkEl('div','cfg-card-title', label));
+    const body = mkEl('div','cfg-card-body');
 
     Object.entries(group).forEach(([key, curVal]) => {
       if (key.startsWith('_')) return;
-      const spec   = FIELD_SPEC_FE[section]?.[key];
+      const spec = FIELD_SPEC_FE[section]?.[key];
+      const id   = _cfgId(section, key);
       const isRestart = spec?.restart || RESTART_FIELDS_FE.has(`${section}.${key}`);
 
-      const tr  = document.createElement('tr');
-      const td1 = mkEl('td','k');
-      td1.textContent = key;
-      if (isRestart) td1.appendChild(mkEl('span','cfg-restart-badge','RESTART'));
+      const item = mkEl('div','cfg-item');
+      const head = mkEl('div','cfg-item-head');
+      head.appendChild(mkEl('span','cfg-item-label', key));
+      if (isRestart) head.appendChild(mkEl('span','cfg-restart-badge','RESTART'));
+      if (spec) {
+        const rst = mkEl('button','cfg-reset','reset');
+        rst.onclick = () => resetConfigField(section, key);
+        rst.title = 'Revert to base default';
+        head.appendChild(rst);
+      }
+      item.appendChild(head);
 
-      const td2 = mkEl('td','v');
-      td2.style.padding = '4px 12px';
+      const ctl = mkEl('div','cfg-item-control');
 
       if (!spec) {
-        // Read-only — render as plain text (same as before)
-        const display = Array.isArray(curVal) ? curVal.join(', ') : curVal === null ? 'null' : String(curVal);
-        td2.textContent = display;
-        if (typeof curVal === 'boolean') td2.className = curVal ? 'v g' : 'v r';
-        else if (typeof curVal === 'number') td2.className = 'v c';
+        // Read-only — plain text; mask anything that looks like a secret.
+        const raw = Array.isArray(curVal) ? curVal.join(', ') : curVal === null ? 'null' : String(curVal);
+        const display = (SENSITIVE.test(key) && raw && raw !== 'null') ? '••••••••' : raw;
+        ctl.appendChild(mkEl('div','cfg-ro', display));
 
       } else if (spec.type === 'boolean') {
-        const id   = _cfgId(section, key);
-        const wrap2 = mkEl('div','cfg-checkbox-wrap');
-        const cb   = document.createElement('input');
-        cb.type    = 'checkbox';
-        cb.className = 'cfg-checkbox';
-        cb.id      = id;
-        cb.checked = !!curVal;
-        const lbl  = document.createElement('label');
-        lbl.htmlFor  = id;
-        lbl.textContent = cb.checked ? 'enabled' : 'disabled';
-        lbl.style.cssText = 'font-size:11px;color:var(--text2);cursor:pointer';
+        const row = mkEl('div','cfg-switch-row');
+        const sw  = document.createElement('label'); sw.className = 'cfg-switch';
+        const cb  = document.createElement('input');
+        cb.type = 'checkbox'; cb.className = 'cfg-toggle'; cb.id = id; cb.checked = !!curVal;
+        sw.appendChild(cb); sw.appendChild(mkEl('span','cfg-track'));
+        const slbl = mkEl('span','cfg-switch-lbl' + (cb.checked ? ' on' : ''), cb.checked ? 'ENABLED' : 'DISABLED');
         cb.addEventListener('change', () => {
-          lbl.textContent = cb.checked ? 'enabled' : 'disabled';
+          slbl.textContent = cb.checked ? 'ENABLED' : 'DISABLED';
+          slbl.classList.toggle('on', cb.checked);
+          cb.classList.add('dirty'); cb.classList.remove('saved','error');
           _markDirty(section, key, cb.checked);
         });
-        const rst = mkEl('button','cfg-reset','reset');
-        rst.onclick = () => resetConfigField(section, key);
-        rst.title = 'Revert to base default';
-        wrap2.appendChild(cb); wrap2.appendChild(lbl); wrap2.appendChild(rst);
-        td2.appendChild(wrap2);
+        row.appendChild(sw); row.appendChild(slbl);
+        ctl.appendChild(row);
 
       } else if (spec.type === 'array' && spec.allowed) {
-        const curArr  = Array.isArray(curVal) ? curVal : [];
-        const patWrap = mkEl('div','cfg-pattern-wrap');
+        const cur   = Array.isArray(curVal) ? curVal : [];
+        const pills = mkEl('div','cfg-pills'); pills.id = id;
         spec.allowed.forEach(pattern => {
-          const item = mkEl('label','cfg-pattern-item');
-          const cb   = document.createElement('input');
-          cb.type    = 'checkbox';
-          cb.checked = curArr.includes(pattern);
-          cb.dataset.pattern = pattern;
-          cb.addEventListener('change', () => {
-            const allCbs = patWrap.querySelectorAll('input[type=checkbox]');
-            const newArr = [...allCbs].filter(c => c.checked).map(c => c.dataset.pattern);
-            // Mark the whole group dirty
-            patWrap.querySelectorAll('.cfg-pattern-item').forEach(it => it.classList.toggle('dirty', true));
-            _markDirty(section, key, newArr);
-          });
-          item.appendChild(cb);
-          item.appendChild(document.createTextNode(pattern));
-          patWrap.appendChild(item);
+          const b = mkEl('button','cfg-pill' + (cur.includes(pattern) ? ' on' : ''), pattern);
+          b.dataset.pattern = pattern;
+          b.onclick = () => {
+            b.classList.toggle('on');
+            const arr = [...pills.querySelectorAll('.cfg-pill.on')].map(x => x.dataset.pattern);
+            _markDirty(section, key, arr);
+          };
+          pills.appendChild(b);
         });
-        const errSpan = mkEl('span','cfg-field-error');
-        errSpan.id = `cfg-err-${section}-${key}`;
-        const rst = mkEl('button','cfg-reset','reset');
-        rst.onclick = () => resetConfigField(section, key);
-        rst.title = 'Revert to base default';
-        td2.appendChild(patWrap);
-        const metaRow = document.createElement('div');
-        metaRow.style.textAlign = 'right';
-        metaRow.appendChild(errSpan); metaRow.appendChild(rst);
-        td2.appendChild(metaRow);
+        ctl.appendChild(pills);
 
       } else if (spec.type === 'string') {
-        const id  = _cfgId(section, key);
         const inp = document.createElement('input');
-        inp.type  = 'text';
-        inp.className = 'cfg-input';
-        inp.id    = id;
-        inp.value = curVal ?? '';
-        inp.maxLength = spec.maxLen ?? 200;
+        inp.type = 'text'; inp.className = 'cfg-text'; inp.id = id;
+        inp.value = curVal ?? ''; inp.maxLength = spec.maxLen ?? 200;
         inp.addEventListener('input', () => {
           inp.classList.add('dirty'); inp.classList.remove('error','saved');
           _markDirty(section, key, inp.value);
         });
-        const errSpan = mkEl('span','cfg-field-error');
-        errSpan.id = `cfg-err-${section}-${key}`;
-        const rst = mkEl('button','cfg-reset','reset');
-        rst.onclick = () => resetConfigField(section, key);
-        const wrap2 = document.createElement('div'); wrap2.style.textAlign = 'right';
-        wrap2.appendChild(inp);
-        wrap2.appendChild(rst); wrap2.appendChild(errSpan);
-        td2.appendChild(wrap2);
+        ctl.appendChild(inp);
 
-      } else {
-        // number / integer
-        const id  = _cfgId(section, key);
-        const inp = document.createElement('input');
-        inp.type  = 'number';
-        inp.className = 'cfg-input';
-        inp.id    = id;
-        inp.value = curVal ?? '';
-        if (spec.min  != null) inp.min  = spec.min;
-        if (spec.max  != null) inp.max  = spec.max;
-        if (spec.step != null) inp.step = spec.step;
-        else inp.step = spec.type === 'integer' ? 1 : 'any';
+      } else if (useSlider(spec)) {
+        const wrap = mkEl('div','cfg-slider-wrap');
+        const inp  = document.createElement('input');
+        inp.type = 'range'; inp.className = 'cfg-slider'; inp.id = id;
+        inp.min = spec.min; inp.max = spec.max;
+        inp.step = spec.step != null ? spec.step : (spec.type === 'integer' ? 1 : 'any');
+        inp.value = curVal != null ? curVal : spec.min;
+        const out = mkEl('div','cfg-readout');
+        const paint = () => { out.innerHTML = fmtNum(inp.value, spec) + (spec.unit ? `<span class="u">${spec.unit}</span>` : ''); };
+        paint();
         inp.addEventListener('input', () => {
-          inp.classList.add('dirty'); inp.classList.remove('error','saved');
-          const parsed = spec.type === 'integer'
-            ? parseInt(inp.value, 10)
-            : parseFloat(inp.value);
+          inp.classList.add('dirty'); inp.classList.remove('error','saved'); paint();
+          const parsed = spec.type === 'integer' ? parseInt(inp.value, 10) : parseFloat(inp.value);
           if (!isNaN(parsed)) _markDirty(section, key, parsed);
         });
-        const errSpan = mkEl('span','cfg-field-error');
-        errSpan.id = `cfg-err-${section}-${key}`;
-        const rst = mkEl('button','cfg-reset','reset');
-        rst.onclick = () => resetConfigField(section, key);
-        const wrap2 = document.createElement('div'); wrap2.style.textAlign = 'right';
-        wrap2.appendChild(inp);
-        if (spec.unit) wrap2.appendChild(mkEl('span','cfg-unit',spec.unit));
-        wrap2.appendChild(rst); wrap2.appendChild(errSpan);
-        td2.appendChild(wrap2);
+        wrap.appendChild(inp); wrap.appendChild(out);
+        ctl.appendChild(wrap);
+        const mm = mkEl('div','cfg-minmax');
+        mm.appendChild(mkEl('span','', fmtNum(spec.min, spec) + (spec.unit ? ' ' + spec.unit : '')));
+        mm.appendChild(mkEl('span','', fmtNum(spec.max, spec) + (spec.unit ? ' ' + spec.unit : '')));
+        ctl.appendChild(mm);
+
+      } else {
+        // stepper — precise / money / ms / unbounded numbers
+        const step = spec.step != null ? spec.step : (spec.type === 'integer' ? 1 : 0.001);
+        const wrap  = mkEl('div','cfg-stepper');
+        const minus = mkEl('button','cfg-step','−');
+        const inp   = document.createElement('input');
+        inp.type = 'number'; inp.className = 'cfg-num'; inp.id = id; inp.value = curVal ?? '';
+        if (spec.min != null) inp.min = spec.min;
+        if (spec.max != null) inp.max = spec.max;
+        inp.step = step;
+        const plus = mkEl('button','cfg-step','+');
+        const sub  = mkEl('div','cfg-sub');
+        const clamp = (v) => { if (spec.min != null) v = Math.max(spec.min, v); if (spec.max != null) v = Math.min(spec.max, v); return v; };
+        const round = (v) => spec.type === 'integer' ? Math.round(v) : parseFloat(v.toFixed(6));
+        const paintSub = () => { sub.textContent = spec.unit === 'ms' ? fmtMs(inp.value) : (spec.unit || ''); };
+        const commit = (v) => {
+          v = round(clamp(v)); inp.value = v;
+          inp.classList.add('dirty'); inp.classList.remove('saved','error'); paintSub();
+          _markDirty(section, key, v);
+        };
+        paintSub();
+        minus.onclick = () => commit((parseFloat(inp.value) || 0) - step);
+        plus.onclick  = () => commit((parseFloat(inp.value) || 0) + step);
+        inp.addEventListener('input', () => {
+          inp.classList.add('dirty'); inp.classList.remove('saved','error'); paintSub();
+          const parsed = spec.type === 'integer' ? parseInt(inp.value, 10) : parseFloat(inp.value);
+          if (!isNaN(parsed)) _markDirty(section, key, parsed);
+        });
+        wrap.appendChild(minus); wrap.appendChild(inp); wrap.appendChild(plus);
+        ctl.appendChild(wrap); ctl.appendChild(sub);
       }
 
-      tr.appendChild(td1); tr.appendChild(td2);
-      table.appendChild(tr);
+      item.appendChild(ctl);
+      const err = mkEl('span','cfg-field-error'); err.id = `cfg-err-${section}-${key}`;
+      item.appendChild(err);
+      body.appendChild(item);
     });
 
-    wrap.appendChild(table);
-    el.appendChild(wrap);
+    card.appendChild(body);
+    el.appendChild(card);
   });
 
   updateScannerPanel();
