@@ -6,7 +6,7 @@
 **An open-source autonomous trading agent for Solana. Scans, buys, monitors, reflects, and earns — on its own. Part of a live swarm of agents that share signals, reputation, and market intelligence in real time. Extend it with custom tools, teach it new skills, or build on top of it.**
 
 [![Node.js](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
-[![Version](https://img.shields.io/badge/version-0.9.6-blue)](https://github.com/Circuit-LLM/circuit-agent/releases)
+[![Version](https://img.shields.io/badge/version-0.9.7-blue)](https://github.com/Circuit-LLM/circuit-agent/releases)
 [![Status](https://img.shields.io/badge/status-beta-orange)](https://github.com/Circuit-LLM/circuit-agent)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
@@ -322,6 +322,11 @@ Your `.env`, `data/`, `soul.local.md`, and `config/agent.local.json` are never t
 ---
 
 ## Changelog
+
+### v0.9.7
+- **Dashboard reimagined.** The horizontal tab bar is now a collapsible command sidebar (agent vitals + navigation, minimizes to a 52px icon rail). The config page was rebuilt as a card grid with larger controls — sliders for bounded ranges, +/− steppers for money/duration values, toggle switches, and segmented pattern pills. The scanner tab now lists *every* evaluated candidate with a per-row data-confidence badge (LIVE/THIN/STALE) and the reason each was blocked, instead of showing a single token.
+- **Scanner data honesty.** Each candidate now carries candle freshness (`dataAgeSec`, measured from the candle's close), a true single-candle 5-minute read, and a confidence rating, so thin or stale tokens are clearly marked rather than showing a misleading "0.003% / 1–3 txns". A new freshness gate (`strategy.maxDataAgeSec`, default 600s, on by default) rejects entries whose freshest candle has gone stale.
+- **x402 chat inference.** The dashboard chat can now run on the Circuit decentralized LLM via x402 pay-per-message — a source toggle switches between OpenRouter (full tool-use) and the Circuit DLLM (conversational, paid in CIRC), with a per-message cost badge and running CIRC spend. Previously, agents pulling inference only from x402 had no working chat.
 
 ### v0.9.6
 - **Sustained-reversal entry gate.** Entries now require the 5-minute bounce to *hold* — a higher low plus an advancing close across candles — rather than firing on a single-candle spike. This restores the implicit confirmation that the v0.9.5 speed-up removed (a one-candle dead-cat bounce no longer triggers a buy before it fades). Tunable via `strategy.requireSustainedBounce` (default true).
