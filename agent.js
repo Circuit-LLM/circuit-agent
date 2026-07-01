@@ -91,9 +91,10 @@ let swap   = null;
 function initModules() {
   wallet = loadWallet(RPC_URL);
   api    = new CircuitClient({
-    baseUrl:     cfg.api.baseUrl,
-    internalKey: INTERNAL_KEY,
-    wallet:      { keypair: wallet.keypair, connection: wallet.connection },
+    baseUrl:      cfg.api.baseUrl,
+    priceFeedUrl: cfg.priceFeedUrl,          // optional override; else derived from baseUrl
+    internalKey:  INTERNAL_KEY,
+    wallet:       { keypair: wallet.keypair, connection: wallet.connection },
   });
 
   const paperMode = cfg.strategy?.paperTrading === true;
