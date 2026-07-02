@@ -32,3 +32,6 @@ Thumbs.db
 *.swp
 *.swo
 .ui-preview/
+
+# local dashboard safety backups
+*.bak
