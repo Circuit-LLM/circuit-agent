@@ -18,7 +18,7 @@
 
 ---
 
-**[What it does](#what-it-does)** · **[Quick Start](#quick-start)** · **[CLI](#cli-commands)** · **[Dashboard](#dashboard)** · **[Telegram](#telegram-commands)** · **[How it works](#how-it-works)** · **[Config](#configuration)** · **[Skills](#skills)** · **[Swarm](#swarm)** · **[CIRC](#circ-token-economy)** · **[Build a specialist →](BUILDING.md)**
+**[What it does](#what-it-does)** · **[Quick Start](#quick-start)** · **[CLI](#cli-commands)** · **[Dashboard](#dashboard)** · **[Telegram](#telegram-commands)** · **[How it works](#how-it-works)** · **[Memory](#memory)** · **[Config](#configuration)** · **[Skills](#skills)** · **[Swarm](#swarm)** · **[CIRC](#circ-token-economy)** · **[Build a specialist →](BUILDING.md)**
 
 ---
 
@@ -174,6 +174,20 @@ reflect       (every 4h)       LLM reviews trades → tunes config → shares in
 **Reflect** is the deep self-improvement cycle. Every 4 hours the LLM reviews full trade history, win rates by pattern, and whether its current config is working. It proposes config changes (auto-applied within safe bounds if `reflect.autoApply` is true), saves lessons to persistent notes injected into every future prompt, shares insights to the swarm, reviews submitted task work, and may propose new tasks if it identifies a gap it can't fill on its own.
 
 Telegram chat, exception escalation, and the agent-loop all share a single LLM queue — the agent handles one thing at a time regardless of what triggered it.
+
+---
+
+## Memory
+
+An opt-in **read-back memory layer** (off by default) lets the agent learn from its own history: it grades each expiring strategy against the trades it produced and feeds recent outcomes into the next strategy brief, injects an exit-reason breakdown so it steers by what's actually profitable, keeps the reasoning trail of its own config changes, and — for chat-heavy deployments — extracts durable facts from conversations and recalls the relevant ones. Each level *reads its memory back into the decision it informs*, and falls back to the agent's original behavior when off — no data migration.
+
+Enable per-agent in `config/agent.local.json` (the trading levels are cheap and safe; the chat levels pay off once there's real conversation to mine):
+
+```json
+"memory": { "enabled": true, "planGrading": true, "proceduralHistory": true, "tradeRecall": true }
+```
+
+→ [Full memory reference](docs/MEMORY.md)
 
 ---
 

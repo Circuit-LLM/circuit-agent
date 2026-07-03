@@ -178,11 +178,27 @@ Custom strategy scripts live in `lib/strategies/`. See `lib/strategies/README.md
 
 ---
 
+## Tests
+
+Node's built-in runner — no dependencies. Run before opening a PR:
+
+```bash
+npm test
+```
+
+Covered so far: `scoreDipReversal` (the pure buy-decision gate, `tests/scoring.test.js`) and the
+read-back memory modules (`tests/memory.test.js`). Add tests for new pure functions and for tool /
+memory handlers with a mockable `ctx`; defer anything needing a live wallet/RPC to paper-trading
+verification instead. The `test` script is scoped to `tests/` so it doesn't run `node_modules`'
+own `*.test.js` files.
+
+---
+
 ## Pull Requests
 
 - Keep PRs focused — one feature or fix per PR
 - Include a description of what changed and why
-- Test manually: `node agent.js wallet`, `node agent.js scan`, `node agent.js send "test message"`
+- Run `npm test`, then test manually: `node agent.js wallet`, `node agent.js scan`, `node agent.js send "test message"`
 - Do not commit `.env`, `data/`, `config/agent.local.json`, or `soul.local.md`
 - Do not introduce new npm dependencies without discussion
 

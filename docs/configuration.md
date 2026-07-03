@@ -175,6 +175,28 @@ ssh -L 18800:localhost:18800 user@your-vps
 
 ---
 
+## Memory
+
+Opt-in **read-back memory** (off by default). See the [Memory reference](MEMORY.md) for the full architecture; add to `config/agent.local.json`:
+
+```json
+{
+  "memory": {
+    "enabled": false,          // Master switch — off = original behavior everywhere
+    "planGrading": true,       // Grade expiring strategies vs their trades; inject outcomes into the brief
+    "proceduralHistory": true, // Keep the full config-change trail; surface it before the next tune
+    "tradeRecall": true,       // Inject an exit-reason breakdown into the strategy brief
+    "episodeRecall": false,    // Inject relevant past conversation episodes into chat (needs episodes)
+    "chatExtraction": false,   // Mine the chat archive into durable facts + episode gists (reflect cycle)
+    "consolidation": false     // Reserved — episode dedup/decay, not yet wired
+  }
+}
+```
+
+Trading levels (`planGrading`, `proceduralHistory`, `tradeRecall`) default on — cheap, and they act on decisions the agent makes autonomously. Chat levels default off — they only pay off with real operator conversation to mine. Every level falls back to the original code path when its flag is off.
+
+---
+
 ## Personality
 
 Your agent's personality is defined in `soul.md`. To customize it:
