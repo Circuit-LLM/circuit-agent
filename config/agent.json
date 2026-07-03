@@ -34,7 +34,7 @@
     "hotTrend6hPct": 40,
     "lockProfitTriggerPct": 4,
     "lockProfitFraction": 0.5,
-    "_tuning_note_2026_06_24": "Anti-pump (#1): maxEntry6hGainPct/maxEntry24hGainPct gate out parabolic tokens (a dip on a +318%/6h pump is the blow-off top, not a dip — it was the #1 loss driver). hotTrend6hPct: above this 6h gain, trend-alignment reward drops 15->6 so the score stops steering into extended pumps. Exit realign (#3): lockProfitTriggerPct/lockProfitFraction ratchet the trailing-stop floor up to lockProfitFraction*peak once peak>=trigger, so a winner exits GREEN instead of round-tripping to breakeven (a +4.5% peak was realizing -0.1%). Only raises the floor; never loosens the stop.",
+    "_tuning_note_2026_06_24": "Anti-pump (#1): maxEntry6hGainPct/maxEntry24hGainPct gate out parabolic tokens (a dip on a +318%/6h pump is the blow-off top, not a dip \u2014 it was the #1 loss driver). hotTrend6hPct: above this 6h gain, trend-alignment reward drops 15->6 so the score stops steering into extended pumps. Exit realign (#3): lockProfitTriggerPct/lockProfitFraction ratchet the trailing-stop floor up to lockProfitFraction*peak once peak>=trigger, so a winner exits GREEN instead of round-tripping to breakeven (a +4.5% peak was realizing -0.1%). Only raises the floor; never loosens the stop.",
     "_strategy_note": "buyCooldownMinutes: skip re-entry on the same mint for this many minutes after closing a position. paperTrading: true enables paper mode \u2014 no real swaps, free data sources only. paperSolBalance: starting virtual SOL for paper mode. deadMoneyMinutes/deadMoneyRangePct/deadMoneyMinHoldMinutes: exit early if pnl stays within \u00b1deadMoneyRangePct for deadMoneyMinutes (after holding at least deadMoneyMinHoldMinutes). minHoldBeforeTpMinutes/minHoldBeforeSlMinutes: suppress TP/SL exits within this many minutes after entry to prevent phantom exits from price-feed lag.",
     "_tuning_note_2026_06_18": "S1 requireEntryConfirm: re-read live price right before buy, abort if it faded > entryConfirmMaxFadePct below the scan price (kills stale-bounce fills, the 73%-never-green root cause). S3 bounceScoreMode 'modest' stops rewarding big (exhausted) 5m bounces; 'magnitude' = legacy curve. S2 requireFreshBounce (default false): gate on the 1m turn still advancing \u2014 left OFF to collect bounceFresh vs outcomes first (see entryConditions in trade_history). S5 hardStopMultiple: below stopLossPct*this, exit immediately without the Jupiter-defer that let fast dumps gap to -10%."
   },
@@ -59,7 +59,7 @@
       "gatewayUrl": "http://localhost:18970/v1",
       "model": "Qwen/Qwen2.5-32B-Instruct-AWQ",
       "maxTokens": 250,
-      "_note": "When enabled, tool-FREE calls (task-review, reflect) run on the Circuit 32B engine via REAL x402 CIRC payment instead of OpenRouter. Tool-USING calls (processor/agent-loop) stay on OpenRouter — the engine has no function-calling. gatewayUrl: http://localhost:18970/v1 on the VPS, or https://inference.circuitllm.xyz/v1 remote. Costs CIRC per call + ~11 tok/s, so use only for non-time-critical reasoning."
+      "_note": "When enabled, tool-FREE calls (task-review, reflect) run on the Circuit 32B engine via REAL x402 CIRC payment instead of OpenRouter. Tool-USING calls (processor/agent-loop) stay on OpenRouter \u2014 the engine has no function-calling. gatewayUrl: http://localhost:18970/v1 on the VPS, or https://inference.circuitllm.xyz/v1 remote. Costs CIRC per call + ~11 tok/s, so use only for non-time-critical reasoning."
     },
     "_note": "provider: 'openrouter' (cloud) or 'ollama' (local). baseUrl overrides provider default. openrouterKey or OPENROUTER_API_KEY env var."
   },
@@ -106,5 +106,15 @@
     "apiKey": "",
     "allowCors": "",
     "_note": "Local web dashboard at http://localhost:18800 (loopback only \u2014 use SSH tunnel for remote access). apiKey: require x-api-key header on all API routes. allowCors: explicit origin to allow (e.g. 'http://localhost:3000') \u2014 leave empty to disable CORS entirely."
+  },
+  "memory": {
+    "_note": "Memory system. Default-safe: enabled=false makes every path fall back to current behavior. Set enabled=true to activate the per-flag defaults below. planGrading/proceduralHistory/tradeRecall are cheap read-back wins on the agent own decisions; episodeRecall/chatExtraction/consolidation stay off until operator chat volume justifies them.",
+    "enabled": false,
+    "planGrading": true,
+    "proceduralHistory": true,
+    "tradeRecall": true,
+    "episodeRecall": false,
+    "chatExtraction": false,
+    "consolidation": false
   }
 }
