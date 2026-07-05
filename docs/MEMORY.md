@@ -121,7 +121,31 @@ circuit-agent runs in two very different shapes, and memory is tuned for both:
   work rides the existing 90-minute and 4-hour loops or the on-demand tool call.
 - **Not unbounded.** Every store is capped; "summarize, don't hoard" keeps footprint flat.
 
+## Integrity — the verify pass
+
+The stores are plain JSON with no integrity layer, so a corrupt or hand-edited file would silently
+steer the agent. `lib/memory/verify.js` is a cheap consistency check on the same ground-truth idea the
+rest of the system uses: `trade_history.json` is what actually happened, so the *derived* stores must
+reconcile against it.
+
+```
+node agent.js memory verify            # read-only; human summary, exit 1 on drift
+node agent.js memory verify --json      # machine-readable { checks, drift } for a cron/supervisor
+node agent.js memory verify --repair    # apply only the safe, deterministic fixes
+```
+
+It returns two layers — `checks` (pass/fail rows) and `drift`
+(`{ kind, store, id, evidence, repair }`, `repair ∈ recompute | trim | drop | clamp | manual`). The
+flagship check recomputes each still-covered strategy grade from the trades that closed in its window
+and flags any mismatch — the exact corruption a bad grading window produces. `--repair` rebuilds grades
+from ground truth, trims over-cap stores, drops duplicate windows, and clamps a runaway extraction
+cursor; `manual` items (schema damage, applied-config drift) are only reported. Read-only by default,
+flag-independent (runs even with `memory.enabled:false`), and it converges — re-verify after a repair
+is clean.
+
 ## Tests
 
 `npm test` covers the pure functions here — `recall.rank`, `procedural.appendWithHistory` /
-`priorChanges` — alongside `scoreDipReversal`. See `tests/memory.test.js`.
+`priorChanges` — alongside `scoreDipReversal` (`tests/memory.test.js`), plus the integrity pass
+(`tests/memory-verify.test.js`: seeds a mismatched grade and a runaway cursor, asserts each is caught
+and repaired).

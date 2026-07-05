@@ -559,7 +559,35 @@ const handlers = {
   scan:   cmdScan,
   send:   async () => cmdSend(sendMsg),
   logs:   async () => cmdLogs(),
+  memory: async () => cmdMemory(),
 };
+
+// memory verify [--json] [--repair] — integrity + cross-store consistency check on the memory
+// stores (docs/MEMORY.md). Read-only by default; --repair applies only the safe, deterministic
+// fixes. Flag-independent — works even with memory.enabled:false, so stores can be vetted first.
+// Exits non-zero when unresolved drift remains, so a cron/supervisor can act on it.
+async function cmdMemory() {
+  const sub   = process.argv[3];
+  const flags = process.argv.slice(4);
+  if (sub !== 'verify') {
+    console.log('Usage: node agent.js memory verify [--json] [--repair]');
+    process.exit(sub ? 1 : 0);
+  }
+  const v = require('./lib/memory/verify');
+  const before = v.verify();
+
+  if (flags.includes('--repair')) {
+    const result = v.repair(before);
+    const after  = v.verify();
+    if (flags.includes('--json')) console.log(JSON.stringify({ before, repair: result, after }, null, 2));
+    else { console.log(v.formatReport(before)); console.log(v.formatRepair(result)); console.log('\nAfter repair:'); console.log(v.formatReport(after)); }
+    process.exit(after.ok ? 0 : 1);
+  }
+
+  if (flags.includes('--json')) console.log(JSON.stringify(before, null, 2));
+  else console.log(v.formatReport(before));
+  process.exit(before.ok ? 0 : 1);
+}
 
 (handlers[cmd] ?? cmdStart)().catch(err => {
   console.error('Fatal:', err.message);
