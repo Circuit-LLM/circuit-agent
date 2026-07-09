@@ -98,13 +98,94 @@ You only need to include the keys you want to change:
   "survival": {
     "minSolWarning": 0.03,   // Warn when SOL drops below this
     "minSolPause": 0.01,     // Pause new buys below this
-    "circuitReinvestPct": 0.25 // % of profit auto-converted to CIRCUIT (default 25%)
+    "circuitReinvestPct": 0.25 // % of NET profit (fees deducted) auto-converted to CIRCUIT
   },
   "circuit": {
     "minCircuitBalance": 5000  // Warn when CIRCUIT balance drops below this (for API top-up)
   }
 }
 ```
+
+## Execution & Fees (swap)
+
+```json
+{
+  "swap": {
+    "priorityLevel": "high",     // Jupiter priority fee level
+    "jitoEnabled": true,         // Jito fast-path submission
+    "dynamicTip": true,          // size the Jito tip to the trade (recommended)
+    "tipPct": 0.02,              // tip = 2% of the SOL side of the swap...
+    "tipMinLamports": 200000,    // ...but never below 0.0002 SOL (inclusion floor)
+    "tipMaxLamports": 1000000,   // ...and never above 0.001 SOL
+    "jitoTipLamports": 1000000   // flat tip used only when dynamicTip=false
+  }
+}
+```
+
+Why dynamic: at 0.005 SOL entries a flat 0.001 SOL tip alone was ~20% of the position — across the
+swarm's recent window, execution fees ran 2.4× the gross P&L. Fees for both legs are booked into
+every trade record (`feesSol`, `netPnlSol`), and all decision loops (circuit breaker, cooldowns,
+reputation, reflect stats) measure on **net** P&L.
+
+## Daily Loss Limit (opt-in)
+
+```json
+{
+  "risk": {
+    "dailyLossLimitSol": 0   // 0 = disabled. e.g. 0.02 → once today's realized NET P&L
+                             // reaches -0.02 SOL, no new buys until UTC midnight.
+                             // Exits and the position monitor keep running.
+  }
+}
+```
+
+## Copilot (watches & research)
+
+```json
+{
+  "copilot": {
+    "watchIntervalMs": 60000,        // price-watch check cadence
+    "walletWatchIntervalMs": 300000, // wallet-watch check cadence
+    "walletDeltaSol": 0.01,          // notify on SOL moves >= this
+    "walletAlertCooldownMs": 600000, // min gap between alerts per wallet watch
+    "maxWatches": 25                 // total watch cap (wallet watches also capped at 5)
+  }
+}
+```
+
+Watches ride free endpoints (price-feed full resolution chain — quiet tokens still resolve)
+and plain RPC. Price alerts are one-shot: fire once, then remove themselves.
+
+**Follow / copy-signal:** `follow_wallet` (or `/follow`) alerts you when a watched wallet enters a
+new token. Optional shadow-buy is double-gated — the follow's `autoBuy` flag AND
+`copilot.followShadowBuy: true` — and every shadow-buy still passes the same rug/blacklist/survival
+gates as a normal trade:
+
+```json
+{
+  "copilot": {
+    "followIntervalMs": 120000,  // how often to poll followed wallets
+    "followShadowBuy": false,    // master switch for shadow-buying (default OFF)
+    "followBudgetSol": 0.005     // SOL per shadow-buy
+  }
+}
+```
+
+## Holder-Exodus Guard
+
+```json
+{
+  "strategy": {
+    "holderExodusExit": "alert",     // off | alert | exit
+    "holderExitDropPct": 50,         // a top holder dropping >= this % of their entry stack triggers it
+    "holderCheckIntervalMs": 300000  // how often to re-check open positions' holders
+  }
+}
+```
+
+At entry the agent snapshots the top-5 holder token accounts. A slow background tick re-reads their
+balances; if one dumps past the threshold, `alert` just warns you, `exit` forces a `whale-exit`
+sell through the monitor, `off` disables it.
 
 ## Agent Loop (LLM Strategy)
 

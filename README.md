@@ -6,7 +6,7 @@
 **An open-source autonomous trading agent for Solana. Scans, buys, monitors, reflects, and earns — on its own. Part of a live swarm of agents that share signals, reputation, and market intelligence in real time. Extend it with custom tools, teach it new skills, or build on top of it.**
 
 [![Node.js](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
-[![Version](https://img.shields.io/badge/version-0.9.7-blue)](https://github.com/Circuit-LLM/circuit-agent/releases)
+[![Version](https://img.shields.io/badge/version-0.9.9-blue)](https://github.com/Circuit-LLM/circuit-agent/releases)
 [![Status](https://img.shields.io/badge/status-beta-orange)](https://github.com/Circuit-LLM/circuit-agent)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
@@ -28,7 +28,10 @@
 - **Self-tunes** — every 4 hours it reviews its own trade history, adjusts config within safe bounds, stores lessons, and shares insights to the swarm.
 - **Participates in a live swarm** — buy/sell signals, shared rug blacklists, coordinated exits, and a reputation system built from signal accuracy. Every agent gets smarter as the swarm grows.
 - **Talks to you** — full Telegram interface: ask questions, request trades, check positions, trigger scans. Or skip Telegram and use the CLI.
+- **Watches the chain for you** — a Solana copilot beyond its own trading: token dossiers, wallet inspection, price alerts, wallet-activity watches, and copy-signal follows (with optional gated shadow-buy) — all on free endpoints.
+- **Guards your positions** — snapshots each position's top holders at entry and warns (or auto-exits) if a whale dumps their stack.
 - **Funds itself** — 25% of each winning trade auto-buys CIRC to pay for its own API calls. A profitable agent is a self-sustaining one.
+- **Drives from anywhere** — control and query it from Claude Desktop, Claude Code, or any MCP client via the bundled [MCP server](mcp/README.md). Its on-chain record is public and verifiable at [circuitllm.xyz/proof](https://circuitllm.xyz/proof).
 - **Extensible** — add tools, write skills, or drop in custom scripts. The agent can write and run its own code via the `builder` skill. Fork it, extend it, build a purpose-built specialist on top of it — **[BUILDING.md](BUILDING.md)** is the full guide.
 
 ---
@@ -89,6 +92,16 @@ node agent.js logs        # Recent activity: trades, scans, reflects
 node agent.js logs 100    # More history (default: 50 lines)
 ```
 
+**Analyze your edge** — every trade record carries the git build it was made on, entry-condition
+snapshots, and net-of-fees P&L. The replay harness slices your closed-trade history by pattern,
+score band, deploy, exit reason, and entry signals (both gross and net):
+
+```bash
+node scripts/replay-scoring.js                # this agent's history
+node scripts/replay-scoring.js --since 7d     # recent window only
+node scripts/replay-scoring.js --build abc123 # one deploy's trades
+```
+
 ---
 
 ## Dashboard
@@ -139,6 +152,9 @@ Access by setting the `x-api-key: your-secret-key` header (query params are inte
 | `/wallet` | SOL + CIRC balances |
 | `/status` | Open positions + P&L |
 | `/scan` | Run a market scan now |
+| `/research <mint>` | Token dossier: price, rug verdict, swarm view, blacklist — free |
+| `/watches` | List active alerts + follows |
+| `/follow <wallet>` | Copy-signal a wallet — alerts on its new entries |
 | `/pause [minutes]` | Pause new buys — position monitor keeps running |
 | `/resume` | Re-enable new buys |
 | `/reflect` | Trigger a reflect cycle now |
@@ -331,11 +347,23 @@ Your `.env`, `data/`, `soul.local.md`, and `config/agent.local.json` are never t
 - [Deployment guide](docs/deployment.md) — systemd, PM2, dashboard remote access, multi-agent setup
 - [Setup walkthrough](walkthrough.md) — step-by-step from zero to running swarm
 - [Architecture](ARCHITECTURE.md) — loops, queue, dashboard, agent-loop extension point
+- [MCP server](mcp/README.md) — drive the agent from Claude Desktop / Claude Code / any MCP client
 - [OPS Terminal](https://circuitllm.xyz/data) — live source health, endpoint status, swarm stats
+- [Proof of Trade](https://circuitllm.xyz/proof) — the swarm's verifiable, net-of-fees, on-chain track record
 
 ---
 
 ## Changelog
+
+### v0.9.9
+- **Economics fixed, measured on net.** Execution fees (Jito tip + network) were invisible to every feedback loop — a gross "win" that fees turned into a loss still counted as a win and dodged loss cooldowns. Now the circuit breaker, re-entry cooldowns, swarm reputation verdicts, reinvest sizing, and all win-rate stats read **net-of-fees** P&L. The Jito tip is now **dynamic** — sized to the trade (`clamp(2% of the SOL side, 0.0002, 0.001 SOL)`) instead of a flat 0.001 that was ~20% of a 0.005 SOL entry. Every trade record is stamped with its git build for per-deploy analysis.
+- **Optional daily kill-switch.** `risk.dailyLossLimitSol` (default off) halts new buys — not exits — once the day's realized net P&L breaches the limit, until UTC midnight.
+- **Edge analysis harness.** `scripts/replay-scoring.js` slices closed-trade history by pattern, score band, deploy, exit reason, and entry-condition signals, on both gross and net bases — for tuning the scorer against reality instead of guesswork.
+- **Solana copilot.** Beyond its own trading: `research_token` (free one-call dossier — price, security, swarm view, blacklist), `inspect_wallet` (any wallet's SOL + holdings), and watches — one-shot **price alerts**, **wallet-activity** watches, and **copy-signal follows** (`/follow`, with optional gated shadow-buy). All on free endpoints; a deterministic loop checks them, no LLM cost. Commands: `/research`, `/watches`, `/follow`.
+- **Holder-exodus guard.** Snapshots each position's top-5 holders at entry; a slow tick re-checks their balances and warns (or force-exits) when a whale dumps — `strategy.holderExodusExit` = off|alert|exit.
+- **Natural-language intents.** The agent maps "risk off," "lock in profits," "research X," "follow that wallet," "how am I doing" to the right actions, confirming before anything that moves money.
+- **Control from any MCP client.** A bundled MCP server (`mcp/`) lets Claude Desktop, Claude Code, or any MCP client read status/positions/trades and chat with the agent; pause/resume are opt-in. Zero new dependencies in the agent runtime.
+- **Free-data & robustness.** Swarm consensus now computes client-side from the free public feed (paid x402 call is opt-in fallback); blacklist/rug re-checks use free RugCheck; the wallet prefers Circuit's own RPC before public fallbacks. Bug fixes: dead-lettered messages now reply to the user instead of vanishing; notifications fall back to the `/start` owner when `heartbeatChatId` is unset; the setup wizard's model label matched its value.
 
 ### v0.9.8
 - **Off-box live feed fixed.** The free real-time scanner (`scanFree`) and the entry-price gate (`feedPriceSol`) were hardcoded to `127.0.0.1:18941` — a price-feed that only exists on the VPS. Agents run on your own machine therefore got an empty live feed *every cycle* and fell back to the paid DexScreener scan, spending CIRC on a minutes-lagged source. They now resolve the feed the same way the position monitor does — new shared `lib/feedBase.js` (`PRICE_FEED_URL` → `priceFeedUrl` config → `127.0.0.1:18941` when co-located, else `https://api.circuitllm.xyz/api/price-feed`) — so the scanner and monitor can never point at different hosts. The whole scan enrichment now runs server-side in a single request (new `/api/price-feed/scan`) instead of a ~200-request-per-scan fan-out, so it's one free call within the feed's rate limit. Net effect for self-hosted agents: the sub-second Geyser feed works, and you stop paying ~190 CIRC per scan.

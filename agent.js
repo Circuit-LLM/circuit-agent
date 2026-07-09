@@ -104,10 +104,17 @@ function initModules() {
       { virtualSol: swap.virtualSolBalance, apiBase: cfg.api.baseUrl });
   } else {
     swap = new SwapExecutor({
-      keypair:     wallet.keypair,
-      connection:  wallet.connection,
-      jupApiKey:   JUP_API_KEY,
-      slippageBps: cfg.strategy?.slippageBps ?? 100,
+      keypair:         wallet.keypair,
+      connection:      wallet.connection,
+      jupApiKey:       JUP_API_KEY,
+      slippageBps:     cfg.strategy?.slippageBps ?? 100,
+      priorityLevel:   cfg.swap?.priorityLevel   ?? 'high',
+      jitoEnabled:     cfg.swap?.jitoEnabled     ?? true,
+      jitoTipLamports: cfg.swap?.jitoTipLamports ?? 1_000_000,
+      dynamicTip:      cfg.swap?.dynamicTip      ?? true,
+      tipPct:          cfg.swap?.tipPct          ?? 0.02,
+      tipMinLamports:  cfg.swap?.tipMinLamports  ?? 200_000,
+      tipMaxLamports:  cfg.swap?.tipMaxLamports  ?? (cfg.swap?.jitoTipLamports ?? 1_000_000),
     });
     log('info', 'Agent initialized', { address: wallet.address.slice(0, 8) + '…', apiBase: cfg.api.baseUrl });
   }
@@ -456,6 +463,9 @@ async function cmdStart() {
   // 8. Autonomous market scanner + auto-buyer (respects session strategy from agent-loop)
   const autoScanner = require('./lib/auto-scanner');
   autoScanner.start(cfg, makeCtx(), telegramBot);
+
+  // Copilot watches — user-defined price/wallet alerts (deterministic, free endpoints)
+  require('./lib/watches').start(cfg, makeCtx(), telegramBot);
 
   // 9. Agent loop — periodic LLM strategy reasoning (sets session_strategy.json)
   const agentLoop = require('./lib/agent-loop');

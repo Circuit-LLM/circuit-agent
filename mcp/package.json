@@ -1,0 +1,14 @@
+{
+  "name": "circuit-agent-mcp",
+  "version": "0.1.0",
+  "description": "MCP server for circuit-agent — control and query your autonomous Solana trading agent from Claude Desktop, Claude Code, or any MCP client. Wraps the agent's local dashboard API.",
+  "license": "MIT",
+  "type": "module",
+  "bin": { "circuit-agent-mcp": "server.js" },
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  },
+  "engines": { "node": ">=18" }
+}

@@ -209,7 +209,7 @@ async function main() {
     console.log(`  ${G('4')}  Custom                        ${D('·  enter any OpenRouter model ID')}`);
     console.log('');
     const mc = await ask(rl, '  Choose [1-4]  (Enter = 1): ');
-    if (mc.trim() === '2') agentModel = 'x-ai/grok-4.1-fast';
+    if (mc.trim() === '2') agentModel = 'google/gemini-2.5-flash-lite';
     else if (mc.trim() === '3') agentModel = 'google/gemini-2.0-flash';
     else if (mc.trim() === '4') { const m = await ask(rl, '  Model ID: '); agentModel = m.trim(); }
     else agentModel = 'anthropic/claude-sonnet-4-6';

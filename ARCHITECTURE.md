@@ -12,6 +12,7 @@ position-mon  (every ~5s)     fetch prices → check stops → auto-sell on trig
 heartbeat     (every 5 min)   build status → alert exceptions → registry ping
 agent-loop    (every 90 min)  LLM sets session strategy (mode, patterns, buy cap)
 reflect       (every 4h)      review trades → tune config → share swarm insights
+watches       (60s–5 min)     price/wallet alerts, wallet follows, holder-exodus guard (copilot, no LLM)
 ```
 
 The scanner, monitor, and heartbeat are fully deterministic — no LLM in the hot path. The agent-loop calls the LLM once every 90 minutes to set session strategy. Reflect calls the LLM every 4 hours for deep self-improvement. Telegram chat and exception escalation also use the LLM on demand, all sharing the same queue.
@@ -43,7 +44,8 @@ agent.js                  Entry point — wires all modules together, starts loo
 │       ├── lib/tools/memory.js    Per-user and agent-self memory tools
 │       ├── lib/tools/self.js      Self-improvement tools (history, config, strategy, skills)
 │       ├── lib/tools/web.js       Web search + URL fetch tools
-│       └── lib/tools/builder.js   Builder tools (read/write files, run scripts, install packages)
+│       ├── lib/tools/builder.js   Builder tools (read/write files, run scripts, install packages)
+│       └── lib/tools/copilot.js   Solana copilot (token dossiers, wallet inspection, watches)
 │
 ├── lib/telegram.js       Grammy bot wrapper: routes messages into processor queue
 │
@@ -62,6 +64,7 @@ agent.js                  Entry point — wires all modules together, starts loo
 ├── lib/paper-swap.js     PaperSwapExecutor — paper trading mode (no real swaps, free data sources)
 ├── lib/task-worker.js    Task board worker — claim, work on, and submit CIRCUIT bounty tasks
 ├── lib/task-review.js    Task review logic — verify submitted subtask work
+├── lib/watches.js        Copilot watches loop — price/wallet alerts (data/watches.json)
 ├── lib/subtask-manager.js Subtask delegation state tracker (data/subtask_manager_state.json)
 └── lib/scoring.js        Shared dip-reversal scorer used by scanner + pre-buy gate
 ```
@@ -214,7 +217,7 @@ position-monitor tick (every ~5s)
   ├─ if triggered:
   │    ├─ swap.sell(mint, rawAmount) → Jupiter Ultra → on-chain tx
   │    ├─ positions.closePosition() → write trade_history.json
-  │    ├─ circuit-reinvest (25% of profit → buy CIRCUIT)
+  │    ├─ circuit-reinvest (share of NET profit → buy CIRCUIT)
   │    ├─ api.swarmPublish('sell_signal')
   │    └─ api.swarmOutcome(verdict) → update agent reputation
 ```
