@@ -43,6 +43,7 @@ code{font-family:var(--font);font-size:.94em;background:rgba(240,208,66,.04);bor
 .hdr-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 2s step-end infinite;flex-shrink:0;box-shadow:0 0 6px currentColor}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.28}}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 
 /* ── Shell: command sidebar + content ── */
 #shell{display:flex;min-height:100vh;position:relative;z-index:1}
@@ -410,6 +411,11 @@ body.sb-collapsed .sb-foot{display:none}
   transform:scale(.97);opacity:.8
 }
 
+/* Refresh button */
+#refresh-btn:hover{color:var(--c2);transform:scale(1.1)}
+#refresh-btn:active{transform:scale(.95)}
+#refresh-btn.spinning{animation:spin 1s linear}
+
 @media(max-width:900px){.g4{grid-template-columns:1fr 1fr}.g3{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){.g4,.g3,.g2{grid-template-columns:1fr}#main{padding:12px 10px 70px}.hdr-addr,.hdr-ext{display:none}}
 @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -481,6 +487,7 @@ body.sb-collapsed .sb-foot{display:none}
       <span class="tb-title" id="tb-title">OVERVIEW</span>
       <div class="tb-right">
         <span id="hdr-context-blind" style="display:none;font-size:9px;letter-spacing:1.5px;color:#ff4444;border:1px solid #ff444466;padding:2px 6px">⚠ BLIND</span>
+        <button id="refresh-btn" onclick="refreshNow()" title="Refresh wallet balance" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:4px 8px;transition:color 0.2s;margin-right:8px">↻</button>
         <span id="tb-clock"></span>
       </div>
     </div>
@@ -1196,6 +1203,15 @@ function copyWalletAddress() {
     const btn = $('wallet-copy-btn');
     if (btn) { btn.textContent = 'COPIED!'; btn.classList.add('copied'); setTimeout(() => { btn.textContent = 'COPY'; btn.classList.remove('copied'); }, 2000); }
   });
+}
+
+// ── Manual refresh ────────────────────────────────────────────────────────────
+
+async function refreshNow() {
+  const btn = $('refresh-btn');
+  if (btn) { btn.classList.add('spinning'); btn.disabled = true; }
+  await Promise.all([loadWallet(), loadStatus()]);
+  if (btn) { btn.classList.remove('spinning'); btn.disabled = false; }
 }
 
 // ── OVERVIEW ──────────────────────────────────────────────────────────────────
@@ -2488,9 +2504,9 @@ async function init() {
   connectSSE();
 
   // Auto-refresh cycles
-  setInterval(loadStatus,   30000);
+  setInterval(loadStatus,   10000);  // status/balances every 10s
   setInterval(loadActivity, 20000);
-  setInterval(loadWallet,  120000); // wallet balances refresh every 2 min
+  setInterval(loadWallet,   10000);  // wallet balances every 10s (was 2 min)
   setInterval(loadHolderGuard, 60000); // holder guard every 60s
 
   setInterval(() => {
