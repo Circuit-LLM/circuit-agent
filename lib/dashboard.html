@@ -269,6 +269,11 @@ body.sb-collapsed .sb-foot{display:none}
 .cfg-reset{font-family:var(--font-ui);font-size:9px;color:var(--text3);cursor:pointer;background:none;border:none;padding:0 0 0 8px;text-decoration:underline;opacity:.6;transition:color .15s,opacity .15s}
 .cfg-reset:hover{color:var(--amber);opacity:1}
 .cfg-restart-badge{font-family:var(--font-ui);font-size:8px;padding:1px 5px;border:1px solid var(--amber2);color:var(--amber);margin-left:6px;letter-spacing:.08em;vertical-align:middle;display:inline-block;border-radius:100px}
+.cfg-card-title{display:flex;align-items:center;gap:8px}
+.cfg-card-icon{font-size:16px;line-height:1}
+.cfg-card-label{flex:1}
+.cfg-card-badge{font-family:var(--font-ui);font-size:8px;padding:1px 4px;border:1px solid var(--green2);color:var(--green);letter-spacing:.08em;border-radius:100px}
+.cfg-card-purpose{font-family:var(--font);font-size:11px;color:var(--text3);padding:8px 12px 4px 12px;font-style:italic}
 .cfg-save-bar{position:fixed;bottom:0;left:0;right:0;background:linear-gradient(180deg,#14110a,var(--bg1));border-top:1px solid var(--c4);padding:11px 22px;display:none;align-items:center;gap:12px;z-index:300;box-shadow:0 -12px 40px -20px #000}
 .cfg-save-bar.visible{display:flex}
 .cfg-save-bar-msg{font-family:var(--font-ui);color:var(--text3);font-size:11px;flex:1}
@@ -1324,31 +1329,37 @@ async function removeWatch(id) {
   }
 }
 
-function addPriceWatchPrompt() {
+async function addPriceWatchPrompt() {
   const mint = prompt('Enter mint address:');
   if (!mint) return;
   const aboveUsd = prompt('Alert if price goes above USD (leave blank to skip):');
   const belowUsd = prompt('Alert if price goes below USD (leave blank to skip):');
   const note = prompt('Note (optional):');
-  // TODO: call /api/watches/add-price with POST
-  alert('Price watch feature coming soon');
+  if (!aboveUsd && !belowUsd) { alert('Set at least one price level'); return; }
+  const result = await apiPost('/api/watches/add-price', {
+    mint, aboveUsd: aboveUsd ? parseFloat(aboveUsd) : null, belowUsd: belowUsd ? parseFloat(belowUsd) : null, note
+  });
+  if (result?.error) alert('Error: ' + result.error);
+  else { alert('Price watch added'); loadWatches(); }
 }
 
-function addWalletWatchPrompt() {
+async function addWalletWatchPrompt() {
   const address = prompt('Enter wallet address to watch:');
   if (!address) return;
   const note = prompt('Note (optional):');
-  // TODO: call /api/watches/add-wallet with POST
-  alert('Wallet watch feature coming soon');
+  const result = await apiPost('/api/watches/add-wallet', { address, note });
+  if (result?.error) alert('Error: ' + result.error);
+  else { alert('Wallet watch added'); loadWatches(); }
 }
 
-function addFollowWatchPrompt() {
+async function addFollowWatchPrompt() {
   const address = prompt('Enter wallet to mirror:');
   if (!address) return;
   const autoBuy = confirm('Auto-buy when this wallet enters new tokens?');
   const note = prompt('Note (optional):');
-  // TODO: call /api/watches/add-follow with POST
-  alert('Follow watch feature coming soon');
+  const result = await apiPost('/api/watches/add-follow', { address, autoBuy, note });
+  if (result?.error) alert('Error: ' + result.error);
+  else { alert('Follow watch added'); loadWatches(); }
 }
 
 async function performResearch() {
@@ -2022,17 +2033,26 @@ async function loadConfig() {
   const el = $('config-sections');
   el.innerHTML = '';
 
-  const GROUPS = [
-    ['strategy',  'Strategy'],
-    ['risk',      'Risk'],
-    ['agentLoop', 'Agent Loop'],
-    ['survival',  'Survival'],
-    ['heartbeat', 'Heartbeat'],
-    ['reflect',   'Reflect'],
-    ['llm',       'LLM'],
-    ['swarm',     'Swarm'],
-    ['dashboard', 'Dashboard'],
-  ];
+  // Use new group-based structure if available (with fallback to old flat structure)
+  let groups = d.groups;
+  if (!groups) {
+    // Fallback: old flat structure (backward compatibility)
+    groups = [
+      {id:'trading-setup',label:'Trading Setup',icon:'🎯',settings:['strategy']},
+      {id:'exit-mgmt',label:'Exit & Position Mgmt',icon:'🎲',settings:['strategy']},
+      {id:'risk-filters',label:'Risk Filters',icon:'🛡️',settings:['risk','strategy']},
+      {id:'portfolio',label:'Portfolio Management',icon:'📊',settings:['strategy']},
+      {id:'yields',label:'Yield Discovery',icon:'🌾',settings:['strategy']},
+      {id:'alerts',label:'Alerts & Monitoring',icon:'🔔',settings:['copilot']},
+      {id:'execution',label:'Execution & Fees',icon:'⚡',settings:['strategy']},
+      {id:'wallet-safety',label:'Wallet Safety',icon:'🏦',settings:['survival']},
+      {id:'agent-loop',label:'Strategy Reasoning',icon:'🤖',settings:['agentLoop','llm']},
+      {id:'swarm',label:'Multi-Agent Swarm',icon:'🐝',settings:['swarm']},
+      {id:'learning',label:'Self-Improvement',icon:'🧠',settings:['reflect']},
+      {id:'heartbeat',label:'Heartbeat & Notifications',icon:'💓',settings:['heartbeat']},
+      {id:'system',label:'System & Advanced',icon:'⚙️',settings:['dashboard','circuit','telegram']},
+    ];
+  }
 
   // A numeric field gets a drag SLIDER when it's a bounded range comfortable to drag; otherwise
   // (money/SOL, ms durations, huge or unbounded ranges) a precise +/- STEPPER.
@@ -2055,18 +2075,36 @@ async function loadConfig() {
   };
   const SENSITIVE = /password|secret|token|mnemonic|private|apikey|api_key/i;
 
-  GROUPS.forEach(([section, label]) => {
-    const group = d.config[section];
-    if (!group || typeof group !== 'object') return;
+  groups.forEach((group) => {
     const card = mkEl('div','cfg-card');
-    card.appendChild(mkEl('div','cfg-card-title', label));
+    const titleDiv = mkEl('div','cfg-card-title');
+    if (group.icon) titleDiv.appendChild(mkEl('span','cfg-card-icon', group.icon));
+    titleDiv.appendChild(mkEl('span','cfg-card-label', group.label));
+    if (group.new) titleDiv.appendChild(mkEl('span','cfg-card-badge','NEW'));
+    card.appendChild(titleDiv);
+    if (group.purpose) {
+      const purpose = mkEl('div','cfg-card-purpose');
+      purpose.textContent = group.purpose;
+      card.appendChild(purpose);
+    }
     const body = mkEl('div','cfg-card-body');
 
-    Object.entries(group).forEach(([key, curVal]) => {
-      if (key.startsWith('_')) return;
-      const spec = FIELD_SPEC_FE[section]?.[key];
-      const id   = _cfgId(section, key);
-      const isRestart = spec?.restart || RESTART_FIELDS_FE.has(`${section}.${key}`);
+    // Collect settings from all sections in this group
+    const settingsBySection = {};
+    (group.settings || []).forEach(sectionName => {
+      const section = d.config[sectionName];
+      if (section && typeof section === 'object') {
+        settingsBySection[sectionName] = section;
+      }
+    });
+
+    // Render primary settings
+    Object.entries(settingsBySection).forEach(([section, sectionData]) => {
+      Object.entries(sectionData).forEach(([key, curVal]) => {
+        if (key.startsWith('_')) return;
+        const spec = FIELD_SPEC_FE[section]?.[key];
+        const id   = _cfgId(section, key);
+        const isRestart = spec?.restart || RESTART_FIELDS_FE.has(`${section}.${key}`);
 
       const item = mkEl('div','cfg-item');
       const head = mkEl('div','cfg-item-head');
