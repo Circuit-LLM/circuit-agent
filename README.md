@@ -6,7 +6,7 @@
 **An open-source autonomous trading agent for Solana. Scans, buys, monitors, reflects, and earns — on its own. Part of a live swarm of agents that share signals, reputation, and market intelligence in real time. Extend it with custom tools, teach it new skills, or build on top of it.**
 
 [![Node.js](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
-[![Version](https://img.shields.io/badge/version-0.9.9-blue)](https://github.com/Circuit-LLM/circuit-agent/releases)
+[![Version](https://img.shields.io/badge/version-0.10.0-blue)](https://github.com/Circuit-LLM/circuit-agent/releases)
 [![Status](https://img.shields.io/badge/status-beta-orange)](https://github.com/Circuit-LLM/circuit-agent)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
@@ -117,6 +117,7 @@ Open **http://localhost:18800** while the agent is running to get full visibilit
 | **Positions** | Current open trades: entry price, current price, P&L%, hold time |
 | **Scanner** | Last scan results — all scored candidates with dip-reversal pattern breakdown |
 | **Swarm** | Live peer signals, consensus view on held tokens, swarm blacklist, agent reputation |
+| **Watches** | Set price alerts on mints, watch wallet activity, follow-signal copies (with optional shadow-buy), and research any token's dossier — free endpoints, deterministic checks |
 | **Tasks** | Task board — propose, claim, track, and submit work for CIRC rewards |
 | **Chat** | Talk to the agent's LLM directly from your browser |
 | **Trades** | Full closed trade history with P&L, exit reason, and timestamps |
@@ -354,6 +355,13 @@ Your `.env`, `data/`, `soul.local.md`, and `config/agent.local.json` are never t
 ---
 
 ## Changelog
+
+### v0.10.0
+- **Dashboard redesigned to match circuit.xyz.** Re-palette from "Signal Gold on Carbon" (antique #dcb820/#080706) to the main website's bright gold (#F0D042/#0B0C0F), unifying the visual identity across all Circuit surfaces. Favicon updated. P&L green/red colors remain independent (true money signals).
+- **Watches tab.** Dashboard now surfaces the Solana copilot's watch system: price alerts (set thresholds on any mint), wallet-activity watches (track account changes), and follow-wallet watches (mirror trades from other wallets with optional gated shadow-buy). All watch types render in three data tables with remove buttons. `/research` dossier now has a dashboard box too — paste a mint CA and get token info, security verdict, rug risk, and swarm consensus in one call.
+- **Custom strategy filters.** New infrastructure in `lib/auto-scanner.js` loads any `.js` files from `lib/strategies/` that export `shouldBuy(candidate, cfg, context)` and runs them before each buy. Any filter returning false blocks the trade (logged). Errors don't crash the scanner (fail-open). `lib/strategies/README.md` documents the convention; currently none are built-in — an operator can drop in domain-specific or regime-gated logic (sector diversification, max-exposure caps, time-window restrictions, etc.).
+- **Daily trading brief.** A new `lib/daily-brief.js` sends a once-per-UTC-day Telegram digest showing trade count, win rate, net P&L, avg hold time, and best/worst trade. Checks every 60s and respects day boundaries. Wired into agent.js startup; Telegram-only, no-op if bot is unconfigured.
+- **Security hardening.** Replaced unsafe `innerHTML` interpolations in the dashboard with DOM node construction + `textContent` to eliminate XSS vectors from untrusted API data (watch notes, token names, security verdicts, error messages). Added HTML escape helper `_esc()`.
 
 ### v0.9.9
 - **Economics fixed, measured on net.** Execution fees (Jito tip + network) were invisible to every feedback loop — a gross "win" that fees turned into a loss still counted as a win and dodged loss cooldowns. Now the circuit breaker, re-entry cooldowns, swarm reputation verdicts, reinvest sizing, and all win-rate stats read **net-of-fees** P&L. The Jito tip is now **dynamic** — sized to the trade (`clamp(2% of the SOL side, 0.0002, 0.001 SOL)`) instead of a flat 0.001 that was ~20% of a 0.005 SOL entry. Every trade record is stamped with its git build for per-deploy analysis.
