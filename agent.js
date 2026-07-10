@@ -467,6 +467,12 @@ async function cmdStart() {
   // Copilot watches — user-defined price/wallet alerts (deterministic, free endpoints)
   require('./lib/watches').start(cfg, makeCtx(), telegramBot);
 
+  // Daily brief — once-per-day Telegram digest
+  if (telegramBot) {
+    const dailyBrief = require('./lib/daily-brief');
+    setInterval(() => dailyBrief.sendBrief(telegramBot, cfg), 60_000);  // check every minute
+  }
+
   // 9. Agent loop — periodic LLM strategy reasoning (sets session_strategy.json)
   const agentLoop = require('./lib/agent-loop');
   agentLoop.start(cfg, makeCtx());
