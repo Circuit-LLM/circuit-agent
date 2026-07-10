@@ -28,6 +28,8 @@
     "entryConfirmMaxFadePct": 1.0,
     "bounceScoreMode": "modest",
     "requireFreshBounce": false,
+    "maxBuyRatioPct": 65,
+    "_buyPressureNote": "maxBuyRatioPct: cap 5m buy-pressure to reject chasing entries. 55-65% band = 65% WR, 65%+ = 26% WR. Default 65; set to null to disable.",
     "hardStopMultiple": 1.6,
     "maxEntry6hGainPct": 80,
     "maxEntry24hGainPct": 150,

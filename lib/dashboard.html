@@ -415,13 +415,13 @@ body.sb-collapsed .sb-foot{display:none}
       <span class="sb-glyph-wrap" onclick="toggleSidebar()" title="Collapse / expand (⌘\\)">
         <svg class="sb-glyph" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <g class="spin">
-            <polygon points="16,3 27,9.5 27,22.5 16,29 5,22.5 5,9.5" stroke="#dcb820" stroke-width="1.3" fill="none" opacity=".5"/>
-            <circle cx="16" cy="3" r="1.7" fill="#ffe000"/>
-            <circle cx="27" cy="22.5" r="1.7" fill="#ffe000"/>
-            <circle cx="5" cy="22.5" r="1.7" fill="#ffe000"/>
+            <polygon points="16,3 27,9.5 27,22.5 16,29 5,22.5 5,9.5" stroke="#F0D042" stroke-width="1.3" fill="none" opacity=".5"/>
+            <circle cx="16" cy="3" r="1.7" fill="#F0D042"/>
+            <circle cx="27" cy="22.5" r="1.7" fill="#F0D042"/>
+            <circle cx="5" cy="22.5" r="1.7" fill="#F0D042"/>
           </g>
-          <circle cx="16" cy="16" r="4.3" stroke="#ffe000" stroke-width="1.4" fill="none"/>
-          <circle cx="16" cy="16" r="1.8" fill="#ffe000"/>
+          <circle cx="16" cy="16" r="4.3" stroke="#F0D042" stroke-width="1.4" fill="none"/>
+          <circle cx="16" cy="16" r="1.8" fill="#F0D042"/>
         </svg>
         <div class="hdr-dot" id="status-dot" style="position:absolute;bottom:-1px;right:-2px;width:6px;height:6px;border:1px solid var(--bg1)"></div>
       </span>
@@ -581,6 +581,11 @@ body.sb-collapsed .sb-foot{display:none}
       <span id="ov-strat-expires" style="font-size:10px;letter-spacing:1px;color:var(--text3)">——</span>
     </div>
     <div id="ov-strat-goal" style="margin-top:8px;font-size:11px;color:var(--text2);line-height:1.5;padding:6px 0;border-top:1px solid var(--border2)">——</div>
+  </div>
+
+  <div class="sec-hdr" style="margin-top:12px"><span>//</span>&nbsp;HOLDER GUARD</div>
+  <div class="box">
+    <div id="ov-holder-guard" style="padding:12px;font-size:11px;color:var(--text2)">loading…</div>
   </div>
 
 </div>
@@ -1326,6 +1331,28 @@ async function removeWatch(id) {
   const result = await apiPost('/api/watches/remove', { id });
   if (result?.ok) {
     loadWatches();
+  }
+}
+
+async function loadHolderGuard() {
+  const flags = await api('/api/watches/holder-flags');
+  const el = $('ov-holder-guard');
+  if (!el) return;
+
+  if (!flags || Object.keys(flags).length === 0) {
+    el.innerHTML = '<span style="color:var(--green)">✓ clear</span>';
+    return;
+  }
+
+  el.innerHTML = '';
+  for (const [mint, data] of Object.entries(flags)) {
+    if (!data || !data.flagged) continue;
+    const p = document.createElement('p');
+    p.style.cssText = 'margin:6px 0;color:var(--red)';
+    const symbol = data.symbol ? ` (${_esc(data.symbol)})` : '';
+    const drop = data.dropPct != null ? ` ${Math.round(data.dropPct)}% drop` : '';
+    p.textContent = `⚠ ${mint.slice(0,8)}${symbol}${drop}`;
+    el.appendChild(p);
   }
 }
 
@@ -2265,6 +2292,7 @@ async function init() {
   if (cfgData) { _config = cfgData.config; }
   await loadStatus();
   await loadActivity();
+  await loadHolderGuard();
   loadWallet(); // async, non-blocking — wallet + QR can load in background
   connectSSE();
 
@@ -2272,6 +2300,7 @@ async function init() {
   setInterval(loadStatus,   30000);
   setInterval(loadActivity, 20000);
   setInterval(loadWallet,  120000); // wallet balances refresh every 2 min
+  setInterval(loadHolderGuard, 60000); // holder guard every 60s
 
   setInterval(() => {
     if (_activeTab === 'positions') loadPositions();
@@ -2279,6 +2308,7 @@ async function init() {
     if (_activeTab === 'swarm')     loadSwarm();
     if (_activeTab === 'tasks')     loadTasks();
     if (_activeTab === 'scanner')   loadScanner();
+    if (_activeTab === 'overview')  loadHolderGuard();
   }, 30000);
 
   // Start loading the first tab data
