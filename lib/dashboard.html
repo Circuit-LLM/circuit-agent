@@ -2428,6 +2428,8 @@ async function loadIntelligence() {
           breakdown.innerHTML = h.breakdown.map(b => `<div>• ${esc(b)}</div>`).join('');
         } else if (anomalies.length) {
           breakdown.innerHTML = `<div>• ${anomalies.join(', ')}</div>`;
+        } else {
+          breakdown.innerHTML = '<div class="dim">Network healthy, no anomalies detected</div>';
         }
       }
     } else {
