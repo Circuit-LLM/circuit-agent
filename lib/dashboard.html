@@ -1222,6 +1222,12 @@ async function loadActivity() {
   set('activity-ts', new Date().toLocaleTimeString());
 }
 
+// HTML escape helper — guard against XSS in untrusted data
+function _esc(s) {
+  const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+  return String(s ?? '').replace(/[&<>"']/g, c => map[c]);
+}
+
 // ── WATCHES ───────────────────────────────────────────────────────────────────
 async function loadWatches() {
   const watches = await api('/api/watches');
@@ -1241,9 +1247,19 @@ async function loadWatches() {
       priceWatches.forEach(w => {
         const row = document.createElement('tr');
         const alerts = [];
-        if (w.aboveUsd) alerts.push(`↑ $${w.aboveUsd}`);
-        if (w.belowUsd) alerts.push(`↓ $${w.belowUsd}`);
-        row.innerHTML = `<td class="sym">${w.mint.slice(0,8)}…</td><td>${w.symbol}</td><td>${alerts.join(' / ')}</td><td><button onclick="removeWatch('${w.id}')" style="font-size:9px;cursor:pointer;color:var(--red);border:none;background:none">remove</button></td>`;
+        if (w.aboveUsd) alerts.push(`↑ $${parseFloat(w.aboveUsd).toFixed(2)}`);
+        if (w.belowUsd) alerts.push(`↓ $${parseFloat(w.belowUsd).toFixed(2)}`);
+
+        const td1 = document.createElement('td'); td1.className = 'sym'; td1.textContent = w.mint.slice(0,8) + '…';
+        const td2 = document.createElement('td'); td2.textContent = w.symbol;
+        const td3 = document.createElement('td'); td3.textContent = alerts.join(' / ');
+        const td4 = document.createElement('td');
+        const btn = document.createElement('button');
+        btn.textContent = 'remove'; btn.style.cssText = 'font-size:9px;cursor:pointer;color:var(--red);border:none;background:none';
+        btn.addEventListener('click', () => removeWatch(_esc(w.id)));
+        td4.appendChild(btn);
+
+        row.appendChild(td1); row.appendChild(td2); row.appendChild(td3); row.appendChild(td4);
         ptb.appendChild(row);
       });
     }
@@ -1258,7 +1274,15 @@ async function loadWatches() {
       wtb.innerHTML = '';
       walletWatches.forEach(w => {
         const row = document.createElement('tr');
-        row.innerHTML = `<td>${w.address.slice(0,8)}…</td><td>${w.note}</td><td><button onclick="removeWatch('${w.id}')" style="font-size:9px;cursor:pointer;color:var(--red);border:none;background:none">remove</button></td>`;
+        const td1 = document.createElement('td'); td1.textContent = w.address.slice(0,8) + '…';
+        const td2 = document.createElement('td'); td2.textContent = w.note;
+        const td3 = document.createElement('td');
+        const btn = document.createElement('button');
+        btn.textContent = 'remove'; btn.style.cssText = 'font-size:9px;cursor:pointer;color:var(--red);border:none;background:none';
+        btn.addEventListener('click', () => removeWatch(_esc(w.id)));
+        td3.appendChild(btn);
+
+        row.appendChild(td1); row.appendChild(td2); row.appendChild(td3);
         wtb.appendChild(row);
       });
     }
@@ -1273,8 +1297,20 @@ async function loadWatches() {
       ftb.innerHTML = '';
       followWatches.forEach(w => {
         const row = document.createElement('tr');
-        const badge = w.autoBuy ? '<span class="badge" style="color:var(--green)">ON</span>' : '<span class="badge" style="color:var(--text3)">OFF</span>';
-        row.innerHTML = `<td>${w.address.slice(0,8)}…</td><td>${badge}</td><td>${w.note}</td><td><button onclick="removeWatch('${w.id}')" style="font-size:9px;cursor:pointer;color:var(--red);border:none;background:none">remove</button></td>`;
+        const td1 = document.createElement('td'); td1.textContent = w.address.slice(0,8) + '…';
+        const td2 = document.createElement('td');
+        const badgeSpan = document.createElement('span'); badgeSpan.className = 'badge';
+        badgeSpan.style.color = w.autoBuy ? 'var(--green)' : 'var(--text3)';
+        badgeSpan.textContent = w.autoBuy ? 'ON' : 'OFF';
+        td2.appendChild(badgeSpan);
+        const td3 = document.createElement('td'); td3.textContent = w.note;
+        const td4 = document.createElement('td');
+        const btn = document.createElement('button');
+        btn.textContent = 'remove'; btn.style.cssText = 'font-size:9px;cursor:pointer;color:var(--red);border:none;background:none';
+        btn.addEventListener('click', () => removeWatch(_esc(w.id)));
+        td4.appendChild(btn);
+
+        row.appendChild(td1); row.appendChild(td2); row.appendChild(td3); row.appendChild(td4);
         ftb.appendChild(row);
       });
     }
@@ -1327,19 +1363,44 @@ async function performResearch() {
   const contentEl = $('research-content');
   contentEl.innerHTML = '';
   if (result.error) {
-    contentEl.innerHTML = `<p style="color:var(--red)">${result.error}</p>`;
+    const p = document.createElement('p');
+    p.style.color = 'var(--red)';
+    p.textContent = result.error;
+    contentEl.appendChild(p);
     resultEl.style.display = 'block';
     return;
   }
-  // Build dossier display
-  let html = '<div style="font-size:11px;line-height:1.6">';
-  if (result.price) html += `<p><strong>Price:</strong> $${result.price.priceUsd ?? result.price.priceSol} (${result.price.source}, ${result.price.ageMs}ms old)</p>`;
-  if (result.token) html += `<p><strong>Token:</strong> ${result.token.symbol} (${result.token.name})</p><p><strong>Supply:</strong> ${result.token.supply}, <strong>Liquidity:</strong> $${result.token.liquidity}</p>`;
-  if (result.security) html += `<p><strong>Security:</strong> ${result.security.verdict} • Top holder: ${(result.security.topHolderPct * 100).toFixed(1)}%</p>`;
-  if (result.swarm) html += `<p><strong>Swarm Signal:</strong> ${result.swarm.direction || 'neutral'} (${result.swarm.count} agents)</p>`;
-  if (result.blacklisted) html += `<p style="color:var(--red)"><strong>⚠ FLAGGED:</strong> ${result.blacklisted.reason}</p>`;
-  html += '</div>';
-  contentEl.innerHTML = html;
+  // Build dossier display with safe DOM construction
+  const div = document.createElement('div');
+  div.style.cssText = 'font-size:11px;line-height:1.6';
+
+  if (result.price) {
+    const p = document.createElement('p');
+    p.innerHTML = `<strong>Price:</strong> $${parseFloat(result.price.priceUsd ?? result.price.priceSol ?? 0).toFixed(4)} (${_esc(result.price.source)})`;
+    div.appendChild(p);
+  }
+  if (result.token) {
+    const p = document.createElement('p');
+    p.innerHTML = `<strong>Token:</strong> ${_esc(result.token.symbol)} (${_esc(result.token.name)})<br/><strong>Supply:</strong> ${_esc(result.token.supply)}, <strong>Liquidity:</strong> $${parseFloat(result.token.liquidity ?? 0).toFixed(0)}`;
+    div.appendChild(p);
+  }
+  if (result.security) {
+    const p = document.createElement('p');
+    p.innerHTML = `<strong>Security:</strong> ${_esc(result.security.verdict)} • Top holder: ${(parseFloat(result.security.topHolderPct ?? 0) * 100).toFixed(1)}%`;
+    div.appendChild(p);
+  }
+  if (result.swarm) {
+    const p = document.createElement('p');
+    p.innerHTML = `<strong>Swarm Signal:</strong> ${_esc(result.swarm.direction || 'neutral')} (${parseInt(result.swarm.count || 0)} agents)`;
+    div.appendChild(p);
+  }
+  if (result.blacklisted) {
+    const p = document.createElement('p');
+    p.style.color = 'var(--red)';
+    p.innerHTML = `<strong>⚠ FLAGGED:</strong> ${_esc(result.blacklisted.reason)}`;
+    div.appendChild(p);
+  }
+  contentEl.appendChild(div);
   resultEl.style.display = 'block';
 }
 
