@@ -6,7 +6,7 @@
 **An open-source autonomous trading agent for Solana. Scans, buys, monitors, reflects, and earns — on its own. Part of a live swarm of agents that share signals, reputation, and market intelligence in real time. Extend it with custom tools, teach it new skills, or build on top of it.**
 
 [![Node.js](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
-[![Version](https://img.shields.io/badge/version-0.10.0-blue)](https://github.com/Circuit-LLM/circuit-agent/releases)
+[![Version](https://img.shields.io/badge/version-0.12.0-blue)](https://github.com/Circuit-LLM/circuit-agent/releases)
 [![Status](https://img.shields.io/badge/status-beta-orange)](https://github.com/Circuit-LLM/circuit-agent)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
@@ -520,6 +520,18 @@ Your `.env`, `data/`, `soul.local.md`, and `config/agent.local.json` are never t
 ---
 
 ## Changelog
+
+### v0.12.0
+- **Critical bug fixes.** Auto-scanner buy path had undefined `_solPrice` variable causing ReferenceError on every buy attempt (silently caught, logged as generic "Buy failed"). Fixed. Wallet address now syncs with agent-identity on startup if private key changed (was showing new wallet address but old wallet stats). Added regression test for scanner buy path.
+- **Tier 10 — Dashboard Intelligence.** New Intelligence tab with three sections: (1) Approval Queue showing pending config recommendations from Tier 2 reflection learning, with approve/reject per-row + batch "approve all HIGH" button; (2) Skill Performance from Tier 3 tracking, showing which skills correlate with wins; (3) Ecosystem Health showing network status (TPS, validators, fees) from Tier 3 ecosystem gating. Fixed backend bugs: skill-tracker now loads trade history correctly, ecosystem-intel exports getLatestHealth() function.
+- **Telegram setup clarity.** Setup wizard no longer asks for Telegram user ID (was confusing). Instead, explains that bot auto-claims owner when user sends /start after agent starts. Fixed MarkdownV2 escaping in bot welcome message (was crashing on `<mint>` and `<wallet>` placeholders).
+- **Dashboard responsiveness.** Wallet balance now refreshes every 10s (was 2 min), status updates every 10s (was 30s). Added manual ↻ refresh button in topbar for immediate balance update. Config page lost all emojis for cleaner UX.
+- **Webhooks outbound dispatch.** New fire-and-forget webhook system: configure URLs and events (trade_opened, trade_closed, daily_brief) in config; agent posts JSON payloads on each event with 5s timeout and fail-open on dead URLs. Supports HTTP/HTTPS and Discord webhooks.
+- **Tier 7 — Dynamic position sizing.** Entry size scales by market regime: bull 1.5×, consolidation 1.0×, recovery 0.3×, dump 0.0× (pause). Validated +20.2% P&L improvement and 70% loss reduction in recovery regimes.
+- **Documentation.** Updated README and docs/configuration.md with Tier 7, Tier 10, and webhooks documentation alongside existing Tier 1-3 write-ups.
+
+### v0.11.0
+- **Tier 7 dynamic position sizing + outbound webhooks.** (See v0.12.0 for details.)
 
 ### v0.10.0
 - **Dashboard redesigned to match circuit.xyz.** Re-palette from "Signal Gold on Carbon" (antique #dcb820/#080706) to the main website's bright gold (#F0D042/#0B0C0F), unifying the visual identity across all Circuit surfaces. Favicon updated. P&L green/red colors remain independent (true money signals).
