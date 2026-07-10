@@ -58,7 +58,7 @@
     "dcaSchedules": [],
     "dcaMaxTotal1d": 1.0,
     "_dcaNote": "Phase 2 DCA Auto-Executor: dcaEnabled activates scheduled dollar-cost-averaging buys. dcaSchedules: array of {id, mint, amountSol, intervalMs, name}. Example: {id: 'weekly-circ', mint: '8fQ2GG...', amountSol: 0.1, intervalMs: 604800000, name: 'Weekly CIRC'}. Each schedule buys every intervalMs if conditions met (balance OK, not paused, rug status OK). Executions logged to data/dca_executions.json.",
-    "ecosystemEnabled": false,
+    "ecosystemEnabled": true,
     "ecosystemMinTps": 400,
     "ecosystemMaxMevPercent": 25,
     "ecosystemMinValidators": 400,
