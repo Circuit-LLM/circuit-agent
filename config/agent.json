@@ -60,7 +60,15 @@
     "ecosystemMinTps": 400,
     "ecosystemMaxMevPercent": 25,
     "ecosystemMinValidators": 400,
-    "_ecosystemNote": "Phase 2 Ecosystem Intel Feed: monitors Solana network health. ecosystemEnabled activates monitoring. Checks TPS, MEV %, validator count every heartbeat. Alerts via Telegram when thresholds breached. Health data logged to data/ecosystem_health.json, alerts to data/ecosystem_alerts.json."
+    "_ecosystemNote": "Phase 2 Ecosystem Intel Feed: monitors Solana network health. ecosystemEnabled activates monitoring. Checks TPS, MEV %, validator count every heartbeat. Alerts via Telegram when thresholds breached. Health data logged to data/ecosystem_health.json, alerts to data/ecosystem_alerts.json.",
+    "lpOptimizeEnabled": false,
+    "lpOptimizeIntervalMs": 3600000,
+    "lpHarvestEnabled": true,
+    "lpRebalanceEnabled": true,
+    "lpHarvestThresholdUsd": 5.0,
+    "lpRebalanceThreshold": 0.15,
+    "lpPositions": [],
+    "_lpNote": "Phase 2 LP Optimizer: manages Solana LP positions separately from trading portfolio. lpOptimizeEnabled: activate LP position management. lpOptimizeIntervalMs: cycle interval (default 1h = 3600000ms). lpHarvestEnabled: auto-harvest fees when unclaimed > threshold USD. lpRebalanceEnabled: auto-rebalance when token ratio > threshold from 50/50. lpPositions: array of {dex, tokenA, tokenB, mint, liquidity} to monitor. Executions logged to data/lp_executions.json, health to data/lp_health.json."
   },
   "circuit": {
     "minCircuitBalance": 5000,

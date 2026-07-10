@@ -66,6 +66,7 @@ const { SwapExecutor }     = require('./lib/swap');
 const { PaperSwapExecutor } = require('./lib/paper-swap');
 const positions             = require('./lib/positions');
 const profile          = require('./lib/profile');
+const lpOptimizer      = require('./lib/lp-optimizer');
 
 // ── Version ───────────────────────────────────────────────────────────────────
 
@@ -476,6 +477,11 @@ async function cmdStart() {
   // 9. Agent loop — periodic LLM strategy reasoning (sets session_strategy.json)
   const agentLoop = require('./lib/agent-loop');
   agentLoop.start(cfg, makeCtx());
+
+  // 10. LP Optimizer — independent 1h loop managing Solana LP positions
+  if (cfg.strategy?.lpOptimizeEnabled) {
+    lpOptimizer.start(cfg, makeCtx(), telegramBot);
+  }
 
   log('info', 'Agent running', {
     address:    wallet.address.slice(0, 8) + '…',
