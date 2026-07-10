@@ -112,11 +112,12 @@ Open **http://localhost:18800** while the agent is running to get full visibilit
 
 | Tab | What you get |
 |-----|-------------|
-| **Overview** | SOL balance, wallet address with QR code, open positions with live P&L, recent activity log |
+| **Overview** | SOL balance, wallet address with QR code, open positions with live P&L, recent activity log, market regime |
 | **Config** | Edit all trading parameters live — saves to `config/agent.local.json` and takes effect on the next scanner/monitor tick. No restart needed for most settings |
 | **Positions** | Current open trades: entry price, current price, P&L%, hold time |
 | **Scanner** | Last scan results — all scored candidates with dip-reversal pattern breakdown |
 | **Swarm** | Live peer signals, consensus view on held tokens, swarm blacklist, agent reputation |
+| **Intelligence** | Approval queue (Tier 2), skill performance (Tier 3), ecosystem health gauge (Tier 3) — full operator oversight |
 | **Watches** | Set price alerts on mints, watch wallet activity, follow-signal copies (with optional shadow-buy), and research any token's dossier — free endpoints, deterministic checks |
 | **Tasks** | Task board — propose, claim, track, and submit work for CIRC rewards |
 | **Chat** | Talk to the agent's LLM directly from your browser |
@@ -218,6 +219,19 @@ circuit-agent ships with a **complete closed-loop adaptive trading system** that
 - Live Effect: Smaller buys during congestion, disabled skills removed from context
 - Files: `data/skill_performance.jsonl` (append-only correlation log)
 
+**TIER 7: Dynamic Position Sizing**
+- Regime Scaler → scales entry size based on market regime (bull 1.5×, consolidation 1.0×, recovery 0.3×, dump 0.0×)
+- Live Effect: Larger positions in bull markets, smaller positions in recovery, avoids buying dumps
+- Validation: +20.2% P&L improvement, 70% loss reduction in recovery regime
+- Files: `data/regime-state.json` (read on every buy scan)
+
+**TIER 10: Dashboard Intelligence**
+- Approval Queue → operator reviews Tier 2 recommendations before auto-apply, track approval workflow
+- Skill Performance → live dashboard of which skills help vs hurt, ranked by correlation with wins
+- Ecosystem Health → network health gauge (TPS, validators, fees), anomaly alerts, trading gating status
+- Live Effect: Full operator visibility into agent decision-making, memory, and ecosystem factors
+- Files: `/api/recommendations/summary`, `/api/skills/performance`, `/api/ecosystem/status`
+
 ### Closed-Loop Flow
 
 ```
@@ -238,7 +252,7 @@ Memory system → avoid bad patterns next cycle
 Repeat
 ```
 
-**Enable all tiers** (default): Tiers 1-3 are enabled by default in `config/agent.json`. To customize:
+**Enable all tiers** (default): Tiers 1-3, 7, and 10 are enabled by default in `config/agent.json`. To customize:
 
 ```json
 {
@@ -253,6 +267,18 @@ Repeat
   "ecosystemGating": {
     "enabled": true,
     "minHealthScore": 60
+  },
+  "regimeSizing": {
+    "enabled": true,
+    "bullMultiplier": 1.5,
+    "consolidationMultiplier": 1.0,
+    "recoveryMultiplier": 0.3,
+    "dumpMultiplier": 0.0
+  },
+  "webhooks": {
+    "enabled": false,
+    "urls": [],
+    "events": ["trade_opened", "trade_closed", "daily_brief"]
   }
 }
 ```
@@ -263,11 +289,14 @@ Repeat
 npm test -- tests/backtest-with-simulation.js
 ```
 
-**View approvals** (Tier 2) in the dashboard → Recommendations tab, or via API:
+**View dashboard Intelligence tab** (Tier 10) for approvals, skill performance, and ecosystem health:
+- Open **http://localhost:18800** → Intelligence tab
+- Or via API:
 
 ```bash
 curl http://localhost:18800/api/recommendations/pending
-curl -X PATCH http://localhost:18800/api/recommendations/{id} -d '{"approved": true, "note": "confirmed"}'
+curl http://localhost:18800/api/skills/performance
+curl http://localhost:18800/api/ecosystem/status
 ```
 
 ---
