@@ -233,13 +233,10 @@ async function main() {
     tgToken = ans.trim();
   }
 
-  let tgChatId = '';
   if (tgToken) {
     console.log('');
-    console.log(`  ${D('Your Telegram user ID — used to receive heartbeat messages.')}`);
-    console.log(`  ${D('Get it:')}  Telegram → ${Y('@userinfobot')} → /start`);
-    const ans = await ask(rl, '  Your Telegram user ID (Enter to skip): ');
-    tgChatId = ans.trim();
+    console.log(`  ${G('After setup:')}  Start this agent, then send ${Y('/start')} to your bot`);
+    console.log(`  ${D('The bot will auto-claim you as the owner — no user ID needed.')}`);
     console.log(`  ${G('✓  Telegram enabled')}`);
   } else {
     console.log(`  ${D('Skipped — add TELEGRAM_BOT_TOKEN to .env later to enable.')}`);
