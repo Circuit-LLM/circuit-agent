@@ -401,6 +401,20 @@ async function cmdStart() {
 
   initModules();
 
+  // Sync wallet address with agent identity (in case private key was changed)
+  const identityFile = path.join(__dirname, 'data/agent-identity.json');
+  try {
+    const walletAddr = wallet.address;
+    const identityData = fs.existsSync(identityFile) ? JSON.parse(fs.readFileSync(identityFile, 'utf8')) : null;
+    if (identityData && identityData.address && identityData.address !== walletAddr) {
+      log('warn', `Wallet address mismatch — private key was changed. Updating identity from ${identityData.address.slice(0,8)}… to ${walletAddr.slice(0,8)}…`);
+      identityData.address = walletAddr;
+      fs.writeFileSync(identityFile, JSON.stringify(identityData, null, 2));
+    }
+  } catch (e) {
+    log('warn', `Identity sync failed: ${e.message}`);
+  }
+
   log('info', `=== circuit-agent v${PKG_VERSION} starting ===`);
   try {
     await wallet.logBalances();
