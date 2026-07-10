@@ -444,15 +444,16 @@ body.sb-collapsed .sb-foot{display:none}
     </div>
 
     <nav class="sb-nav-wrap">
-      <div class="sb-nav active" data-tab="overview"  onclick="switchTab('overview')"><span class="sb-ico">▤</span><span class="sb-label">Overview</span></div>
-      <div class="sb-nav"        data-tab="positions" onclick="switchTab('positions')"><span class="sb-ico">◎</span><span class="sb-label">Positions</span><span class="sb-badge" id="tab-pos-count">0</span></div>
-      <div class="sb-nav"        data-tab="trades"    onclick="switchTab('trades')"><span class="sb-ico">⇄</span><span class="sb-label">Trades</span></div>
-      <div class="sb-nav"        data-tab="scanner"   onclick="switchTab('scanner')"><span class="sb-ico">⌕</span><span class="sb-label">Scanner</span></div>
-      <div class="sb-nav"        data-tab="swarm"     onclick="switchTab('swarm')"><span class="sb-ico">⋈</span><span class="sb-label">Swarm</span></div>
-      <div class="sb-nav"        data-tab="watches"   onclick="switchTab('watches')"><span class="sb-ico">⊙</span><span class="sb-label">Watches</span></div>
-      <div class="sb-nav"        data-tab="tasks"     onclick="switchTab('tasks')"><span class="sb-ico">☰</span><span class="sb-label">Tasks</span></div>
-      <div class="sb-nav"        data-tab="chat"      onclick="switchTab('chat')"><span class="sb-ico">✎</span><span class="sb-label">Chat</span></div>
-      <div class="sb-nav"        data-tab="config"    onclick="switchTab('config')"><span class="sb-ico">⚙</span><span class="sb-label">Config</span></div>
+      <div class="sb-nav active" data-tab="overview"     onclick="switchTab('overview')"><span class="sb-ico">▤</span><span class="sb-label">Overview</span></div>
+      <div class="sb-nav"        data-tab="positions"   onclick="switchTab('positions')"><span class="sb-ico">◎</span><span class="sb-label">Positions</span><span class="sb-badge" id="tab-pos-count">0</span></div>
+      <div class="sb-nav"        data-tab="trades"      onclick="switchTab('trades')"><span class="sb-ico">⇄</span><span class="sb-label">Trades</span></div>
+      <div class="sb-nav"        data-tab="scanner"     onclick="switchTab('scanner')"><span class="sb-ico">⌕</span><span class="sb-label">Scanner</span></div>
+      <div class="sb-nav"        data-tab="swarm"       onclick="switchTab('swarm')"><span class="sb-ico">⋈</span><span class="sb-label">Swarm</span></div>
+      <div class="sb-nav"        data-tab="intelligence" onclick="switchTab('intelligence')"><span class="sb-ico">◈</span><span class="sb-label">Intelligence</span></div>
+      <div class="sb-nav"        data-tab="watches"     onclick="switchTab('watches')"><span class="sb-ico">⊙</span><span class="sb-label">Watches</span></div>
+      <div class="sb-nav"        data-tab="tasks"       onclick="switchTab('tasks')"><span class="sb-ico">☰</span><span class="sb-label">Tasks</span></div>
+      <div class="sb-nav"        data-tab="chat"        onclick="switchTab('chat')"><span class="sb-ico">✎</span><span class="sb-label">Chat</span></div>
+      <div class="sb-nav"        data-tab="config"      onclick="switchTab('config')"><span class="sb-ico">⚙</span><span class="sb-label">Config</span></div>
     </nav>
 
     <div class="sb-foot">
@@ -770,6 +771,54 @@ body.sb-collapsed .sb-foot{display:none}
 
 </div>
 
+<!-- ═══════════════════ INTELLIGENCE ═══════════════════ -->
+<div id="tab-intelligence" class="tab-panel">
+
+  <div class="sec-hdr" style="margin-top:8px"><span>//</span>&nbsp;APPROVAL QUEUE</div>
+  <div class="g2">
+    <div class="stat-card"><div class="stat-label">Pending</div><div class="stat-val neu" id="int-pending-count">0</div></div>
+    <div class="stat-card"><div class="stat-label">Approved</div><div class="stat-val pos" id="int-approved-count">0</div></div>
+    <div class="stat-card"><div class="stat-label">Rejected</div><div class="stat-val neg" id="int-rejected-count">0</div></div>
+    <div class="stat-card"><div class="stat-label">Applied</div><div class="stat-val neu" id="int-applied-count">0</div></div>
+  </div>
+
+  <div class="box" style="margin-top:12px">
+    <div class="box-hdr">PENDING RECOMMENDATIONS
+      <button onclick="approveAllHigh()" style="float:right;font-size:10px;padding:2px 8px;cursor:pointer">Approve All HIGH</button>
+    </div>
+    <table class="data-table" id="int-recs-table">
+      <thead><tr><th>Title</th><th>Action</th><th>Priority</th><th>Type</th><th>Expected Lift</th><th>Decide</th></tr></thead>
+      <tbody id="int-recs-tbody"><tr><td colspan="6" class="empty dim">loading…</td></tr></tbody>
+    </table>
+  </div>
+
+  <div class="sec-hdr" style="margin-top:16px"><span>//</span>&nbsp;SKILL PERFORMANCE</div>
+  <table class="data-table" id="int-skills-table">
+    <thead><tr><th>Skill</th><th>Win Rate</th><th>Avg P&L</th><th>Score</th><th>Days Active</th><th>Verdict</th></tr></thead>
+    <tbody id="int-skills-tbody"><tr><td colspan="6" class="empty dim">loading…</td></tr></tbody>
+  </table>
+
+  <div class="sec-hdr" style="margin-top:16px"><span>//</span>&nbsp;ECOSYSTEM HEALTH</div>
+  <div class="g2">
+    <div class="stat-card">
+      <div class="stat-label">Network Health</div>
+      <div class="stat-val neu" id="int-health-score">——</div>
+      <div id="int-health-gauge" style="margin-top:8px;height:8px;background:var(--bg2);border-radius:4px;overflow:hidden">
+        <div id="int-health-bar" style="height:100%;width:0%;background:var(--green);transition:width 0.3s"></div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Anomalies</div>
+      <div class="stat-val neu" id="int-health-anomalies">——</div>
+      <div id="int-health-status" class="stat-sub" style="margin-top:4px">——</div>
+    </div>
+  </div>
+  <div id="int-health-breakdown" style="margin-top:12px;padding:8px;background:var(--bg2);border-radius:4px;color:var(--text2);font-size:11px;line-height:1.6">
+    <div class="dim">no health data yet — enable strategy.ecosystemEnabled to monitor</div>
+  </div>
+
+</div>
+
 <!-- ═══════════════════ WATCHES ═══════════════════ -->
 <div id="tab-watches" class="tab-panel">
 
@@ -1001,14 +1050,15 @@ function toggleSidebar() {
 })();
 
 function loadTab(id) {
-  if (id === 'positions') loadPositions();
-  if (id === 'trades')    loadTrades();
-  if (id === 'scanner')   loadScanner();
-  if (id === 'swarm')     loadSwarm();
-  if (id === 'watches')   loadWatches();
-  if (id === 'tasks')     loadTasks();
-  if (id === 'config')    loadConfig();
-  if (id === 'chat')      { loadChatHistory(); initChatSource(); }
+  if (id === 'positions')    loadPositions();
+  if (id === 'trades')       loadTrades();
+  if (id === 'scanner')      loadScanner();
+  if (id === 'swarm')        loadSwarm();
+  if (id === 'intelligence') loadIntelligence();
+  if (id === 'watches')      loadWatches();
+  if (id === 'tasks')        loadTasks();
+  if (id === 'config')       loadConfig();
+  if (id === 'chat')         { loadChatHistory(); initChatSource(); }
 }
 
 // ── API calls ─────────────────────────────────────────────────────────────────
@@ -1174,7 +1224,7 @@ async function loadStatus() {
   set('ov-signals', d.swarm ? `${d.swarm.agents} agents · ${d.swarm.signals} signals` : '——');
   set('ov-created', d.createdAt ? new Date(d.createdAt).toLocaleDateString() : '——');
   if (d.fearGreed?.value) set('ov-fg', `${d.fearGreed.value} — ${d.fearGreed.label}`);
-  set('ov-regime', '——');
+  set('ov-regime', d.regime ? `${d.regime.regime} (${(d.regime.confidence*100).toFixed(0)}%)` : '——');
 
   // Context health — warn if sol or fearGreed is null
   const hasSol = d.sol != null;
@@ -2259,6 +2309,133 @@ async function loadConfig() {
   });
 
   updateScannerPanel();
+}
+
+// ── Intelligence (Tier 10: Approvals, Skills, Ecosystem) ────────────────────
+
+async function loadIntelligence() {
+  try {
+    // 1. Approval queue summary
+    const summary = await api('/api/recommendations/summary');
+    if (summary?.summary) {
+      const s = summary.summary;
+      set('int-pending-count', s.pending ?? 0);
+      set('int-approved-count', s.approved ?? 0);
+      set('int-rejected-count', s.rejected ?? 0);
+      set('int-applied-count', s.applied ?? 0);
+    }
+
+    // 2. Pending recommendations table
+    const recs = await api('/api/recommendations/pending');
+    const recsTbody = $('int-recs-tbody');
+    if (recsTbody) {
+      if (!recs?.recommendations?.length) {
+        recsTbody.innerHTML = '<tr><td colspan="6" class="empty dim">no pending recommendations</td></tr>';
+      } else {
+        recsTbody.innerHTML = '';
+        recs.recommendations.forEach(r => {
+          const tr = document.createElement('tr');
+          const priorityClass = 'conf-' + (r.priority === 'HIGH' ? 'high' : r.priority === 'LOW' ? 'stale' : 'thin');
+          tr.innerHTML = `
+            <td><strong>${esc(r.title)}</strong></td>
+            <td>${esc(r.action)}</td>
+            <td><span class="badge ${priorityClass}">${r.priority}</span></td>
+            <td>${esc(r.type)}</td>
+            <td>${r.expectedLift ? String(r.expectedLift) : '—'}</td>
+            <td style="white-space:nowrap">
+              <button onclick="approveRec('${_esc(r.id)}', true)" style="font-size:10px;padding:2px 6px;cursor:pointer;color:var(--green);border:none;background:none">approve</button>
+              <button onclick="approveRec('${_esc(r.id)}', false)" style="font-size:10px;padding:2px 6px;cursor:pointer;color:var(--red);border:none;background:none">reject</button>
+            </td>
+          `;
+          recsTbody.appendChild(tr);
+        });
+      }
+    }
+
+    // 3. Skill performance
+    const skills = await api('/api/skills/performance');
+    const skillsTbody = $('int-skills-tbody');
+    if (skillsTbody) {
+      if (!skills?.skills?.allGrades?.length) {
+        skillsTbody.innerHTML = '<tr><td colspan="6" class="empty dim">no skill data yet</td></tr>';
+      } else {
+        skillsTbody.innerHTML = '';
+        skills.skills.allGrades.forEach(s => {
+          const tr = document.createElement('tr');
+          const verdictClass = s.recommendation === 'KEEP' ? 'conf-high' : s.recommendation === 'DISABLE' ? 'conf-stale' : 'conf-thin';
+          tr.innerHTML = `
+            <td><strong>${esc(s.skillName)}</strong></td>
+            <td>${fmtPct(s.avgWinRate * 100)}</td>
+            <td>${fmtPct(s.avgPnl)}</td>
+            <td>${s.performanceScore.toFixed(1)}</td>
+            <td>${s.daysActive}</td>
+            <td><span class="badge ${verdictClass}">${s.recommendation}</span></td>
+          `;
+          skillsTbody.appendChild(tr);
+        });
+      }
+    }
+
+    // 4. Ecosystem health
+    const eco = await api('/api/ecosystem/status');
+    if (eco?.health) {
+      const h = eco.health;
+      const scoreEl = $('int-health-score');
+      if (scoreEl) {
+        scoreEl.textContent = h.score + ' / 100';
+        scoreEl.className = 'stat-val ' + (h.score >= 80 ? 'pos' : h.score >= 60 ? 'neu' : 'neg');
+      }
+      const bar = $('int-health-bar');
+      if (bar) bar.style.width = (h.score) + '%';
+
+      const anomalies = h.anomalies ?? [];
+      const anomalyEl = $('int-health-anomalies');
+      if (anomalyEl) anomalyEl.textContent = anomalies.length > 0 ? anomalies.length + ' alert' + (anomalies.length > 1 ? 's' : '') : '0 alerts';
+
+      const breakdown = $('int-health-breakdown');
+      if (breakdown) {
+        if (h.breakdown?.length) {
+          breakdown.innerHTML = h.breakdown.map(b => `<div>• ${esc(b)}</div>`).join('');
+        } else if (anomalies.length) {
+          breakdown.innerHTML = `<div>• ${anomalies.join(', ')}</div>`;
+        }
+      }
+    } else {
+      const breakdown = $('int-health-breakdown');
+      if (breakdown) breakdown.innerHTML = '<div class="dim">no health data yet — enable strategy.ecosystemEnabled to monitor</div>';
+    }
+  } catch (err) {
+    console.error('[INT] loadIntelligence error', err);
+  }
+}
+
+function approveRec(id, approved) {
+  const note = prompt(approved ? 'Approval note (optional):' : 'Rejection reason (optional):');
+  if (note === null) return;  // cancelled
+  apiPost(`/api/recommendations/${_esc(id)}`, { approved, note })
+    .then(() => loadIntelligence())
+    .catch(e => alert('Error: ' + (e?.error || e)));
+}
+
+function approveAllHigh() {
+  const tbody = $('int-recs-tbody');
+  if (!tbody) return;
+  const rows = Array.from(tbody.querySelectorAll('tr')).filter(tr => {
+    const badge = tr.querySelector('.conf-high');
+    return badge != null;
+  });
+  if (!rows.length) { alert('No HIGH priority recommendations'); return; }
+  if (!confirm(`Approve ${rows.length} HIGH priority recommendation${rows.length > 1 ? 's' : ''}?`)) return;
+
+  let count = 0;
+  rows.forEach(tr => {
+    const btn = tr.querySelector('button');
+    if (btn) {
+      btn.click();  // clicks the approve button
+      count++;
+    }
+  });
+  alert(`Approved ${count} recommendation${count > 1 ? 's' : ''}`);
 }
 
 // ── SSE ───────────────────────────────────────────────────────────────────────
