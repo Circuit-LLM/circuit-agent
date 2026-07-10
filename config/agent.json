@@ -51,7 +51,16 @@
     "holderExodusExit": "alert",
     "holderExitDropPct": 50,
     "holderCheckIntervalMs": 300000,
-    "_holderNote": "holderExodusExit: off|alert|exit \u2014 re-checks entry-time top-5 holders of open positions; on a >= holderExitDropPct balance drop, alert (default) or force a 'whale-exit'."
+    "_holderNote": "holderExodusExit: off|alert|exit \u2014 re-checks entry-time top-5 holders of open positions; on a >= holderExitDropPct balance drop, alert (default) or force a 'whale-exit'.",
+    "dcaEnabled": false,
+    "dcaSchedules": [],
+    "dcaMaxTotal1d": 1.0,
+    "_dcaNote": "Phase 2 DCA Auto-Executor: dcaEnabled activates scheduled dollar-cost-averaging buys. dcaSchedules: array of {id, mint, amountSol, intervalMs, name}. Example: {id: 'weekly-circ', mint: '8fQ2GG...', amountSol: 0.1, intervalMs: 604800000, name: 'Weekly CIRC'}. Each schedule buys every intervalMs if conditions met (balance OK, not paused, rug status OK). Executions logged to data/dca_executions.json.",
+    "ecosystemEnabled": false,
+    "ecosystemMinTps": 400,
+    "ecosystemMaxMevPercent": 25,
+    "ecosystemMinValidators": 400,
+    "_ecosystemNote": "Phase 2 Ecosystem Intel Feed: monitors Solana network health. ecosystemEnabled activates monitoring. Checks TPS, MEV %, validator count every heartbeat. Alerts via Telegram when thresholds breached. Health data logged to data/ecosystem_health.json, alerts to data/ecosystem_alerts.json."
   },
   "circuit": {
     "minCircuitBalance": 5000,
