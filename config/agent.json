@@ -157,5 +157,11 @@
     "episodeRecall": false,
     "chatExtraction": false,
     "consolidation": false
+  },
+  "search": {
+    "enabled": true,
+    "cacheTtlMs": 3600000,
+    "rateLimit": 10,
+    "_note": "Web search configuration. enabled: master switch (default true). cacheTtlMs: how long to cache results in milliseconds (default 1 hour = 3600000). rateLimit: max searches per session (default 10). Cache file: data/web_search_cache.json"
   }
 }
