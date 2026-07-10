@@ -2306,7 +2306,8 @@ async function loadConfig() {
 
     card.appendChild(body);
     el.appendChild(card);
-  });
+  });  // closes Object.entries...forEach (line 2179)
+  });  // closes groups.forEach (line 2155)
 
   updateScannerPanel();
 }
