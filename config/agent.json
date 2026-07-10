@@ -181,6 +181,15 @@
     "maxPriorityFeePerSol": 0.001,
     "_example": "High fees (>0.001 SOL) or poor health (<60) will reduce DCA position size by 50-100% to avoid overpaying"
   },
+  "regimeSizing": {
+    "_note": "Tier 7: Scale entry size by detected market regime. Backtest-validated: +20.2% P&L improvement, ~70% loss reduction in recovery regime. enabled: master switch. Multipliers apply to entryBudgetSol. Ranges: 0.0=pause, 1.0=normal, 1.5+=boost. Only affects auto-scanner (not DCA, which has its own Tier 3 ecosystem multiplier).",
+    "enabled": true,
+    "bullMultiplier": 1.5,
+    "consolidationMultiplier": 1.0,
+    "recoveryMultiplier": 0.3,
+    "dumpMultiplier": 0.0,
+    "_backtest": "Tests back-tested +20.2% P&L, recovery regime 70% loss reduction (data/regime-state.json required, loaded live)"
+  },
   "memory": {
     "_note": "Memory system. Default-safe: enabled=false makes every path fall back to current behavior. Set enabled=true to activate the per-flag defaults below. planGrading/proceduralHistory/tradeRecall are cheap read-back wins on the agent own decisions; reflectionLearner grades config changes over time; episodeRecall/chatExtraction/consolidation stay off until operator chat volume justifies them.",
     "enabled": true,
