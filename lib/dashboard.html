@@ -444,6 +444,7 @@ body.sb-collapsed .sb-foot{display:none}
       <div class="sb-nav"        data-tab="trades"    onclick="switchTab('trades')"><span class="sb-ico">⇄</span><span class="sb-label">Trades</span></div>
       <div class="sb-nav"        data-tab="scanner"   onclick="switchTab('scanner')"><span class="sb-ico">⌕</span><span class="sb-label">Scanner</span></div>
       <div class="sb-nav"        data-tab="swarm"     onclick="switchTab('swarm')"><span class="sb-ico">⋈</span><span class="sb-label">Swarm</span></div>
+      <div class="sb-nav"        data-tab="watches"   onclick="switchTab('watches')"><span class="sb-ico">⊙</span><span class="sb-label">Watches</span></div>
       <div class="sb-nav"        data-tab="tasks"     onclick="switchTab('tasks')"><span class="sb-ico">☰</span><span class="sb-label">Tasks</span></div>
       <div class="sb-nav"        data-tab="chat"      onclick="switchTab('chat')"><span class="sb-ico">✎</span><span class="sb-label">Chat</span></div>
       <div class="sb-nav"        data-tab="config"    onclick="switchTab('config')"><span class="sb-ico">⚙</span><span class="sb-label">Config</span></div>
@@ -759,6 +760,62 @@ body.sb-collapsed .sb-foot{display:none}
 
 </div>
 
+<!-- ═══════════════════ WATCHES ═══════════════════ -->
+<div id="tab-watches" class="tab-panel">
+
+  <div class="sec-hdr" style="margin-top:8px"><span>//</span>&nbsp;PRICE WATCHES</div>
+  <div class="box">
+    <div class="box-hdr">ALERTS
+      <span class="box-hdr-r">
+        <button onclick="addPriceWatchPrompt()" style="font-size:10px;padding:4px 10px;cursor:pointer;color:var(--c);border:1px solid var(--c3)">+ ADD</button>
+      </span>
+    </div>
+    <table class="data-table" id="price-watches-table">
+      <thead><tr><th>Mint</th><th>Symbol</th><th>Alert Level (USD)</th><th></th></tr></thead>
+      <tbody id="price-watches-tbody"><tr><td class="neu" colspan="4" style="text-align:center;padding:20px">loading…</td></tr></tbody>
+    </table>
+  </div>
+
+  <div class="sec-hdr" style="margin-top:12px"><span>//</span>&nbsp;WALLET WATCHES</div>
+  <div class="box">
+    <div class="box-hdr">TRACKED WALLETS
+      <span class="box-hdr-r">
+        <button onclick="addWalletWatchPrompt()" style="font-size:10px;padding:4px 10px;cursor:pointer;color:var(--c);border:1px solid var(--c3)">+ ADD</button>
+      </span>
+    </div>
+    <table class="data-table" id="wallet-watches-table">
+      <thead><tr><th>Address</th><th>Note</th><th></th></tr></thead>
+      <tbody id="wallet-watches-tbody"><tr><td class="neu" colspan="3" style="text-align:center;padding:20px">loading…</td></tr></tbody>
+    </table>
+  </div>
+
+  <div class="sec-hdr" style="margin-top:12px"><span>//</span>&nbsp;FOLLOW WATCHES</div>
+  <div class="box">
+    <div class="box-hdr">COPY SIGNALS
+      <span class="box-hdr-r">
+        <button onclick="addFollowWatchPrompt()" style="font-size:10px;padding:4px 10px;cursor:pointer;color:var(--c);border:1px solid var(--c3)">+ ADD</button>
+      </span>
+    </div>
+    <table class="data-table" id="follow-watches-table">
+      <thead><tr><th>Wallet</th><th>Auto-Buy</th><th>Note</th><th></th></tr></thead>
+      <tbody id="follow-watches-tbody"><tr><td class="neu" colspan="4" style="text-align:center;padding:20px">loading…</td></tr></tbody>
+    </table>
+  </div>
+
+  <div class="sec-hdr" style="margin-top:12px"><span>//</span>&nbsp;TOKEN RESEARCH</div>
+  <div class="box">
+    <div class="box-hdr">DOSSIER</div>
+    <div style="padding:14px;display:flex;gap:10px;flex-wrap:wrap">
+      <input id="research-mint" type="text" placeholder="Enter mint CA or symbol" style="flex:1;min-width:200px;padding:6px 10px;border:1px solid var(--border);background:var(--bg2);color:var(--text);font-size:12px;font-family:var(--font)">
+      <button onclick="performResearch()" style="padding:6px 14px;cursor:pointer;color:var(--bg);background:var(--c);border:none;font-weight:600;font-size:11px">RESEARCH</button>
+    </div>
+    <div id="research-result" style="padding:14px;display:none">
+      <div id="research-content"></div>
+    </div>
+  </div>
+
+</div>
+
 <!-- ═══════════════════ TASKS ═══════════════════ -->
 <div id="tab-tasks" class="tab-panel">
 
@@ -938,6 +995,7 @@ function loadTab(id) {
   if (id === 'trades')    loadTrades();
   if (id === 'scanner')   loadScanner();
   if (id === 'swarm')     loadSwarm();
+  if (id === 'watches')   loadWatches();
   if (id === 'tasks')     loadTasks();
   if (id === 'config')    loadConfig();
   if (id === 'chat')      { loadChatHistory(); initChatSource(); }
@@ -1162,6 +1220,127 @@ async function loadActivity() {
     el.appendChild(row);
   });
   set('activity-ts', new Date().toLocaleTimeString());
+}
+
+// ── WATCHES ───────────────────────────────────────────────────────────────────
+async function loadWatches() {
+  const watches = await api('/api/watches');
+  if (!watches) return;
+
+  const priceWatches = watches.filter(w => w.type === 'price');
+  const walletWatches = watches.filter(w => w.type === 'wallet');
+  const followWatches = watches.filter(w => w.type === 'follow');
+
+  // Render price watches
+  const ptb = $('price-watches-tbody');
+  if (ptb) {
+    if (priceWatches.length === 0) {
+      ptb.innerHTML = '<tr><td class="neu" colspan="4" style="text-align:center;padding:12px">No price watches</td></tr>';
+    } else {
+      ptb.innerHTML = '';
+      priceWatches.forEach(w => {
+        const row = document.createElement('tr');
+        const alerts = [];
+        if (w.aboveUsd) alerts.push(`↑ $${w.aboveUsd}`);
+        if (w.belowUsd) alerts.push(`↓ $${w.belowUsd}`);
+        row.innerHTML = `<td class="sym">${w.mint.slice(0,8)}…</td><td>${w.symbol}</td><td>${alerts.join(' / ')}</td><td><button onclick="removeWatch('${w.id}')" style="font-size:9px;cursor:pointer;color:var(--red);border:none;background:none">remove</button></td>`;
+        ptb.appendChild(row);
+      });
+    }
+  }
+
+  // Render wallet watches
+  const wtb = $('wallet-watches-tbody');
+  if (wtb) {
+    if (walletWatches.length === 0) {
+      wtb.innerHTML = '<tr><td class="neu" colspan="3" style="text-align:center;padding:12px">No wallet watches</td></tr>';
+    } else {
+      wtb.innerHTML = '';
+      walletWatches.forEach(w => {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${w.address.slice(0,8)}…</td><td>${w.note}</td><td><button onclick="removeWatch('${w.id}')" style="font-size:9px;cursor:pointer;color:var(--red);border:none;background:none">remove</button></td>`;
+        wtb.appendChild(row);
+      });
+    }
+  }
+
+  // Render follow watches
+  const ftb = $('follow-watches-tbody');
+  if (ftb) {
+    if (followWatches.length === 0) {
+      ftb.innerHTML = '<tr><td class="neu" colspan="4" style="text-align:center;padding:12px">No follow watches</td></tr>';
+    } else {
+      ftb.innerHTML = '';
+      followWatches.forEach(w => {
+        const row = document.createElement('tr');
+        const badge = w.autoBuy ? '<span class="badge" style="color:var(--green)">ON</span>' : '<span class="badge" style="color:var(--text3)">OFF</span>';
+        row.innerHTML = `<td>${w.address.slice(0,8)}…</td><td>${badge}</td><td>${w.note}</td><td><button onclick="removeWatch('${w.id}')" style="font-size:9px;cursor:pointer;color:var(--red);border:none;background:none">remove</button></td>`;
+        ftb.appendChild(row);
+      });
+    }
+  }
+}
+
+async function removeWatch(id) {
+  const result = await apiPost('/api/watches/remove', { id });
+  if (result?.ok) {
+    loadWatches();
+  }
+}
+
+function addPriceWatchPrompt() {
+  const mint = prompt('Enter mint address:');
+  if (!mint) return;
+  const aboveUsd = prompt('Alert if price goes above USD (leave blank to skip):');
+  const belowUsd = prompt('Alert if price goes below USD (leave blank to skip):');
+  const note = prompt('Note (optional):');
+  // TODO: call /api/watches/add-price with POST
+  alert('Price watch feature coming soon');
+}
+
+function addWalletWatchPrompt() {
+  const address = prompt('Enter wallet address to watch:');
+  if (!address) return;
+  const note = prompt('Note (optional):');
+  // TODO: call /api/watches/add-wallet with POST
+  alert('Wallet watch feature coming soon');
+}
+
+function addFollowWatchPrompt() {
+  const address = prompt('Enter wallet to mirror:');
+  if (!address) return;
+  const autoBuy = confirm('Auto-buy when this wallet enters new tokens?');
+  const note = prompt('Note (optional):');
+  // TODO: call /api/watches/add-follow with POST
+  alert('Follow watch feature coming soon');
+}
+
+async function performResearch() {
+  const mint = $('research-mint').value.trim();
+  if (!mint) {
+    alert('Enter a mint address');
+    return;
+  }
+  const result = await apiPost('/api/copilot/research', { mint });
+  if (!result) return;
+  const resultEl = $('research-result');
+  const contentEl = $('research-content');
+  contentEl.innerHTML = '';
+  if (result.error) {
+    contentEl.innerHTML = `<p style="color:var(--red)">${result.error}</p>`;
+    resultEl.style.display = 'block';
+    return;
+  }
+  // Build dossier display
+  let html = '<div style="font-size:11px;line-height:1.6">';
+  if (result.price) html += `<p><strong>Price:</strong> $${result.price.priceUsd ?? result.price.priceSol} (${result.price.source}, ${result.price.ageMs}ms old)</p>`;
+  if (result.token) html += `<p><strong>Token:</strong> ${result.token.symbol} (${result.token.name})</p><p><strong>Supply:</strong> ${result.token.supply}, <strong>Liquidity:</strong> $${result.token.liquidity}</p>`;
+  if (result.security) html += `<p><strong>Security:</strong> ${result.security.verdict} • Top holder: ${(result.security.topHolderPct * 100).toFixed(1)}%</p>`;
+  if (result.swarm) html += `<p><strong>Swarm Signal:</strong> ${result.swarm.direction || 'neutral'} (${result.swarm.count} agents)</p>`;
+  if (result.blacklisted) html += `<p style="color:var(--red)"><strong>⚠ FLAGGED:</strong> ${result.blacklisted.reason}</p>`;
+  html += '</div>';
+  contentEl.innerHTML = html;
+  resultEl.style.display = 'block';
 }
 
 // ── POSITIONS ─────────────────────────────────────────────────────────────────
