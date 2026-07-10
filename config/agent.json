@@ -206,5 +206,11 @@
     "cacheTtlMs": 3600000,
     "rateLimit": 10,
     "_note": "Web search configuration. enabled: master switch (default true). cacheTtlMs: how long to cache results in milliseconds (default 1 hour = 3600000). rateLimit: max searches per session (default 10). Cache file: data/web_search_cache.json"
+  },
+  "webhooks": {
+    "_note": "Outbound webhooks on trading events. enabled: master switch (default false). urls: array of webhook URLs (supports HTTP/HTTPS, Discord webhooks). events: array of event types to send (['trade_opened', 'trade_closed', 'daily_brief'], default all). Fire-and-forget async with 5s timeout — webhook failures never block trading.",
+    "enabled": false,
+    "urls": [],
+    "events": ["trade_opened", "trade_closed", "daily_brief"]
   }
 }
