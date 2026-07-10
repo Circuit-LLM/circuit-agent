@@ -67,7 +67,18 @@ agent.js                  Entry point — wires all modules together, starts loo
 ├── lib/watches.js        Copilot watches loop — price/wallet alerts (data/watches.json)
 ├── lib/subtask-manager.js Subtask delegation state tracker (data/subtask_manager_state.json)
 └── lib/scoring.js        Shared dip-reversal scorer used by scanner + pre-buy gate
+│
+└── **lib/analysis/** (Adaptive Trading Intelligence)
+    ├── data-loader.js      Load swarm trade history, enrich with metadata
+    ├── clusterer.js        Group trades by pattern-regime-time, rank by win rate
+    ├── regime-detector.js  Detect market regime at each trade entry
+    ├── gate-learner.js     Optimize buyRatio thresholds per cluster
+    ├── holder-predictor.js Model exit timing + risk from holder behavior
+    ├── intelligence-generator.js Synthesize signals → recommendations
+    └── adaptive-simulator.js  Simulate impact of applying learned logic
 ```
+
+The **Analysis subsystem** learns from historical trade data (local + swarm) and generates data-driven recommendations. Run `npm test -- tests/backtest-with-simulation.js` to see backtest results on your trade history. See [docs/ANALYSIS.md](docs/ANALYSIS.md) for full details.
 
 ---
 

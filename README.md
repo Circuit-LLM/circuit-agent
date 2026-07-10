@@ -18,7 +18,7 @@
 
 ---
 
-**[What it does](#what-it-does)** · **[Quick Start](#quick-start)** · **[CLI](#cli-commands)** · **[Dashboard](#dashboard)** · **[Telegram](#telegram-commands)** · **[How it works](#how-it-works)** · **[Memory](#memory)** · **[Config](#configuration)** · **[Skills](#skills)** · **[Swarm](#swarm)** · **[CIRC](#circ-token-economy)** · **[Build a specialist →](BUILDING.md)**
+**[What it does](#what-it-does)** · **[Quick Start](#quick-start)** · **[CLI](#cli-commands)** · **[Dashboard](#dashboard)** · **[Telegram](#telegram-commands)** · **[How it works](#how-it-works)** · **[Analysis](#analysis)** · **[Memory](#memory)** · **[Config](#configuration)** · **[Skills](#skills)** · **[Swarm](#swarm)** · **[CIRC](#circ-token-economy)** · **[Build a specialist →](BUILDING.md)**
 
 ---
 
@@ -191,6 +191,33 @@ reflect       (every 4h)       LLM reviews trades → tunes config → shares in
 **Reflect** is the deep self-improvement cycle. Every 4 hours the LLM reviews full trade history, win rates by pattern, and whether its current config is working. It proposes config changes (auto-applied within safe bounds if `reflect.autoApply` is true), saves lessons to persistent notes injected into every future prompt, shares insights to the swarm, reviews submitted task work, and may propose new tasks if it identifies a gap it can't fill on its own.
 
 Telegram chat, exception escalation, and the agent-loop all share a single LLM queue — the agent handles one thing at a time regardless of what triggered it.
+
+---
+
+## Analysis
+
+circuit-agent includes a **5-component adaptive intelligence system** that learns from your trade history and generates data-driven recommendations.
+
+**What it does:**
+- **Clustering** — Groups trades by entry pattern, time of day, and market regime; ranks by win rate. Reveals which pattern-regime combos actually work.
+- **Regime Detection** — Classifies market state (bull/consolidation/recovery/dump) at each entry and measures win rates per regime. Finds that entering in recovery = 0% WR vs. bull = 53%.
+- **Gate Optimization** — Tunes buyRatio thresholds per cluster. Example: "momentum | evening" should use 75% threshold (not 65%) because it wins at that ratio.
+- **Holder Prediction** — Models when positions blow up. Finds that trades peaking high then dumping typically take 106 minutes, while winners take 29 minutes.
+- **Intelligence Generator** — Synthesizes all signals into ranked recommendations with confidence scores.
+
+**Backtest results on 951 swarm trades:**
+- **Baseline** (no filtering): 24% WR, -0.1297 SOL
+- **Adaptive** (filter bad clusters): 25.8% WR, -0.1052 SOL (+18.9% lift)
+- **Selective** (only >50% WR trades): 61.5% WR, -0.0049 SOL (+96.2% lift, n=13)
+
+**Run analysis:**
+```bash
+npm test -- tests/backtest-with-simulation.js
+```
+
+Shows cluster breakdowns, regime effectiveness, gate recommendations, and simulated impact of applying each.
+
+→ [Full analysis guide](docs/ANALYSIS.md)
 
 ---
 
