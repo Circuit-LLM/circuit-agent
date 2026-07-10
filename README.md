@@ -194,7 +194,85 @@ Telegram chat, exception escalation, and the agent-loop all share a single LLM q
 
 ---
 
-## Analysis
+## Adaptive Trading Intelligence (Tiers 1-3)
+
+circuit-agent ships with a **complete closed-loop adaptive trading system** that learns from backtests, applies insights live, and improves each cycle through operator feedback and self-reflection.
+
+### How It Works
+
+**TIER 1: Learned Gates + Regime Adaptation**
+- Gate Learner → discovers optimal entry thresholds per pattern-regime-time cluster
+- Regime Detector → classifies market state (bull/consolidation/recovery/dump) and adjusts strategy
+- Live Effect: Scanner applies adaptive buyRatio gates (+18.9% P&L proven), agent-loop switches strategy per regime
+- Files: `data/learned-gates.json`, `data/regime-state.json` (read on every scan/strategy cycle)
+
+**TIER 2: Reflection Learning + Operator Approval**
+- Reflection Learner → grades config changes 4 hours after applying them (learns what worked)
+- Approval Workflow → recommendations queued for operator review before auto-apply
+- Live Effect: Prevents repeat of failed experiments, operator-in-the-loop decisions
+- Files: `data/reflection_log.jsonl`, `data/approvals.jsonl` (append-only audit trails)
+
+**TIER 3: Skill Tracking + Ecosystem Gating**
+- Skill Tracker → correlates skill usage with win rates, auto-ranks strong/weak performers
+- Ecosystem Gating → adjusts DCA position size based on network health (TPS, fees, validators)
+- Live Effect: Smaller buys during congestion, disabled skills removed from context
+- Files: `data/skill_performance.jsonl` (append-only correlation log)
+
+### Closed-Loop Flow
+
+```
+Backtest (951 trades analyzed)
+    ↓
+Save learned insights (gates + regime + recommendations)
+    ↓
+Live Agent reads + applies daily
+    ├─ Scanner: Adaptive gates per cluster
+    ├─ Agent-loop: Regime-aware strategy
+    ├─ DCA: Size multiplier per ecosystem health
+    └─ Reflect: Grade changes, learn patterns
+    ↓
+Operator review → approval/rejection with notes
+    ↓
+Memory system → avoid bad patterns next cycle
+    ↓
+Repeat
+```
+
+**Enable all tiers** (default): Tiers 1-3 are enabled by default in `config/agent.json`. To customize:
+
+```json
+{
+  "analysis": {
+    "adaptiveGatesEnabled": true,
+    "regimeDetectionEnabled": true
+  },
+  "memory": {
+    "enabled": true,
+    "reflectionLearner": true
+  },
+  "ecosystemGating": {
+    "enabled": true,
+    "minHealthScore": 60
+  }
+}
+```
+
+**Run backtest** to generate learned insights (run anytime to re-analyze and update recommendations):
+
+```bash
+npm test -- tests/backtest-with-simulation.js
+```
+
+**View approvals** (Tier 2) in the dashboard → Recommendations tab, or via API:
+
+```bash
+curl http://localhost:18800/api/recommendations/pending
+curl -X PATCH http://localhost:18800/api/recommendations/{id} -d '{"approved": true, "note": "confirmed"}'
+```
+
+---
+
+## Analysis (Backtest Details)
 
 circuit-agent includes a **5-component adaptive intelligence system** that learns from your trade history and generates data-driven recommendations.
 
@@ -221,15 +299,46 @@ Shows cluster breakdowns, regime effectiveness, gate recommendations, and simula
 
 ---
 
-## Memory
+## Memory & Learning
 
-An opt-in **read-back memory layer** (off by default) lets the agent learn from its own history: it grades each expiring strategy against the trades it produced and feeds recent outcomes into the next strategy brief, injects an exit-reason breakdown so it steers by what's actually profitable, keeps the reasoning trail of its own config changes, and — for chat-heavy deployments — extracts durable facts from conversations and recalls the relevant ones. Each level *reads its memory back into the decision it informs*, and falls back to the agent's original behavior when off — no data migration.
+A **multi-layer memory system** (enabled by default) lets the agent learn from its own history and improve over time:
 
-Enable per-agent in `config/agent.local.json` (the trading levels are cheap and safe; the chat levels pay off once there's real conversation to mine):
+**Trading Memory (Tier 2 - Reflection Learning):**
+- **Config Change Grading** — grades each config change 4 hours after applying it (compares win rates before/after)
+- **Reflection Learning** — stores grades in `data/reflection_log.jsonl`, avoids repeating bad changes
+- **Approval Workflow** — recommendations queue for operator approval before auto-apply
+
+**Decision Memory:**
+- **Plan Grading** — grades each strategy session against the trades it produced
+- **Procedural History** — stores repeatable patterns ("morning entries fail" → avoids them)
+- **Trade Recall** — injects exit-reason breakdown so strategy steers by what's actually profitable
+
+**Skill Memory (Tier 3 - Skill Tracking):**
+- **Skill Performance** — correlates skill usage with win rates, ranks strong/weak performers
+- **Auto-Disable** — underperforming skills removed from LLM context (future automation)
+
+**Chat Memory (Optional, off by default):**
+- **Episode Recall** — stores multi-turn conversation facts
+- **Chat Extraction** — pulls durable facts from conversations
+- **Consolidation** — summarizes old notes into narratives
+
+Enable in `config/agent.local.json`:
 
 ```json
-"memory": { "enabled": true, "planGrading": true, "proceduralHistory": true, "tradeRecall": true }
+{
+  "memory": {
+    "enabled": true,
+    "planGrading": true,
+    "proceduralHistory": true,
+    "tradeRecall": true,
+    "reflectionLearner": true,
+    "episodeRecall": false,
+    "chatExtraction": false
+  }
+}
 ```
+
+Each level *reads its memory back into the decision it informs*. Memory is append-only with automatic pruning (30-day rolling window) and falls back to original behavior when off — no data migration.
 
 → [Full memory reference](docs/MEMORY.md)
 

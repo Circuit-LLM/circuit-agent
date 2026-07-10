@@ -306,6 +306,78 @@ To apply a preset, copy the relevant keys into `config/agent.local.json`.
 
 ---
 
+## Adaptive Trading Intelligence (Tiers 1-3)
+
+### Tier 1: Learned Gates + Regime Adaptation
+
+```json
+{
+  "analysis": {
+    "adaptiveGatesEnabled": true,
+    "regimeDetectionEnabled": true,
+    "gateConfidenceThreshold": 0.85
+  }
+}
+```
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `adaptiveGatesEnabled` | `true` | Scanner loads learned buyRatio thresholds from `data/learned-gates.json` per cluster (pattern-regime-time). When false, uses static `strategy.maxBuyRatioPct` (default 65%). |
+| `regimeDetectionEnabled` | `true` | Agent-loop detects market regime (bull/consolidation/recovery/dump) from 7d trade history and includes analysis in LLM brief. LLM can then adjust strategy per regime. |
+| `gateConfidenceThreshold` | `0.85` | Only apply learned gates with confidence ≥ this level (0–1). 0.85 = HIGH confidence only. Recommendations below threshold use default 65% buyRatio gate. |
+
+**How to use:** Leave defaults enabled. Run backtest (`npm test -- tests/backtest-with-simulation.js`) anytime to regenerate learned insights. Scanner and agent-loop read automatically on next cycle.
+
+### Tier 2: Reflection Learning + Operator Approval
+
+```json
+{
+  "memory": {
+    "enabled": true,
+    "planGrading": true,
+    "proceduralHistory": true,
+    "tradeRecall": true,
+    "reflectionLearner": true,
+    "episodeRecall": false,
+    "chatExtraction": false
+  }
+}
+```
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `enabled` | `true` | Master switch for memory system. Disables all sub-levels when false. |
+| `planGrading` | `true` | Grades each strategy session against trades it produced (4h delay). Read-back into next brief. |
+| `proceduralHistory` | `true` | Stores repeatable patterns ("morning entries fail") — avoid them in future strategy decisions. |
+| `tradeRecall` | `true` | Injects exit-reason breakdown (why trades exited) so strategy steers by what's actually profitable. |
+| `reflectionLearner` | `true` | Grades config changes 4h after applying them (compares win rates before/after). Stores in `data/reflection_log.jsonl`. Next reflect cycle reads grades, avoids bad patterns. |
+| `episodeRecall` | `false` | Chat-heavy feature: stores multi-turn conversation facts. Off by default (only useful if you chat heavily). |
+| `chatExtraction` | `false` | Chat-heavy feature: extracts durable facts from conversations automatically. Off by default. |
+
+**How to use:** Leave defaults enabled. Reflect.js automatically grades changes every 4 hours. Operator reviews pending recommendations via dashboard or `/api/recommendations/pending` API.
+
+### Tier 3: Skill Tracking + Ecosystem Gating
+
+```json
+{
+  "ecosystemGating": {
+    "enabled": true,
+    "minHealthScore": 60,
+    "maxPriorityFeePerSol": 0.001
+  }
+}
+```
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `enabled` | `true` | Master switch for ecosystem-based gating. When true, DCA position size scales based on network health + fees. When false, DCA ignores ecosystem conditions (uses fixed size). |
+| `minHealthScore` | `60` | Pause DCA if ecosystem health drops below this (0–100 scale, lower = worse). Health considers TPS, MEV%, validators, priority fees. |
+| `maxPriorityFeePerSol` | `0.001` | Pause DCA if average priority fee exceeds this (in SOL). Default 0.001 SOL (~$0.10 at current prices). |
+
+**How to use:** DCA executor checks these before each buy. If health < 60 or fees > 0.001, position size is reduced by 50–100%. If both conditions fail, DCA is paused (0% size). Check dashboard `/api/ecosystem/status` to see current gating state.
+
+---
+
 ## Dip-Reversal Scoring
 
 The auto-scanner uses a 6-component scoring system (0–100):

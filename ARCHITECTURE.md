@@ -68,17 +68,42 @@ agent.js                  Entry point — wires all modules together, starts loo
 ├── lib/subtask-manager.js Subtask delegation state tracker (data/subtask_manager_state.json)
 └── lib/scoring.js        Shared dip-reversal scorer used by scanner + pre-buy gate
 │
-└── **lib/analysis/** (Adaptive Trading Intelligence)
-    ├── data-loader.js      Load swarm trade history, enrich with metadata
-    ├── clusterer.js        Group trades by pattern-regime-time, rank by win rate
-    ├── regime-detector.js  Detect market regime at each trade entry
-    ├── gate-learner.js     Optimize buyRatio thresholds per cluster
-    ├── holder-predictor.js Model exit timing + risk from holder behavior
-    ├── intelligence-generator.js Synthesize signals → recommendations
-    └── adaptive-simulator.js  Simulate impact of applying learned logic
+├── lib/dca-ecosystem-gating.js Tier 3: Gate DCA based on network health + fees
+│
+└── **lib/analysis/** (Adaptive Trading Intelligence — Tiers 1-3)
+    ├── data-loader.js           Load swarm trade history, enrich with metadata
+    ├── clusterer.js             Group trades by pattern-regime-time, rank by win rate
+    ├── regime-detector.js       Detect market regime at each trade entry
+    ├── regime-state.js          Tier 1: Persist detected regime, read by agent-loop
+    ├── gate-learner.js          Optimize buyRatio thresholds per cluster
+    ├── learned-gates.js         Tier 1: Persist learned thresholds, read by scanner
+    ├── holder-predictor.js      Model exit timing + risk from holder behavior
+    ├── intelligence-generator.js Synthesize signals → recommendations + Tier 2 approval submission
+    ├── approval-queue.js        Tier 2: Recommendation approval workflow (operator review)
+    ├── adaptive-simulator.js    Simulate impact of applying learned logic
+    └── (plus lib/memory/reflection-learner.js, skill-tracker.js for Tier 2-3)
 ```
 
-The **Analysis subsystem** learns from historical trade data (local + swarm) and generates data-driven recommendations. Run `npm test -- tests/backtest-with-simulation.js` to see backtest results on your trade history. See [docs/ANALYSIS.md](docs/ANALYSIS.md) for full details.
+**Tier 1: Learned Gates + Regime Adaptation**
+- `learned-gates.js` + `regime-state.js` persist insights from backtest
+- Scanner loads learned gates on every tick, applies adaptive buyRatio per cluster
+- Agent-loop includes regime analysis in LLM brief, switches strategy per regime
+- **Effect:** +18.9% P&L lift (proven on 951 swarm trades)
+
+**Tier 2: Reflection Learning + Operator Approval**
+- `lib/memory/reflection-learner.js` grades config changes 4h after applying
+- `approval-queue.js` queues recommendations for operator review
+- Reflect.js reads grades, avoids repeating bad changes
+- Dashboard APIs expose approvals workflow
+- **Effect:** Prevents unvalidated changes, closes operator feedback loop
+
+**Tier 3: Skill Tracking + Ecosystem Gating**
+- `lib/memory/skill-tracker.js` correlates skill usage with win rates
+- `dca-ecosystem-gating.js` adjusts DCA sizing based on network health
+- Dashboard APIs show skill performance + ecosystem status
+- **Effect:** Auto-disable weak skills, reduce position size during congestion
+
+Run `npm test -- tests/backtest-with-simulation.js` to see backtest results on your trade history and generate learned insights. See [docs/ANALYSIS.md](docs/ANALYSIS.md) for full details.
 
 ---
 
@@ -127,6 +152,36 @@ Two files, one rule:
 `lib/config.js` deep-merges local over base. You only include the keys you want to change.
 
 Three trading presets in `config/presets/`: `conservative`, `balanced`, `degen`.
+
+**Adaptive Trading Intelligence Config (Tiers 1-3):**
+
+```json
+{
+  "analysis": {
+    "adaptiveGatesEnabled": true,
+    "regimeDetectionEnabled": true,
+    "gateConfidenceThreshold": 0.85
+  },
+  "memory": {
+    "enabled": true,
+    "planGrading": true,
+    "proceduralHistory": true,
+    "tradeRecall": true,
+    "reflectionLearner": true,
+    "episodeRecall": false,
+    "chatExtraction": false
+  },
+  "ecosystemGating": {
+    "enabled": true,
+    "minHealthScore": 60,
+    "maxPriorityFeePerSol": 0.001
+  }
+}
+```
+
+- **analysis**: Tier 1 settings. adaptiveGatesEnabled=true means scanner loads learned thresholds per cluster. regimeDetectionEnabled=true means agent-loop detects and adapts to market regime.
+- **memory**: Tier 2-3 learning system. reflectionLearner grades config changes 4h after applying them.
+- **ecosystemGating**: Tier 3 conditional trading. DCA position size multiplied by health score + fee conditions.
 
 ---
 

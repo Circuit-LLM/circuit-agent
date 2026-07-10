@@ -24,6 +24,26 @@ test('Backtest with adaptive strategy simulation', async () => {
   const gateRecommendations = gateLearner.learnGates(enriched, clusterStats);
   const holderModel = holderPredictor.buildHolderModel(enriched);
 
+  // SAVE learned gates to file for live agent to consume
+  const learnedGates = require('../lib/analysis/learned-gates');
+  const gatesForSaving = {};
+  Object.entries(gateRecommendations).forEach(([key, rec]) => {
+    gatesForSaving[key] = {
+      current:    rec.current,
+      recommended: rec.recommended,
+      confidence: rec.confidence,
+      reasoning:  rec.reasoning,
+    };
+  });
+  learnedGates.saveLearnedGates(gatesForSaving);
+  console.log(`\n✅ Learned gates saved to data/learned-gates.json (${Object.keys(gatesForSaving).length} clusters)`);
+
+  // DETECT and save current regime for live agent
+  const regimeStateModule = require('../lib/analysis/regime-state');
+  const detectedRegime = regimeStateModule.detectRegime(enriched);
+  regimeStateModule.saveRegimeState(detectedRegime.regime, detectedRegime.confidence, detectedRegime.reasoning);
+  console.log(`✅ Regime state saved: ${detectedRegime.regime} (confidence ${(detectedRegime.confidence * 100).toFixed(0)}%)\n`);
+
   // RUN SIMULATIONS
   const simulations = adaptiveSimulator.simulateAdaptiveSystem(enriched, clusterStats, gateRecommendations, holderModel);
 
@@ -101,6 +121,10 @@ test('Backtest with adaptive strategy simulation', async () => {
 
   // REPORT
   const report = intelligenceGenerator.generateReport(enriched, clusterStats, regimeStats, gateRecommendations);
+
+  // SUBMIT for operator approval (Tier 2)
+  const submittedIds = intelligenceGenerator.submitForApproval(report.recommendations);
+  console.log(`✅ ${submittedIds.length} recommendations submitted for operator approval (Tier 2 workflow)`);
 
   console.log('='.repeat(80));
   console.log('💡 RECOMMENDATIONS FOR DEPLOYMENT\n');

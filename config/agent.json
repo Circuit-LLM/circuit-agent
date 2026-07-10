@@ -167,12 +167,27 @@
     "allowCors": "",
     "_note": "Local web dashboard at http://localhost:18800 (loopback only \u2014 use SSH tunnel for remote access). apiKey: require x-api-key header on all API routes. allowCors: explicit origin to allow (e.g. 'http://localhost:3000') \u2014 leave empty to disable CORS entirely."
   },
+  "analysis": {
+    "_note": "Adaptive Trading Intelligence (Tier 1 & 2). adaptiveGatesEnabled: use learned buyRatio thresholds per cluster. regimeDetectionEnabled: detect bull/consolidation/recovery/dump market regimes and adjust strategy. gateConfidenceThreshold: only apply learned gates at this confidence level (0-1, default 0.85 = HIGH confidence only).",
+    "adaptiveGatesEnabled": true,
+    "regimeDetectionEnabled": true,
+    "gateConfidenceThreshold": 0.85,
+    "_backtest_command": "npm test -- tests/backtest-with-simulation.js"
+  },
+  "ecosystemGating": {
+    "_note": "Tier 3: Gate trading based on network health. enabled: master switch. minHealthScore: pause if ecosystem health < this (0-100). maxPriorityFeePerSol: pause if avg fee > this. Affects DCA sizing and entry approval. Values: health score 0-100 (lower=bad), priority fee in SOL.",
+    "enabled": true,
+    "minHealthScore": 60,
+    "maxPriorityFeePerSol": 0.001,
+    "_example": "High fees (>0.001 SOL) or poor health (<60) will reduce DCA position size by 50-100% to avoid overpaying"
+  },
   "memory": {
-    "_note": "Memory system. Default-safe: enabled=false makes every path fall back to current behavior. Set enabled=true to activate the per-flag defaults below. planGrading/proceduralHistory/tradeRecall are cheap read-back wins on the agent own decisions; episodeRecall/chatExtraction/consolidation stay off until operator chat volume justifies them.",
-    "enabled": false,
+    "_note": "Memory system. Default-safe: enabled=false makes every path fall back to current behavior. Set enabled=true to activate the per-flag defaults below. planGrading/proceduralHistory/tradeRecall are cheap read-back wins on the agent own decisions; reflectionLearner grades config changes over time; episodeRecall/chatExtraction/consolidation stay off until operator chat volume justifies them.",
+    "enabled": true,
     "planGrading": true,
     "proceduralHistory": true,
     "tradeRecall": true,
+    "reflectionLearner": true,
     "episodeRecall": false,
     "chatExtraction": false,
     "consolidation": false
