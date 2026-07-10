@@ -397,6 +397,19 @@ body.sb-collapsed .sb-foot{display:none}
 .filter-btn:hover{color:var(--text2);border-color:var(--c4)}
 .filter-btn.on{border-color:var(--c3);color:var(--c);background:var(--c5)}
 
+/* ── Action buttons (+ ADD, Approve) ── */
+.action-btn{
+  font-family:var(--font-ui);font-size:10px;font-weight:600;letter-spacing:.06em;padding:6px 12px;
+  border:1px solid var(--c3);background:rgba(240,208,66,.08);color:var(--c);cursor:pointer;border-radius:4px;
+  transition:all .16s;user-select:none
+}
+.action-btn:hover{
+  background:rgba(240,208,66,.14);border-color:var(--c2);box-shadow:0 0 8px rgba(240,208,66,.2)
+}
+.action-btn:active{
+  transform:scale(.97);opacity:.8
+}
+
 @media(max-width:900px){.g4{grid-template-columns:1fr 1fr}.g3{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){.g4,.g3,.g2{grid-template-columns:1fr}#main{padding:12px 10px 70px}.hdr-addr,.hdr-ext{display:none}}
 @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -784,7 +797,7 @@ body.sb-collapsed .sb-foot{display:none}
 
   <div class="box" style="margin-top:12px">
     <div class="box-hdr">PENDING RECOMMENDATIONS
-      <button onclick="approveAllHigh()" style="float:right;font-size:10px;padding:2px 8px;cursor:pointer">Approve All HIGH</button>
+      <button onclick="approveAllHigh()" class="action-btn">Approve All HIGH</button>
     </div>
     <table class="data-table" id="int-recs-table">
       <thead><tr><th>Title</th><th>Action</th><th>Priority</th><th>Type</th><th>Expected Lift</th><th>Decide</th></tr></thead>
@@ -826,7 +839,7 @@ body.sb-collapsed .sb-foot{display:none}
   <div class="box">
     <div class="box-hdr">ALERTS
       <span class="box-hdr-r">
-        <button onclick="addPriceWatchPrompt()" style="font-size:10px;padding:4px 10px;cursor:pointer;color:var(--c);border:1px solid var(--c3)">+ ADD</button>
+        <button onclick="addPriceWatchPrompt()" class="action-btn">+ ADD</button>
       </span>
     </div>
     <table class="data-table" id="price-watches-table">
@@ -839,7 +852,7 @@ body.sb-collapsed .sb-foot{display:none}
   <div class="box">
     <div class="box-hdr">TRACKED WALLETS
       <span class="box-hdr-r">
-        <button onclick="addWalletWatchPrompt()" style="font-size:10px;padding:4px 10px;cursor:pointer;color:var(--c);border:1px solid var(--c3)">+ ADD</button>
+        <button onclick="addWalletWatchPrompt()" class="action-btn">+ ADD</button>
       </span>
     </div>
     <table class="data-table" id="wallet-watches-table">
@@ -852,7 +865,7 @@ body.sb-collapsed .sb-foot{display:none}
   <div class="box">
     <div class="box-hdr">COPY SIGNALS
       <span class="box-hdr-r">
-        <button onclick="addFollowWatchPrompt()" style="font-size:10px;padding:4px 10px;cursor:pointer;color:var(--c);border:1px solid var(--c3)">+ ADD</button>
+        <button onclick="addFollowWatchPrompt()" class="action-btn">+ ADD</button>
       </span>
     </div>
     <table class="data-table" id="follow-watches-table">
@@ -1417,7 +1430,7 @@ async function addPriceWatchPrompt() {
     mint, aboveUsd: aboveUsd ? parseFloat(aboveUsd) : null, belowUsd: belowUsd ? parseFloat(belowUsd) : null, note
   });
   if (result?.error) alert('Error: ' + result.error);
-  else { alert('Price watch added'); loadWatches(); }
+  else { alert('Added'); loadWatches(); }
 }
 
 async function addWalletWatchPrompt() {
@@ -1426,7 +1439,7 @@ async function addWalletWatchPrompt() {
   const note = prompt('Note (optional):');
   const result = await apiPost('/api/watches/add-wallet', { address, note });
   if (result?.error) alert('Error: ' + result.error);
-  else { alert('Wallet watch added'); loadWatches(); }
+  else { alert('Added'); loadWatches(); }
 }
 
 async function addFollowWatchPrompt() {
@@ -1436,7 +1449,7 @@ async function addFollowWatchPrompt() {
   const note = prompt('Note (optional):');
   const result = await apiPost('/api/watches/add-follow', { address, autoBuy, note });
   if (result?.error) alert('Error: ' + result.error);
-  else { alert('Follow watch added'); loadWatches(); }
+  else { alert('Added'); loadWatches(); }
 }
 
 async function performResearch() {
@@ -2115,19 +2128,19 @@ async function loadConfig() {
   if (!groups) {
     // Fallback: old flat structure (backward compatibility)
     groups = [
-      {id:'trading-setup',label:'Trading Setup',icon:'🎯',settings:['strategy']},
-      {id:'exit-mgmt',label:'Exit & Position Mgmt',icon:'🎲',settings:['strategy']},
-      {id:'risk-filters',label:'Risk Filters',icon:'🛡️',settings:['risk','strategy']},
-      {id:'portfolio',label:'Portfolio Management',icon:'📊',settings:['strategy']},
-      {id:'yields',label:'Yield Discovery',icon:'🌾',settings:['strategy']},
-      {id:'alerts',label:'Alerts & Monitoring',icon:'🔔',settings:['copilot']},
-      {id:'execution',label:'Execution & Fees',icon:'⚡',settings:['strategy']},
-      {id:'wallet-safety',label:'Wallet Safety',icon:'🏦',settings:['survival']},
-      {id:'agent-loop',label:'Strategy Reasoning',icon:'🤖',settings:['agentLoop','llm']},
-      {id:'swarm',label:'Multi-Agent Swarm',icon:'🐝',settings:['swarm']},
-      {id:'learning',label:'Self-Improvement',icon:'🧠',settings:['reflect']},
-      {id:'heartbeat',label:'Heartbeat & Notifications',icon:'💓',settings:['heartbeat']},
-      {id:'system',label:'System & Advanced',icon:'⚙️',settings:['dashboard','circuit','telegram']},
+      {id:'trading-setup',label:'Trading Setup',settings:['strategy']},
+      {id:'exit-mgmt',label:'Exit & Position Mgmt',settings:['strategy']},
+      {id:'risk-filters',label:'Risk Filters',settings:['risk','strategy']},
+      {id:'portfolio',label:'Portfolio Management',settings:['strategy']},
+      {id:'yields',label:'Yield Discovery',settings:['strategy']},
+      {id:'alerts',label:'Alerts & Monitoring',settings:['copilot']},
+      {id:'execution',label:'Execution & Fees',settings:['strategy']},
+      {id:'wallet-safety',label:'Wallet Safety',settings:['survival']},
+      {id:'agent-loop',label:'Strategy Reasoning',settings:['agentLoop','llm']},
+      {id:'swarm',label:'Multi-Agent Swarm',settings:['swarm']},
+      {id:'learning',label:'Self-Improvement',settings:['reflect']},
+      {id:'heartbeat',label:'Heartbeat & Notifications',settings:['heartbeat']},
+      {id:'system',label:'System & Advanced',settings:['dashboard','circuit','telegram']},
     ];
   }
 
