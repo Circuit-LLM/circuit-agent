@@ -1514,6 +1514,15 @@ function _dossVerdictColor(v) {
   if (s === 'CAUTION' || s === 'WARNING') return 'var(--amber)';
   return 'var(--red)';   // DANGER / RUGGED / unknown
 }
+// Token metadata (website/twitter) is attacker-controlled — a `javascript:` or
+// `data:` URI in an href executes in the dashboard origin. Only allow http/https;
+// anything else falls back to plain text (no link).
+function _dossSafeUrl(u) {
+  try {
+    const p = new URL(String(u));
+    return (p.protocol === 'http:' || p.protocol === 'https:') ? p.href : null;
+  } catch { return null; }
+}
 function _dossRow(label, valueHtml) {
   return `<div style="display:flex;justify-content:space-between;gap:12px;padding:2px 0">
     <span style="color:var(--text3)">${label}</span>
@@ -1621,8 +1630,18 @@ function renderDossier(r) {
   if (r.socials) {
     const s = r.socials;
     let rows = '';
-    if (s.website) rows += _dossRow('Website', `<a href="${_esc(s.website)}" target="_blank" rel="noopener" style="color:var(--amber)">${_esc(s.website.replace(/^https?:\/\//,'').slice(0,32))}</a>`);
-    if (s.twitter) rows += _dossRow('Twitter', `<a href="${_esc(s.twitter)}" target="_blank" rel="noopener" style="color:var(--amber)">${_esc(s.twitter.replace(/^https?:\/\/(www\.)?(twitter|x)\.com\//,'@').slice(0,32))}</a>`);
+    if (s.website) {
+      const url = _dossSafeUrl(s.website);
+      const txt = _esc(s.website.replace(/^https?:\/\//,'').slice(0,32));
+      rows += _dossRow('Website', url
+        ? `<a href="${_esc(url)}" target="_blank" rel="noopener noreferrer" style="color:var(--amber)">${txt}</a>` : txt);
+    }
+    if (s.twitter) {
+      const url = _dossSafeUrl(s.twitter);
+      const txt = _esc(s.twitter.replace(/^https?:\/\/(www\.)?(twitter|x)\.com\//,'@').slice(0,32));
+      rows += _dossRow('Twitter', url
+        ? `<a href="${_esc(url)}" target="_blank" rel="noopener noreferrer" style="color:var(--amber)">${txt}</a>` : txt);
+    }
     if (s.description) rows += `<div style="color:var(--text3);font-size:10px;margin-top:4px;line-height:1.5">${_esc(s.description.slice(0,240))}</div>`;
     if (rows) html += _dossSection('Links', rows);
   }
