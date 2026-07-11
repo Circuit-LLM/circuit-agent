@@ -11,7 +11,7 @@ All three matter. Evaluate all three.
 
 ## Step 1: Survival status
 
-Run **check_wallet** — get current SOL, CIRCUIT, and open positions.
+Your current SOL, CIRCUIT, and open positions are already provided at the top of this message. **Do not call check_wallet** — use that snapshot.
 
 Calculate:
 - CIRCUIT runway: API calls cost $0.001–$0.01 USD each, paid in CIRCUIT at current market price. Estimate days remaining = balance × CIRCUIT_price / avg_daily_usd_spend. Use recall_notes key="circuit_daily_usd" to retrieve last tracked spend.
