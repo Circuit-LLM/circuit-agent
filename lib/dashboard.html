@@ -1522,22 +1522,37 @@ async function performResearch() {
     alert('Enter a mint address');
     return;
   }
-  const result = await apiPost('/api/copilot/research', { mint });
-  if (!result) return;
   const resultEl = $('research-result');
   const contentEl = $('research-content');
-  contentEl.innerHTML = '';
+  // Building a dossier hits several external sources + on-chain reads, so it can
+  // take longer than a normal API call — show progress and use a 40s timeout
+  // (the generic apiPost 10s cutoff was aborting slow lookups → blank result).
+  resultEl.style.display = 'block';
+  contentEl.innerHTML = '<div style="padding:16px;color:var(--text3);font-size:11px">Building dossier…</div>';
+  let result = null;
+  try {
+    const r = await fetch('/api/copilot/research', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mint }),
+      signal: AbortSignal.timeout(40000),
+    });
+    result = await r.json();
+  } catch {
+    contentEl.innerHTML = '<div style="padding:16px;color:var(--red);font-size:11px">Research timed out. Try again, or the token may have very sparse data.</div>';
+    return;
+  }
+  if (!result) { contentEl.innerHTML = '<div style="padding:16px;color:var(--red);font-size:11px">No response.</div>'; return; }
   if (result.error) {
+    contentEl.innerHTML = '';
     const p = document.createElement('p');
     p.style.color = 'var(--red)';
     p.textContent = result.error;
     contentEl.appendChild(p);
-    resultEl.style.display = 'block';
     return;
   }
   _lastDossier = result;
   contentEl.innerHTML = renderDossier(result);
-  resultEl.style.display = 'block';
 }
 
 // ── Dossier renderer ────────────────────────────────────────────────────────
