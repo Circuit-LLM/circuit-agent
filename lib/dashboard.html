@@ -274,6 +274,55 @@ body.sb-collapsed .sb-foot{display:none}
 .cfg-card-icon{font-size:16px;line-height:1}
 .cfg-card-label{flex:1}
 .cfg-card-badge{font-family:var(--font-ui);font-size:8px;padding:1px 4px;border:1px solid var(--green2);color:var(--green);letter-spacing:.08em;border-radius:100px}
+
+/* ── Token dossier — terminal readout ── */
+.dz{font-family:var(--font);font-size:11px;color:var(--text)}
+.dz-hero{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.dz-idwrap{display:flex;gap:10px;align-items:center;min-width:0}
+.dz-logo{width:38px;height:38px;border-radius:9px;border:1px solid var(--border);object-fit:cover;flex-shrink:0;background:var(--bg2)}
+.dz-sym{font-family:var(--font-ui);font-size:17px;font-weight:800;color:var(--head);letter-spacing:.01em;text-decoration:none}
+.dz-name{color:var(--text3);font-size:11px;margin-left:6px}
+.dz-meta{font-family:var(--font-ui);font-size:9px;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-top:2px}
+.dz-acts{display:flex;gap:6px;flex-shrink:0}
+.dz-btn{font-family:var(--font-ui);font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:4px 9px;cursor:pointer;background:transparent;border:1px solid var(--border);color:var(--text3);border-radius:3px}
+.dz-btn:hover{border-color:var(--head);color:var(--head)}
+.dz-price{display:flex;align-items:baseline;gap:10px;margin-top:13px;flex-wrap:wrap}
+.dz-price-v{font-size:23px;font-weight:700;color:var(--text);letter-spacing:-.01em}
+.dz-chg{font-family:var(--font-ui);font-size:12px;font-weight:700}
+.dz-verdict{margin-left:auto;font-family:var(--font-ui);font-size:10px;font-weight:800;letter-spacing:.1em;padding:4px 11px;border:1px solid;border-radius:100px;text-transform:uppercase}
+.dz-links{display:flex;gap:6px;margin-top:11px;flex-wrap:wrap}
+.dz-link{font-family:var(--font-ui);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--text2);text-decoration:none;padding:3px 9px;border:1px solid var(--border);border-radius:100px}
+.dz-link:hover{border-color:var(--head);color:var(--head)}
+.dz-tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border2);border:1px solid var(--border2);border-radius:5px;overflow:hidden;margin-top:14px}
+.dz-tile{background:var(--bg1);padding:9px 10px}
+.dz-tile-k{font-family:var(--font-ui);font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:var(--text3)}
+.dz-tile-v{font-size:14px;font-weight:700;color:var(--text);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dz-sec{margin-top:16px}
+.dz-sec-h{font-family:var(--font-ui);font-size:9px;font-weight:700;letter-spacing:.17em;text-transform:uppercase;color:var(--head);margin-bottom:7px;display:flex;align-items:center;gap:7px}
+.dz-sec-h::after{content:'';flex:1;height:1px;background:var(--border)}
+.dz-row{display:flex;justify-content:space-between;gap:12px;padding:2.5px 0;line-height:1.5}
+.dz-row .k{color:var(--text3)}
+.dz-row .v{text-align:right}
+.dz-mom{display:flex;gap:6px;margin-bottom:9px}
+.dz-mchip{flex:1;text-align:center;padding:6px 4px;background:var(--bg2);border:1px solid var(--border);border-radius:4px}
+.dz-mchip .t{font-family:var(--font-ui);font-size:8px;letter-spacing:.1em;color:var(--text3);text-transform:uppercase}
+.dz-mchip .n{font-size:12px;font-weight:700;margin-top:2px}
+.dz-flow{height:7px;border-radius:4px;overflow:hidden;display:flex;background:var(--red2);margin:3px 0}
+.dz-flow-b{background:var(--green);height:100%}
+.dz-hrow{display:flex;align-items:center;gap:8px;padding:3px 0}
+.dz-hrank{color:var(--text3);width:20px;font-size:10px}
+.dz-hwho{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dz-hwho a{color:var(--text2);text-decoration:none}
+.dz-hwho a:hover{color:var(--head)}
+.dz-hamt{color:var(--text3);font-size:10px;width:52px;text-align:right}
+.dz-hpct{width:44px;text-align:right;font-weight:600}
+.dz-bar{height:2px;background:var(--border2);border-radius:2px;margin:0 0 3px 28px}
+.dz-bar-f{height:100%;border-radius:2px}
+.dz-tag{font-family:var(--font-ui);font-size:8px;padding:0 4px;margin-left:4px;border:1px solid;border-radius:100px;vertical-align:middle}
+.dz-note{font-size:10px;color:var(--text3);font-style:italic;margin-top:5px;line-height:1.5}
+.dz-flag{padding:2px 0;font-size:10px;display:flex;gap:6px}
+.dz-foot{margin-top:15px;padding-top:9px;border-top:1px solid var(--border);font-family:var(--font-ui);font-size:8px;letter-spacing:.06em;color:var(--text3);text-transform:uppercase;display:flex;justify-content:space-between}
+@media(max-width:520px){.dz-tiles{grid-template-columns:repeat(2,1fr)}}
 .cfg-card-purpose{font-family:var(--font);font-size:11px;color:var(--text3);padding:8px 12px 4px 12px;font-style:italic}
 .cfg-save-bar{position:fixed;bottom:0;left:0;right:0;background:linear-gradient(180deg,#14110a,var(--bg1));border-top:1px solid var(--c4);padding:11px 22px;display:none;align-items:center;gap:12px;z-index:300;box-shadow:0 -12px 40px -20px #000}
 .cfg-save-bar.visible{display:flex}
@@ -1540,6 +1589,14 @@ function dossierToText(r) {
     const more = count - (lq.markets||[]).length;
     if (more > 0) L.push(`  + ${more} more pool${more>1?'s':''}`);
   }
+  if (r.market) {
+    const m = r.market;
+    L.push('', 'MOMENTUM');
+    const ch = (v) => v == null ? '—' : (v > 0 ? '+' : '') + Number(v).toFixed(1) + '%';
+    L.push(`  1h ${ch(m.change1h)}  6h ${ch(m.change6h)}  24h ${ch(m.change24h)}`);
+    if (m.volume24h != null) L.push(`  Volume 24h: ${_dossUsd(m.volume24h)}`);
+    if (m.buys24h != null || m.sells24h != null) L.push(`  Buys/Sells 24h: ${m.buys24h ?? 0} / ${m.sells24h ?? 0}`);
+  }
   if (r.holders) {
     const h = r.holders;
     L.push('', 'HOLDERS');
@@ -1564,8 +1621,10 @@ function dossierToText(r) {
   if (r.swarm) L.push('', 'SWARM', `  Consensus: ${r.swarm.consensus || r.swarm.direction || 'neutral'} (${r.swarm.agents ?? r.swarm.count ?? 0} agents)`);
   if (r.socials) {
     L.push('', 'LINKS');
-    if (r.socials.website) L.push(`  Website: ${r.socials.website}`);
-    if (r.socials.twitter) L.push(`  Twitter: ${r.socials.twitter}`);
+    if (r.socials.website)  L.push(`  Website: ${r.socials.website}`);
+    if (r.socials.twitter)  L.push(`  X: ${r.socials.twitter}`);
+    if (r.socials.telegram) L.push(`  Telegram: ${r.socials.telegram}`);
+    if (r.socials.discord)  L.push(`  Discord: ${r.socials.discord}`);
   }
   L.push('', `Solscan: https://solscan.io/token/${r.mint}`, r._cost || 'free');
   return L.join('\n');
@@ -1630,78 +1689,95 @@ function _dossSection(title, innerHtml) {
     <div style="font-size:11px;line-height:1.65">${innerHtml}</div></div>`;
 }
 
+function _dossChg(n) {
+  if (n == null || isNaN(n)) return { txt: '—', col: 'var(--text3)' };
+  const v = Number(n);
+  return { txt: (v > 0 ? '+' : '') + v.toFixed(1) + '%', col: v > 0 ? 'var(--green)' : v < 0 ? 'var(--red)' : 'var(--text3)' };
+}
+function _dzLink(url, label) {
+  const u = _dossSafeUrl(url);
+  return u ? `<a class="dz-link" href="${_esc(u)}" target="_blank" rel="noopener noreferrer">${label}</a>` : '';
+}
 function renderDossier(r) {
-  const t = r.token || {};
-  let html = '';
+  const t = r.token || {}, m = r.market || {}, s = r.security || {}, h = r.holders, l = r.liquidity;
+  let html = '<div class="dz">';
 
-  // Header — symbol (→Solscan) · name · badges · copy/download actions
-  const badges = [];
-  if (t.isToken2022) badges.push('<span class="badge conf-thin">TOKEN-2022</span>');
-  if (t.launchpad)   badges.push(`<span class="badge conf-thin">${_esc(t.launchpad)}</span>`);
-  const age = _dossAge(t.ageHours);
-  if (age) badges.push(`<span class="badge conf-thin">${age} old</span>`);
-  const btn = 'font-size:10px;padding:3px 9px;cursor:pointer;background:var(--bg2);border:1px solid var(--border);color:var(--text2);border-radius:3px;font-family:var(--font-ui)';
-  html += `<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
-      <div>
-        <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
-          <a href="${_solscan(r.mint,'token')}" target="_blank" rel="noopener noreferrer" style="font-size:16px;font-weight:700;color:var(--head);text-decoration:none">${_esc(t.symbol || '?')}</a>
-          <span style="color:var(--text3);font-size:12px">${_esc(t.name || '')}</span>
-        </div>
-        <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:5px">${badges.join('')}</div>
+  // ── Hero: logo · symbol · name · meta · actions ──
+  const logo = t.logo ? `<img class="dz-logo" src="${_esc(t.logo)}" alt="" onerror="this.style.display='none'">` : '';
+  const meta = [t.isToken2022 ? 'Token-2022' : null, t.launchpad, _dossAge(t.ageHours) ? _dossAge(t.ageHours) + ' old' : null].filter(Boolean).join(' · ');
+  html += `<div class="dz-hero">
+    <div class="dz-idwrap">${logo}
+      <div style="min-width:0">
+        <div><a class="dz-sym" href="${_solscan(r.mint,'token')}" target="_blank" rel="noopener noreferrer">${_esc(t.symbol || '?')}</a><span class="dz-name">${_esc(t.name || '')}</span></div>
+        ${meta ? `<div class="dz-meta">${_esc(meta)}</div>` : ''}
       </div>
-      <div style="display:flex;gap:6px;flex-shrink:0">
-        <button id="doss-copy" onclick="copyDossier()" style="${btn}">copy</button>
-        <button onclick="downloadDossier()" style="${btn}">download</button>
-      </div>
-    </div>`;
+    </div>
+    <div class="dz-acts">
+      <button id="doss-copy" class="dz-btn" onclick="copyDossier()">copy</button>
+      <button class="dz-btn" onclick="downloadDossier()">download</button>
+    </div>
+  </div>`;
 
   if (r.blacklisted) {
-    html += `<div style="margin-top:10px;padding:7px 10px;background:rgba(255,60,60,.1);border:1px solid var(--red);border-radius:3px;color:var(--red);font-size:11px">
-      ⚠ SWARM BLACKLISTED — ${_esc(r.blacklisted.reason || 'flagged')}</div>`;
+    html += `<div style="margin-top:11px;padding:7px 10px;background:var(--red2);border:1px solid var(--red);border-radius:4px;color:var(--red);font-size:11px;font-weight:600">SWARM BLACKLISTED — ${_esc(r.blacklisted.reason || 'flagged')}</div>`;
   }
 
-  // Price + market cap
-  if (r.price) {
-    let rows = _dossRow('Price', `<strong>${_dossUsd(r.price.priceUsd)}</strong>`);
-    if (r.price.marketCap != null) rows += _dossRow('Market cap', _dossUsd(r.price.marketCap));
-    if (t.supply != null) rows += _dossRow('Supply', Number(t.supply).toLocaleString(undefined, {maximumFractionDigits:0}));
-    rows += _dossRow('Source', `<span style="color:var(--text3)">${_esc(r.price.source || '—')}</span>`);
-    html += _dossSection('Price', rows);
+  // ── Price ticker + verdict ──
+  const c24 = _dossChg(m.change24h);
+  const vcol = _dossVerdictColor(s.verdict);
+  html += `<div class="dz-price">
+    <span class="dz-price-v">${_dossUsd(r.price?.priceUsd)}</span>
+    <span class="dz-chg" style="color:${c24.col}">${c24.txt} <span style="color:var(--text3);font-weight:400">24h</span></span>
+    ${s.verdict ? `<span class="dz-verdict" style="color:${vcol};border-color:${vcol}">${_esc(s.verdict)}</span>` : ''}
+  </div>`;
+
+  // ── Social / chart links ──
+  const links = [];
+  if (r.socials?.website)  links.push(_dzLink(r.socials.website, 'Website'));
+  if (r.socials?.twitter)  links.push(_dzLink(r.socials.twitter, 'X'));
+  if (r.socials?.telegram) links.push(_dzLink(r.socials.telegram, 'Telegram'));
+  if (r.socials?.discord)  links.push(_dzLink(r.socials.discord, 'Discord'));
+  if (m.pairUrl)           links.push(_dzLink(m.pairUrl, 'Chart'));
+  const linksHtml = links.filter(Boolean).join('');
+  if (linksHtml) html += `<div class="dz-links">${linksHtml}</div>`;
+
+  // ── Stat tiles ──
+  const tile = (k, v) => `<div class="dz-tile"><div class="dz-tile-k">${k}</div><div class="dz-tile-v">${v}</div></div>`;
+  html += `<div class="dz-tiles">
+    ${tile('Mkt Cap', _dossUsd(r.price?.marketCap ?? m.fdv))}
+    ${tile('Liquidity', l ? _dossUsd(l.totalUsd) : '—')}
+    ${tile('Vol 24h', m.volume24h != null ? _dossUsd(m.volume24h) : '—')}
+    ${tile('Holders', h && h.total != null ? Number(h.total).toLocaleString() : '—')}
+  </div>`;
+
+  // ── Momentum + buy/sell flow ──
+  if (m.change1h != null || m.change6h != null || m.change24h != null || m.buys24h != null) {
+    let inner = '';
+    if (m.change1h != null || m.change6h != null || m.change24h != null) {
+      const a = _dossChg(m.change1h), b = _dossChg(m.change6h), c = _dossChg(m.change24h);
+      inner += `<div class="dz-mom">
+        <div class="dz-mchip"><div class="t">1H</div><div class="n" style="color:${a.col}">${a.txt}</div></div>
+        <div class="dz-mchip"><div class="t">6H</div><div class="n" style="color:${b.col}">${b.txt}</div></div>
+        <div class="dz-mchip"><div class="t">24H</div><div class="n" style="color:${c.col}">${c.txt}</div></div>
+      </div>`;
+    }
+    if (m.buys24h != null || m.sells24h != null) {
+      const b = m.buys24h || 0, se = m.sells24h || 0, tot = b + se || 1;
+      inner += `<div class="dz-row"><span class="k">Buys / Sells 24h</span><span class="v"><span style="color:var(--green)">${b.toLocaleString()}</span> / <span style="color:var(--red)">${se.toLocaleString()}</span></span></div>
+        <div class="dz-flow"><div class="dz-flow-b" style="width:${(b / tot * 100).toFixed(1)}%"></div></div>`;
+    }
+    html += `<div class="dz-sec"><div class="dz-sec-h">Momentum</div>${inner}</div>`;
   }
 
-  // Liquidity + market breakdown (top pools → Solscan, with total pool count)
-  if (r.liquidity) {
-    const lq = r.liquidity;
-    const shown = (lq.markets || []).length;
-    const count = lq.marketCount ?? shown;
-    let rows = _dossRow('Total liquidity', `<strong>${_dossUsd(lq.totalUsd)}</strong>`);
-    if (lq.stableUsd != null) rows += _dossRow('Stable side', _dossUsd(lq.stableUsd));
-    if (count) rows += _dossRow('Pools', `${count}`);
-    (lq.markets || []).forEach(m => {
-      const lock = m.lpLockedPct != null ? ` <span style="color:var(--text3)">(${Math.round(m.lpLockedPct)}% lock)</span>` : '';
-      const name = m.pubkey
-        ? `<a href="${_solscan(m.pubkey,'account')}" target="_blank" rel="noopener noreferrer" style="color:var(--text2);text-decoration:none">${_esc(m.dex)}</a>`
-        : _esc(m.dex);
-      rows += _dossRow(`&nbsp;&nbsp;${name}`, _dossUsd(m.liquidityUsd) + lock);
-    });
-    const more = count - shown;
-    if (more > 0) rows += `<div style="color:var(--text3);font-size:10px;padding:2px 0 0 0">+${more} more pool${more>1?'s':''}</div>`;
-    html += _dossSection('Liquidity', rows);
-  }
-
-  // Holders — honest concentration, infra/program-labeled, top-10 table with links
-  if (r.holders) {
-    const h = r.holders;
-    const holdersLink = `<a href="${_solscan(r.mint,'token')}#holders" target="_blank" rel="noopener noreferrer" style="color:var(--amber);text-decoration:none">view all →</a>`;
+  // ── Holders ──
+  if (h) {
+    const viewAll = `<a href="${_solscan(r.mint,'token')}#holders" target="_blank" rel="noopener noreferrer" style="color:var(--head);text-decoration:none">view all →</a>`;
     let rows = '';
-    if (h.total != null) rows += _dossRow('Total holders', `<strong>${Number(h.total).toLocaleString()}</strong> <span style="color:var(--text3);font-size:10px">${_esc(h.totalSource||'')}</span> · ${holdersLink}`);
-    else                 rows += _dossRow('Total holders', `<span style="color:var(--text3)">count on</span> ${holdersLink}`);
-    if (h.topHolderPct != null) rows += _dossRow('Top wallet', h.topHolderPct.toFixed(1) + '%');
-    if (h.top5Pct != null)      rows += _dossRow('Top 5 wallets', h.top5Pct.toFixed(1) + '%');
-    if (h.creatorPct != null)   rows += _dossRow('Creator holds', h.creatorPct.toFixed(2) + '%');
-    if (h.insiders)             rows += _dossRow('Insider wallets', `<span style="color:var(--amber)">${h.insiders}</span>`);
-
-    // top-10 table: rank · who(+tag) · amount · pct(bar)
+    if (h.total != null) rows += `<div class="dz-row"><span class="k">Total holders</span><span class="v"><strong>${Number(h.total).toLocaleString()}</strong> <span style="color:var(--text3);font-size:9px">${_esc(h.totalSource || '')}</span> · ${viewAll}</span></div>`;
+    else rows += `<div class="dz-row"><span class="k">Total holders</span><span class="v">${viewAll}</span></div>`;
+    if (h.topHolderPct != null) rows += `<div class="dz-row"><span class="k">Top wallet</span><span class="v">${h.topHolderPct.toFixed(1)}%</span></div>`;
+    if (h.top5Pct != null)      rows += `<div class="dz-row"><span class="k">Top 5 wallets</span><span class="v">${h.top5Pct.toFixed(1)}%</span></div>`;
+    if (h.creatorPct != null)   rows += `<div class="dz-row"><span class="k">Creator holds</span><span class="v">${h.creatorPct.toFixed(2)}%</span></div>`;
     let infraSeen = false;
     if (Array.isArray(h.top) && h.top.length) {
       rows += '<div style="margin-top:7px;padding-top:6px;border-top:1px solid var(--border2)">';
@@ -1710,69 +1786,69 @@ function renderDossier(r) {
         if (x.infra) infraSeen = true;
         const who = x.infra
           ? `<span style="color:var(--text3)">${_esc(x.infra)}</span>`
-          : `<a href="${_solscan(x.owner,'account')}" target="_blank" rel="noopener noreferrer" style="font-family:var(--font);color:var(--text2);text-decoration:none">${_esc((x.owner||'').slice(0,4))}…${_esc((x.owner||'').slice(-4))}</a>`;
-        const barW = Math.min(100, (x.pct || 0) * 3);   // visual scale
-        rows += `<div style="display:flex;align-items:center;gap:8px;padding:3px 0">
-            <span style="color:var(--text3);width:20px;font-size:10px">#${x.rank}</span>
-            <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${who}
-              <span class="badge ${tag.cls}" style="font-size:8px;padding:0 4px;margin-left:3px">${tag.text}</span></span>
-            <span style="color:var(--text3);font-size:10px;width:52px;text-align:right">${_dossAmt(x.amount)}</span>
-            <span style="width:44px;text-align:right;font-weight:600">${(x.pct||0).toFixed(1)}%</span>
+          : `<a href="${_solscan(x.owner,'account')}" target="_blank" rel="noopener noreferrer">${_esc((x.owner || '').slice(0,4))}…${_esc((x.owner || '').slice(-4))}</a>`;
+        const barW = Math.min(100, (x.pct || 0) * 3);
+        rows += `<div class="dz-hrow">
+            <span class="dz-hrank">#${x.rank}</span>
+            <span class="dz-hwho">${who}<span class="dz-tag ${tag.cls}">${tag.text}</span></span>
+            <span class="dz-hamt">${_dossAmt(x.amount)}</span>
+            <span class="dz-hpct">${(x.pct || 0).toFixed(1)}%</span>
           </div>
-          <div style="height:2px;background:var(--border2);border-radius:2px;margin:0 0 2px 28px"><div style="height:100%;width:${barW}%;background:${x.infra?'var(--text3)':'var(--amber)'};border-radius:2px"></div></div>`;
+          <div class="dz-bar"><div class="dz-bar-f" style="width:${barW}%;background:${x.infra ? 'var(--text3)' : 'var(--amber)'}"></div></div>`;
       });
       rows += '</div>';
     }
-    html += _dossSection('Holders', rows);
-    if (infraSeen) {
-      html += `<div style="font-size:10px;color:var(--text3);font-style:italic;margin-top:3px">Pools, lockers &amp; program vaults are labeled and excluded from wallet concentration. Holder totals vary by provider (${_esc(h.totalSource||'')}); Solscan may differ.</div>`;
-    }
+    html += `<div class="dz-sec"><div class="dz-sec-h">Holders</div>${rows}</div>`;
+    if (infraSeen) html += `<div class="dz-note">Pools, lockers &amp; program vaults are labeled and excluded from wallet concentration. Count is ${_esc(h.totalSource || 'approximate')}.</div>`;
   }
 
-  // Security
+  // ── Security ──
   if (r.security) {
-    const s = r.security;
-    let rows = _dossRow('Verdict', `<strong style="color:${_dossVerdictColor(s.verdict)}">${_esc(s.verdict)}</strong>`);
-    if (s.mintRenounced != null)   rows += _dossRow('Mint authority', s.mintRenounced ? '<span style="color:var(--green)">renounced ✓</span>' : '<span style="color:var(--red)">active ✗</span>');
-    if (s.freezeRenounced != null) rows += _dossRow('Freeze authority', s.freezeRenounced ? '<span style="color:var(--green)">renounced ✓</span>' : '<span style="color:var(--red)">active ✗</span>');
-    if (s.immutable != null)       rows += _dossRow('Metadata', s.immutable ? '<span style="color:var(--green)">immutable ✓</span>' : '<span style="color:var(--amber)">mutable ⚠</span>');
-    if (s.transferFeePct != null)  rows += _dossRow('Transfer fee', s.transferFeePct > 0 ? `<span style="color:var(--amber)">${s.transferFeePct}%</span>` : '0%');
-    // specific flags
+    const chk = (ok) => ok ? '<span style="color:var(--green)">renounced ✓</span>' : '<span style="color:var(--red)">active ✗</span>';
+    let rows = '';
+    if (s.mintRenounced != null)   rows += `<div class="dz-row"><span class="k">Mint authority</span><span class="v">${chk(s.mintRenounced)}</span></div>`;
+    if (s.freezeRenounced != null) rows += `<div class="dz-row"><span class="k">Freeze authority</span><span class="v">${chk(s.freezeRenounced)}</span></div>`;
+    if (s.immutable != null)       rows += `<div class="dz-row"><span class="k">Metadata</span><span class="v">${s.immutable ? '<span style="color:var(--green)">immutable ✓</span>' : '<span style="color:var(--amber)">mutable ⚠</span>'}</span></div>`;
+    if (s.transferFeePct != null)  rows += `<div class="dz-row"><span class="k">Transfer fee</span><span class="v">${s.transferFeePct > 0 ? `<span style="color:var(--amber)">${s.transferFeePct}%</span>` : '0%'}</span></div>`;
     (s.flags || []).forEach(f => {
       const col = f.severity === 'HIGH' ? 'var(--red)' : f.severity === 'INFO' ? 'var(--text3)' : 'var(--amber)';
-      rows += `<div style="color:${col};padding:2px 0;font-size:10px">• ${_esc(f.msg || f.flag)}</div>`;
+      rows += `<div class="dz-flag" style="color:${col}"><span>•</span><span>${_esc(f.msg || f.flag)}</span></div>`;
     });
-    html += _dossSection('Security', rows);
+    const vc = _dossVerdictColor(s.verdict);
+    html += `<div class="dz-sec"><div class="dz-sec-h">Security <span style="color:${vc};font-weight:800">${_esc(s.verdict || '')}</span></div>${rows}</div>`;
   }
 
-  // Swarm
+  // ── Liquidity pools ──
+  if (l) {
+    const shown = (l.markets || []).length, count = l.marketCount ?? shown;
+    let rows = `<div class="dz-row"><span class="k">Total</span><span class="v"><strong>${_dossUsd(l.totalUsd)}</strong>${count ? ` <span style="color:var(--text3);font-size:9px">across ${count} pool${count > 1 ? 's' : ''}</span>` : ''}</span></div>`;
+    (l.markets || []).forEach(mk => {
+      const lock = mk.lpLockedPct != null ? ` <span style="color:var(--text3);font-size:9px">${Math.round(mk.lpLockedPct)}% lock</span>` : '';
+      const name = mk.pubkey
+        ? `<a href="${_solscan(mk.pubkey,'account')}" target="_blank" rel="noopener noreferrer" style="color:var(--text2);text-decoration:none">${_esc(mk.dex)}</a>`
+        : _esc(mk.dex);
+      rows += `<div class="dz-row"><span class="k">${name}</span><span class="v">${_dossUsd(mk.liquidityUsd)}${lock}</span></div>`;
+    });
+    const more = count - shown;
+    if (more > 0) rows += `<div class="dz-note" style="font-style:normal">+${more} more pool${more > 1 ? 's' : ''}</div>`;
+    html += `<div class="dz-sec"><div class="dz-sec-h">Liquidity</div>${rows}</div>`;
+  }
+
+  // ── Swarm ──
   if (r.swarm) {
     const c = r.swarm.consensus || r.swarm.direction || 'neutral';
     const n = r.swarm.agents ?? r.swarm.count ?? 0;
-    html += _dossSection('Swarm', _dossRow('Consensus', `${_esc(c)} <span style="color:var(--text3)">(${n} agent${n===1?'':'s'})</span>`));
+    html += `<div class="dz-sec"><div class="dz-sec-h">Swarm</div><div class="dz-row"><span class="k">Consensus</span><span class="v">${_esc(c)} <span style="color:var(--text3)">(${n} agent${n === 1 ? '' : 's'})</span></span></div></div>`;
   }
 
-  // Socials
-  if (r.socials) {
-    const s = r.socials;
-    let rows = '';
-    if (s.website) {
-      const url = _dossSafeUrl(s.website);
-      const txt = _esc(s.website.replace(/^https?:\/\//,'').slice(0,32));
-      rows += _dossRow('Website', url
-        ? `<a href="${_esc(url)}" target="_blank" rel="noopener noreferrer" style="color:var(--amber)">${txt}</a>` : txt);
-    }
-    if (s.twitter) {
-      const url = _dossSafeUrl(s.twitter);
-      const txt = _esc(s.twitter.replace(/^https?:\/\/(www\.)?(twitter|x)\.com\//,'@').slice(0,32));
-      rows += _dossRow('Twitter', url
-        ? `<a href="${_esc(url)}" target="_blank" rel="noopener noreferrer" style="color:var(--amber)">${txt}</a>` : txt);
-    }
-    if (s.description) rows += `<div style="color:var(--text3);font-size:10px;margin-top:4px;line-height:1.5">${_esc(s.description.slice(0,240))}</div>`;
-    if (rows) html += _dossSection('Links', rows);
+  // ── Description ──
+  if (r.socials?.description) {
+    html += `<div class="dz-sec"><div class="dz-sec-h">About</div><div style="color:var(--text2);font-size:11px;line-height:1.55">${_esc(r.socials.description.slice(0, 280))}</div></div>`;
   }
 
-  html += `<div style="margin-top:12px;font-size:9px;color:var(--text3);letter-spacing:.05em">${_esc(r._cost || 'free')} · <span style="font-family:monospace">${_esc((r.mint||'').slice(0,8))}…</span></div>`;
+  // ── Footer ──
+  html += `<div class="dz-foot"><span>${_esc(r._cost || 'free')}</span><span>${_esc((r.mint || '').slice(0,4))}…${_esc((r.mint || '').slice(-4))}</span></div>`;
+  html += '</div>';
   return html;
 }
 
