@@ -1533,9 +1533,12 @@ function dossierToText(r) {
     L.push(`  Source: ${r.price.source || '—'}`);
   }
   if (r.liquidity) {
+    const lq = r.liquidity, count = lq.marketCount ?? (lq.markets||[]).length;
     L.push('', 'LIQUIDITY');
-    L.push(`  Total: ${_dossUsd(r.liquidity.totalUsd)}`);
-    (r.liquidity.markets || []).forEach(m => L.push(`  - ${m.dex}: ${_dossUsd(m.liquidityUsd)}`));
+    L.push(`  Total: ${_dossUsd(lq.totalUsd)}${count ? `  (${count} pool${count>1?'s':''})` : ''}`);
+    (lq.markets || []).forEach(m => L.push(`  - ${m.dex}: ${_dossUsd(m.liquidityUsd)}`));
+    const more = count - (lq.markets||[]).length;
+    if (more > 0) L.push(`  + ${more} more pool${more>1?'s':''}`);
   }
   if (r.holders) {
     const h = r.holders;
@@ -1666,14 +1669,23 @@ function renderDossier(r) {
     html += _dossSection('Price', rows);
   }
 
-  // Liquidity + market breakdown (each pool → Solscan)
+  // Liquidity + market breakdown (top pools → Solscan, with total pool count)
   if (r.liquidity) {
-    let rows = _dossRow('Total liquidity', `<strong>${_dossUsd(r.liquidity.totalUsd)}</strong>`);
-    if (r.liquidity.stableUsd != null) rows += _dossRow('Stable side', _dossUsd(r.liquidity.stableUsd));
-    (r.liquidity.markets || []).forEach(m => {
-      const lock = m.lpLockedPct != null ? ` <span style="color:var(--text3)">(${m.lpLockedPct}% locked)</span>` : '';
-      rows += _dossRow(`&nbsp;&nbsp;${_esc(m.dex)}`, _dossUsd(m.liquidityUsd) + lock);
+    const lq = r.liquidity;
+    const shown = (lq.markets || []).length;
+    const count = lq.marketCount ?? shown;
+    let rows = _dossRow('Total liquidity', `<strong>${_dossUsd(lq.totalUsd)}</strong>`);
+    if (lq.stableUsd != null) rows += _dossRow('Stable side', _dossUsd(lq.stableUsd));
+    if (count) rows += _dossRow('Pools', `${count}`);
+    (lq.markets || []).forEach(m => {
+      const lock = m.lpLockedPct != null ? ` <span style="color:var(--text3)">(${Math.round(m.lpLockedPct)}% lock)</span>` : '';
+      const name = m.pubkey
+        ? `<a href="${_solscan(m.pubkey,'account')}" target="_blank" rel="noopener noreferrer" style="color:var(--text2);text-decoration:none">${_esc(m.dex)}</a>`
+        : _esc(m.dex);
+      rows += _dossRow(`&nbsp;&nbsp;${name}`, _dossUsd(m.liquidityUsd) + lock);
     });
+    const more = count - shown;
+    if (more > 0) rows += `<div style="color:var(--text3);font-size:10px;padding:2px 0 0 0">+${more} more pool${more>1?'s':''}</div>`;
     html += _dossSection('Liquidity', rows);
   }
 
@@ -1682,7 +1694,8 @@ function renderDossier(r) {
     const h = r.holders;
     const holdersLink = `<a href="${_solscan(r.mint,'token')}#holders" target="_blank" rel="noopener noreferrer" style="color:var(--amber);text-decoration:none">view all →</a>`;
     let rows = '';
-    if (h.total != null)        rows += _dossRow('Total holders', `<strong>${Number(h.total).toLocaleString()}</strong> <span style="color:var(--text3);font-size:10px">${_esc(h.totalSource||'')}</span> · ${holdersLink}`);
+    if (h.total != null) rows += _dossRow('Total holders', `<strong>${Number(h.total).toLocaleString()}</strong> <span style="color:var(--text3);font-size:10px">${_esc(h.totalSource||'')}</span> · ${holdersLink}`);
+    else                 rows += _dossRow('Total holders', `<span style="color:var(--text3)">count on</span> ${holdersLink}`);
     if (h.topHolderPct != null) rows += _dossRow('Top wallet', h.topHolderPct.toFixed(1) + '%');
     if (h.top5Pct != null)      rows += _dossRow('Top 5 wallets', h.top5Pct.toFixed(1) + '%');
     if (h.creatorPct != null)   rows += _dossRow('Creator holds', h.creatorPct.toFixed(2) + '%');
@@ -1722,7 +1735,7 @@ function renderDossier(r) {
     let rows = _dossRow('Verdict', `<strong style="color:${_dossVerdictColor(s.verdict)}">${_esc(s.verdict)}</strong>`);
     if (s.mintRenounced != null)   rows += _dossRow('Mint authority', s.mintRenounced ? '<span style="color:var(--green)">renounced ✓</span>' : '<span style="color:var(--red)">active ✗</span>');
     if (s.freezeRenounced != null) rows += _dossRow('Freeze authority', s.freezeRenounced ? '<span style="color:var(--green)">renounced ✓</span>' : '<span style="color:var(--red)">active ✗</span>');
-    if (s.immutable != null)       rows += _dossRow('Metadata', s.immutable ? '<span style="color:var(--green)">immutable ✓</span>' : 'mutable');
+    if (s.immutable != null)       rows += _dossRow('Metadata', s.immutable ? '<span style="color:var(--green)">immutable ✓</span>' : '<span style="color:var(--amber)">mutable ⚠</span>');
     if (s.transferFeePct != null)  rows += _dossRow('Transfer fee', s.transferFeePct > 0 ? `<span style="color:var(--amber)">${s.transferFeePct}%</span>` : '0%');
     // specific flags
     (s.flags || []).forEach(f => {
