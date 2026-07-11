@@ -1486,38 +1486,149 @@ async function performResearch() {
     resultEl.style.display = 'block';
     return;
   }
-  // Build dossier display with safe DOM construction
-  const div = document.createElement('div');
-  div.style.cssText = 'font-size:11px;line-height:1.6';
-
-  if (result.price) {
-    const p = document.createElement('p');
-    p.innerHTML = `<strong>Price:</strong> $${parseFloat(result.price.priceUsd ?? result.price.priceSol ?? 0).toFixed(4)} (${_esc(result.price.source)})`;
-    div.appendChild(p);
-  }
-  if (result.token) {
-    const p = document.createElement('p');
-    p.innerHTML = `<strong>Token:</strong> ${_esc(result.token.symbol)} (${_esc(result.token.name)})<br/><strong>Supply:</strong> ${_esc(result.token.supply)}, <strong>Liquidity:</strong> $${parseFloat(result.token.liquidity ?? 0).toFixed(0)}`;
-    div.appendChild(p);
-  }
-  if (result.security) {
-    const p = document.createElement('p');
-    p.innerHTML = `<strong>Security:</strong> ${_esc(result.security.verdict)} • Top holder: ${(parseFloat(result.security.topHolderPct ?? 0) * 100).toFixed(1)}%`;
-    div.appendChild(p);
-  }
-  if (result.swarm) {
-    const p = document.createElement('p');
-    p.innerHTML = `<strong>Swarm Signal:</strong> ${_esc(result.swarm.direction || 'neutral')} (${parseInt(result.swarm.count || 0)} agents)`;
-    div.appendChild(p);
-  }
-  if (result.blacklisted) {
-    const p = document.createElement('p');
-    p.style.color = 'var(--red)';
-    p.innerHTML = `<strong>⚠ FLAGGED:</strong> ${_esc(result.blacklisted.reason)}`;
-    div.appendChild(p);
-  }
-  contentEl.appendChild(div);
+  contentEl.innerHTML = renderDossier(result);
   resultEl.style.display = 'block';
+}
+
+// ── Dossier renderer ────────────────────────────────────────────────────────
+function _dossUsd(n) {
+  if (n == null || isNaN(n)) return '—';
+  n = Number(n);
+  if (n >= 1e9) return '$' + (n / 1e9).toFixed(2) + 'B';
+  if (n >= 1e6) return '$' + (n / 1e6).toFixed(2) + 'M';
+  if (n >= 1e3) return '$' + (n / 1e3).toFixed(1) + 'k';
+  if (n >= 1)   return '$' + n.toFixed(2);
+  if (n === 0)  return '$0';
+  return '$' + n.toPrecision(3);   // sub-dollar prices keep significant figures
+}
+function _dossAge(h) {
+  if (h == null || isNaN(h)) return null;
+  if (h < 1)  return Math.round(h * 60) + 'm';
+  if (h < 48) return h.toFixed(0) + 'h';
+  return (h / 24).toFixed(0) + 'd';
+}
+function _dossVerdictColor(v) {
+  const s = String(v || '').toUpperCase();
+  if (s === 'SAFE') return 'var(--green)';
+  if (s === 'LOW_RISK') return 'var(--green)';
+  if (s === 'CAUTION' || s === 'WARNING') return 'var(--amber)';
+  return 'var(--red)';   // DANGER / RUGGED / unknown
+}
+function _dossRow(label, valueHtml) {
+  return `<div style="display:flex;justify-content:space-between;gap:12px;padding:2px 0">
+    <span style="color:var(--text3)">${label}</span>
+    <span style="text-align:right">${valueHtml}</span></div>`;
+}
+function _dossSection(title, innerHtml) {
+  return `<div style="margin-top:12px">
+    <div style="font-family:var(--font-ui);font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--head);margin-bottom:5px">${title}</div>
+    <div style="font-size:11px;line-height:1.65">${innerHtml}</div></div>`;
+}
+
+function renderDossier(r) {
+  const t = r.token || {};
+  let html = '';
+
+  // Header — symbol · name · badges
+  const badges = [];
+  if (t.isToken2022) badges.push('<span class="badge conf-thin">TOKEN-2022</span>');
+  if (t.launchpad)   badges.push(`<span class="badge conf-thin">${_esc(t.launchpad)}</span>`);
+  const age = _dossAge(t.ageHours);
+  if (age) badges.push(`<span class="badge conf-thin">${age} old</span>`);
+  html += `<div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+      <span style="font-size:16px;font-weight:700;color:var(--head)">${_esc(t.symbol || '?')}</span>
+      <span style="color:var(--text3);font-size:12px">${_esc(t.name || '')}</span>
+    </div>
+    <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:5px">${badges.join('')}</div>`;
+
+  if (r.blacklisted) {
+    html += `<div style="margin-top:10px;padding:7px 10px;background:rgba(255,60,60,.1);border:1px solid var(--red);border-radius:3px;color:var(--red);font-size:11px">
+      ⚠ SWARM BLACKLISTED — ${_esc(r.blacklisted.reason || 'flagged')}</div>`;
+  }
+
+  // Price + market cap
+  if (r.price) {
+    let rows = _dossRow('Price', `<strong>${_dossUsd(r.price.priceUsd)}</strong>`);
+    if (r.price.marketCap != null) rows += _dossRow('Market cap', _dossUsd(r.price.marketCap));
+    if (t.supply != null) rows += _dossRow('Supply', Number(t.supply).toLocaleString(undefined, {maximumFractionDigits:0}));
+    rows += _dossRow('Source', `<span style="color:var(--text3)">${_esc(r.price.source || '—')}</span>`);
+    html += _dossSection('Price', rows);
+  }
+
+  // Liquidity + market breakdown
+  if (r.liquidity) {
+    let rows = _dossRow('Total liquidity', `<strong>${_dossUsd(r.liquidity.totalUsd)}</strong>`);
+    if (r.liquidity.stableUsd != null) rows += _dossRow('Stable side', _dossUsd(r.liquidity.stableUsd));
+    (r.liquidity.markets || []).forEach(m => {
+      const lock = m.lpLockedPct != null ? ` <span style="color:var(--text3)">(${m.lpLockedPct}% locked)</span>` : '';
+      rows += _dossRow(`&nbsp;&nbsp;${_esc(m.dex)}`, _dossUsd(m.liquidityUsd) + lock);
+    });
+    html += _dossSection('Liquidity', rows);
+  }
+
+  // Holders — honest concentration (infra-labeled)
+  if (r.holders) {
+    const h = r.holders;
+    let rows = '';
+    if (h.total != null)        rows += _dossRow('Total holders', `<strong>${Number(h.total).toLocaleString()}</strong>`);
+    if (h.topHolderPct != null) rows += _dossRow('Top wallet', h.topHolderPct.toFixed(1) + '%');
+    if (h.top5Pct != null)      rows += _dossRow('Top 5 wallets', h.top5Pct.toFixed(1) + '%');
+    if (h.creatorPct != null)   rows += _dossRow('Creator holds', h.creatorPct.toFixed(2) + '%');
+    if (h.insiders)             rows += _dossRow('Insider wallets', `<span style="color:var(--amber)">${h.insiders}</span>`);
+    // top holder list with infra labels
+    if (Array.isArray(h.top) && h.top.length) {
+      rows += '<div style="margin-top:5px;padding-top:5px;border-top:1px solid var(--border2)">';
+      h.top.forEach(x => {
+        const label = x.infra
+          ? `<span style="color:var(--text3)">${_esc(x.infra)}</span>`
+          : `<span style="font-family:monospace">${_esc((x.owner||'').slice(0,4))}…${_esc((x.owner||'').slice(-4))}</span>`;
+        const ins = x.insider ? ' <span style="color:var(--amber)">•insider</span>' : '';
+        rows += _dossRow(label + ins, (x.pct||0).toFixed(1) + '%');
+      });
+      rows += '</div>';
+    }
+    html += _dossSection('Holders', rows);
+    // honesty note when top account is infra
+    if (h.top && h.top[0] && h.top[0].infra) {
+      html += `<div style="font-size:10px;color:var(--text3);font-style:italic;margin-top:3px">Largest account is a liquidity pool (${_esc(h.top[0].infra)}), not a wallet — excluded from concentration.</div>`;
+    }
+  }
+
+  // Security
+  if (r.security) {
+    const s = r.security;
+    let rows = _dossRow('Verdict', `<strong style="color:${_dossVerdictColor(s.verdict)}">${_esc(s.verdict)}</strong>`);
+    if (s.mintRenounced != null)   rows += _dossRow('Mint authority', s.mintRenounced ? '<span style="color:var(--green)">renounced ✓</span>' : '<span style="color:var(--red)">active ✗</span>');
+    if (s.freezeRenounced != null) rows += _dossRow('Freeze authority', s.freezeRenounced ? '<span style="color:var(--green)">renounced ✓</span>' : '<span style="color:var(--red)">active ✗</span>');
+    if (s.immutable != null)       rows += _dossRow('Metadata', s.immutable ? '<span style="color:var(--green)">immutable ✓</span>' : 'mutable');
+    if (s.transferFeePct != null)  rows += _dossRow('Transfer fee', s.transferFeePct > 0 ? `<span style="color:var(--amber)">${s.transferFeePct}%</span>` : '0%');
+    // specific flags
+    (s.flags || []).forEach(f => {
+      const col = f.severity === 'HIGH' ? 'var(--red)' : f.severity === 'INFO' ? 'var(--text3)' : 'var(--amber)';
+      rows += `<div style="color:${col};padding:2px 0;font-size:10px">• ${_esc(f.msg || f.flag)}</div>`;
+    });
+    html += _dossSection('Security', rows);
+  }
+
+  // Swarm
+  if (r.swarm) {
+    const c = r.swarm.consensus || r.swarm.direction || 'neutral';
+    const n = r.swarm.agents ?? r.swarm.count ?? 0;
+    html += _dossSection('Swarm', _dossRow('Consensus', `${_esc(c)} <span style="color:var(--text3)">(${n} agent${n===1?'':'s'})</span>`));
+  }
+
+  // Socials
+  if (r.socials) {
+    const s = r.socials;
+    let rows = '';
+    if (s.website) rows += _dossRow('Website', `<a href="${_esc(s.website)}" target="_blank" rel="noopener" style="color:var(--amber)">${_esc(s.website.replace(/^https?:\/\//,'').slice(0,32))}</a>`);
+    if (s.twitter) rows += _dossRow('Twitter', `<a href="${_esc(s.twitter)}" target="_blank" rel="noopener" style="color:var(--amber)">${_esc(s.twitter.replace(/^https?:\/\/(www\.)?(twitter|x)\.com\//,'@').slice(0,32))}</a>`);
+    if (s.description) rows += `<div style="color:var(--text3);font-size:10px;margin-top:4px;line-height:1.5">${_esc(s.description.slice(0,240))}</div>`;
+    if (rows) html += _dossSection('Links', rows);
+  }
+
+  html += `<div style="margin-top:12px;font-size:9px;color:var(--text3);letter-spacing:.05em">${_esc(r._cost || 'free')} · <span style="font-family:monospace">${_esc((r.mint||'').slice(0,8))}…</span></div>`;
+  return html;
 }
 
 // ── POSITIONS ─────────────────────────────────────────────────────────────────
