@@ -1486,11 +1486,104 @@ async function performResearch() {
     resultEl.style.display = 'block';
     return;
   }
+  _lastDossier = result;
   contentEl.innerHTML = renderDossier(result);
   resultEl.style.display = 'block';
 }
 
 // ── Dossier renderer ────────────────────────────────────────────────────────
+let _lastDossier = null;
+
+function _solscan(addr, kind) {
+  return `https://solscan.io/${kind === 'token' ? 'token' : 'account'}/${encodeURIComponent(addr || '')}`;
+}
+// Holder type → { text, cls } badge. cls maps to existing conf-* palette.
+function _dossHolderTag(x) {
+  if (x.insider)                return { text: 'INSIDER', cls: 'conf-stale' };
+  const t = String(x.infraType || '').toUpperCase();
+  if (t === 'AMM')              return { text: 'POOL',     cls: 'conf-thin' };
+  if (t === 'LOCKER')           return { text: 'STAKED/LOCK', cls: 'conf-thin' };
+  if (t === 'CREATOR')          return { text: 'CREATOR',  cls: 'conf-thin' };
+  if (t === 'PROGRAM' || t === 'PROTOCOL') return { text: 'PROGRAM', cls: 'conf-thin' };
+  if (x.infra)                  return { text: 'CONTRACT', cls: 'conf-thin' };
+  return { text: 'WALLET', cls: 'conf-high' };
+}
+function _dossAmt(n) {
+  if (n == null || isNaN(n)) return '—';
+  n = Number(n);
+  if (n >= 1e9) return (n / 1e9).toFixed(2) + 'B';
+  if (n >= 1e6) return (n / 1e6).toFixed(2) + 'M';
+  if (n >= 1e3) return (n / 1e3).toFixed(1) + 'k';
+  return Math.round(n).toLocaleString();
+}
+
+// ── Copy / download ─────────────────────────────────────────────────────────
+function dossierToText(r) {
+  if (!r) return '';
+  const t = r.token || {}, L = [];
+  L.push(`${t.symbol || '?'} — ${t.name || ''}`);
+  L.push(r.mint);
+  if (t.launchpad || t.isToken2022 || t.ageHours != null)
+    L.push([t.isToken2022 ? 'Token-2022' : null, t.launchpad, _dossAge(t.ageHours) ? _dossAge(t.ageHours)+' old' : null].filter(Boolean).join(' · '));
+  if (r.price) {
+    L.push('', 'PRICE');
+    L.push(`  Price: ${_dossUsd(r.price.priceUsd)}`);
+    if (r.price.marketCap != null) L.push(`  Market cap: ${_dossUsd(r.price.marketCap)}`);
+    if (t.supply != null) L.push(`  Supply: ${Number(t.supply).toLocaleString(undefined,{maximumFractionDigits:0})}`);
+    L.push(`  Source: ${r.price.source || '—'}`);
+  }
+  if (r.liquidity) {
+    L.push('', 'LIQUIDITY');
+    L.push(`  Total: ${_dossUsd(r.liquidity.totalUsd)}`);
+    (r.liquidity.markets || []).forEach(m => L.push(`  - ${m.dex}: ${_dossUsd(m.liquidityUsd)}`));
+  }
+  if (r.holders) {
+    const h = r.holders;
+    L.push('', 'HOLDERS');
+    if (h.total != null) L.push(`  Total: ${Number(h.total).toLocaleString()} (${h.totalSource || 'source varies'})`);
+    if (h.topHolderPct != null) L.push(`  Top wallet: ${h.topHolderPct.toFixed(1)}%`);
+    if (h.top5Pct != null) L.push(`  Top 5 wallets: ${h.top5Pct.toFixed(1)}%`);
+    if (h.creatorPct != null) L.push(`  Creator: ${h.creatorPct.toFixed(2)}%`);
+    (h.top || []).forEach(x => {
+      const who = x.infra ? x.infra : x.owner;
+      L.push(`  #${x.rank} ${(x.pct||0).toFixed(1)}%  ${_dossAmt(x.amount)}  ${who}${x.insider?' [insider]':''}`);
+    });
+  }
+  if (r.security) {
+    const s = r.security;
+    L.push('', 'SECURITY');
+    L.push(`  Verdict: ${s.verdict}`);
+    if (s.mintRenounced != null) L.push(`  Mint authority: ${s.mintRenounced ? 'renounced' : 'ACTIVE'}`);
+    if (s.freezeRenounced != null) L.push(`  Freeze authority: ${s.freezeRenounced ? 'renounced' : 'ACTIVE'}`);
+    if (s.transferFeePct != null) L.push(`  Transfer fee: ${s.transferFeePct}%`);
+    (s.flags || []).forEach(f => L.push(`  - ${f.msg || f.flag}`));
+  }
+  if (r.swarm) L.push('', 'SWARM', `  Consensus: ${r.swarm.consensus || r.swarm.direction || 'neutral'} (${r.swarm.agents ?? r.swarm.count ?? 0} agents)`);
+  if (r.socials) {
+    L.push('', 'LINKS');
+    if (r.socials.website) L.push(`  Website: ${r.socials.website}`);
+    if (r.socials.twitter) L.push(`  Twitter: ${r.socials.twitter}`);
+  }
+  L.push('', `Solscan: https://solscan.io/token/${r.mint}`, r._cost || 'free');
+  return L.join('\n');
+}
+function copyDossier() {
+  const txt = dossierToText(_lastDossier);
+  navigator.clipboard.writeText(txt).then(
+    () => { const b = $('doss-copy'); if (b) { const o = b.textContent; b.textContent = 'copied ✓'; setTimeout(() => b.textContent = o, 1400); } },
+    () => alert('Copy failed')
+  );
+}
+function downloadDossier() {
+  if (!_lastDossier) return;
+  const sym = (_lastDossier.token?.symbol || 'token').replace(/[^a-z0-9]/gi, '');
+  const blob = new Blob([JSON.stringify(_lastDossier, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `dossier-${sym}-${_lastDossier.mint.slice(0,6)}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
 function _dossUsd(n) {
   if (n == null || isNaN(n)) return '—';
   n = Number(n);
@@ -1538,17 +1631,26 @@ function renderDossier(r) {
   const t = r.token || {};
   let html = '';
 
-  // Header — symbol · name · badges
+  // Header — symbol (→Solscan) · name · badges · copy/download actions
   const badges = [];
   if (t.isToken2022) badges.push('<span class="badge conf-thin">TOKEN-2022</span>');
   if (t.launchpad)   badges.push(`<span class="badge conf-thin">${_esc(t.launchpad)}</span>`);
   const age = _dossAge(t.ageHours);
   if (age) badges.push(`<span class="badge conf-thin">${age} old</span>`);
-  html += `<div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
-      <span style="font-size:16px;font-weight:700;color:var(--head)">${_esc(t.symbol || '?')}</span>
-      <span style="color:var(--text3);font-size:12px">${_esc(t.name || '')}</span>
-    </div>
-    <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:5px">${badges.join('')}</div>`;
+  const btn = 'font-size:10px;padding:3px 9px;cursor:pointer;background:var(--bg2);border:1px solid var(--border);color:var(--text2);border-radius:3px;font-family:var(--font-ui)';
+  html += `<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+      <div>
+        <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+          <a href="${_solscan(r.mint,'token')}" target="_blank" rel="noopener noreferrer" style="font-size:16px;font-weight:700;color:var(--head);text-decoration:none">${_esc(t.symbol || '?')}</a>
+          <span style="color:var(--text3);font-size:12px">${_esc(t.name || '')}</span>
+        </div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:5px">${badges.join('')}</div>
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0">
+        <button id="doss-copy" onclick="copyDossier()" style="${btn}">copy</button>
+        <button onclick="downloadDossier()" style="${btn}">download</button>
+      </div>
+    </div>`;
 
   if (r.blacklisted) {
     html += `<div style="margin-top:10px;padding:7px 10px;background:rgba(255,60,60,.1);border:1px solid var(--red);border-radius:3px;color:var(--red);font-size:11px">
@@ -1564,7 +1666,7 @@ function renderDossier(r) {
     html += _dossSection('Price', rows);
   }
 
-  // Liquidity + market breakdown
+  // Liquidity + market breakdown (each pool → Solscan)
   if (r.liquidity) {
     let rows = _dossRow('Total liquidity', `<strong>${_dossUsd(r.liquidity.totalUsd)}</strong>`);
     if (r.liquidity.stableUsd != null) rows += _dossRow('Stable side', _dossUsd(r.liquidity.stableUsd));
@@ -1575,31 +1677,42 @@ function renderDossier(r) {
     html += _dossSection('Liquidity', rows);
   }
 
-  // Holders — honest concentration (infra-labeled)
+  // Holders — honest concentration, infra/program-labeled, top-10 table with links
   if (r.holders) {
     const h = r.holders;
+    const holdersLink = `<a href="${_solscan(r.mint,'token')}#holders" target="_blank" rel="noopener noreferrer" style="color:var(--amber);text-decoration:none">view all →</a>`;
     let rows = '';
-    if (h.total != null)        rows += _dossRow('Total holders', `<strong>${Number(h.total).toLocaleString()}</strong>`);
+    if (h.total != null)        rows += _dossRow('Total holders', `<strong>${Number(h.total).toLocaleString()}</strong> <span style="color:var(--text3);font-size:10px">${_esc(h.totalSource||'')}</span> · ${holdersLink}`);
     if (h.topHolderPct != null) rows += _dossRow('Top wallet', h.topHolderPct.toFixed(1) + '%');
     if (h.top5Pct != null)      rows += _dossRow('Top 5 wallets', h.top5Pct.toFixed(1) + '%');
     if (h.creatorPct != null)   rows += _dossRow('Creator holds', h.creatorPct.toFixed(2) + '%');
     if (h.insiders)             rows += _dossRow('Insider wallets', `<span style="color:var(--amber)">${h.insiders}</span>`);
-    // top holder list with infra labels
+
+    // top-10 table: rank · who(+tag) · amount · pct(bar)
+    let infraSeen = false;
     if (Array.isArray(h.top) && h.top.length) {
-      rows += '<div style="margin-top:5px;padding-top:5px;border-top:1px solid var(--border2)">';
+      rows += '<div style="margin-top:7px;padding-top:6px;border-top:1px solid var(--border2)">';
       h.top.forEach(x => {
-        const label = x.infra
+        const tag = _dossHolderTag(x);
+        if (x.infra) infraSeen = true;
+        const who = x.infra
           ? `<span style="color:var(--text3)">${_esc(x.infra)}</span>`
-          : `<span style="font-family:monospace">${_esc((x.owner||'').slice(0,4))}…${_esc((x.owner||'').slice(-4))}</span>`;
-        const ins = x.insider ? ' <span style="color:var(--amber)">•insider</span>' : '';
-        rows += _dossRow(label + ins, (x.pct||0).toFixed(1) + '%');
+          : `<a href="${_solscan(x.owner,'account')}" target="_blank" rel="noopener noreferrer" style="font-family:var(--font);color:var(--text2);text-decoration:none">${_esc((x.owner||'').slice(0,4))}…${_esc((x.owner||'').slice(-4))}</a>`;
+        const barW = Math.min(100, (x.pct || 0) * 3);   // visual scale
+        rows += `<div style="display:flex;align-items:center;gap:8px;padding:3px 0">
+            <span style="color:var(--text3);width:20px;font-size:10px">#${x.rank}</span>
+            <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${who}
+              <span class="badge ${tag.cls}" style="font-size:8px;padding:0 4px;margin-left:3px">${tag.text}</span></span>
+            <span style="color:var(--text3);font-size:10px;width:52px;text-align:right">${_dossAmt(x.amount)}</span>
+            <span style="width:44px;text-align:right;font-weight:600">${(x.pct||0).toFixed(1)}%</span>
+          </div>
+          <div style="height:2px;background:var(--border2);border-radius:2px;margin:0 0 2px 28px"><div style="height:100%;width:${barW}%;background:${x.infra?'var(--text3)':'var(--amber)'};border-radius:2px"></div></div>`;
       });
       rows += '</div>';
     }
     html += _dossSection('Holders', rows);
-    // honesty note when top account is infra
-    if (h.top && h.top[0] && h.top[0].infra) {
-      html += `<div style="font-size:10px;color:var(--text3);font-style:italic;margin-top:3px">Largest account is a liquidity pool (${_esc(h.top[0].infra)}), not a wallet — excluded from concentration.</div>`;
+    if (infraSeen) {
+      html += `<div style="font-size:10px;color:var(--text3);font-style:italic;margin-top:3px">Pools, lockers &amp; program vaults are labeled and excluded from wallet concentration. Holder totals vary by provider (${_esc(h.totalSource||'')}); Solscan may differ.</div>`;
     }
   }
 
