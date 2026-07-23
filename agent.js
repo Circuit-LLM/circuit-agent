@@ -100,7 +100,7 @@ function initModules() {
 
   const paperMode = cfg.strategy?.paperTrading === true;
   if (paperMode) {
-    swap = new PaperSwapExecutor({ initialSolBalance: cfg.strategy?.paperSolBalance ?? 1.0, baseUrl: cfg.api.baseUrl });
+    swap = new PaperSwapExecutor({ initialSolBalance: cfg.strategy?.paperSolBalance ?? 1.0, baseUrl: cfg.api.baseUrl, feeSolPerSide: cfg.strategy?.paperFeeSolPerSide });
     log('info', '📝 PAPER TRADING MODE — no real trades will execute',
       { virtualSol: swap.virtualSolBalance, apiBase: cfg.api.baseUrl });
   } else {
@@ -475,9 +475,14 @@ async function cmdStart() {
   const monitor = require('./lib/monitor');
   monitor.start(cfg, makeCtx(), telegramBot);
 
-  // 8. Autonomous market scanner + auto-buyer (respects session strategy from agent-loop)
-  const autoScanner = require('./lib/auto-scanner');
-  autoScanner.start(cfg, makeCtx(), telegramBot);
+  // 8. Market scanner. Smart-money mode (agent2 experiment) runs the follow-the-money scanner
+  //    instead of the price-pattern auto-scanner; both reuse positions/swap/monitor for exits.
+  if (cfg.strategy?.scorer === 'smartmoney') {
+    require('./lib/smart-money-scanner').start(cfg, makeCtx(), telegramBot);
+  } else {
+    const autoScanner = require('./lib/auto-scanner');
+    autoScanner.start(cfg, makeCtx(), telegramBot);
+  }
 
   // Copilot watches — user-defined price/wallet alerts (deterministic, free endpoints)
   require('./lib/watches').start(cfg, makeCtx(), telegramBot);
