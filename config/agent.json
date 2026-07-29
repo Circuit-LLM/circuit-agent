@@ -228,6 +228,8 @@
     "minSolPause": 0.01,
     "blacklist": [],
     "watch": {},
-    "_note": "NFT buying (Phase 2, self-custody). paperTrading=true => no real buys. watch: {collectionAddr:[targetSolRungs...]} accumulator ladders. Caps: maxBuySol per-buy, maxOpenNfts holdings, dailyBuyLimitSol gross/day, maxHeldSol standing NFT exposure (illiquid). Shares the wallet survival floor."
+    "liveDryRun": false,
+    "priorityMicroLamports": 50000,
+    "_note": "NFT buying (Phase 2, self-custody). paperTrading=true => no real buys. Set paperTrading=false to go LIVE (Tensor buyLegacy, simulate-first). liveDryRun=true is an extra notch: the live executor simulates every buy but never submits. priorityMicroLamports = compute-unit price for the buy tx. watch: {collectionAddr:[targetSolRungs...]} accumulator ladders. Caps: maxBuySol per-buy, maxOpenNfts holdings, dailyBuyLimitSol gross/day, maxHeldSol standing NFT exposure (illiquid). Shares the wallet survival floor."
   }
 }

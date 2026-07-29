@@ -16,6 +16,7 @@
   "dependencies": {
     "@solana/spl-token": "^0.4.14",
     "@solana/web3.js": "^1.98.0",
+    "@tensor-foundation/marketplace": "^1.0.0",
     "bs58": "^6.0.0",
     "grammy": "^1.41.1",
     "node-fetch": "^3.3.2",

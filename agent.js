@@ -65,6 +65,7 @@ const { loadWallet }       = require('./lib/wallet');
 const { SwapExecutor }     = require('./lib/swap');
 const { PaperSwapExecutor } = require('./lib/paper-swap');
 const { PaperNftExecutor }  = require('./lib/paper-nft');
+const { NftBuyExecutor }    = require('./lib/nft-buy');
 const positions             = require('./lib/positions');
 const nftPositions          = require('./lib/nft-positions');
 const profile          = require('./lib/profile');
@@ -123,12 +124,24 @@ function initModules() {
     log('info', 'Agent initialized', { address: wallet.address.slice(0, 8) + '…', apiBase: cfg.api.baseUrl });
   }
 
-  // NFT executor (Phase 2, self-custody). Paper by default; live buying (P2.1) is not wired yet, so
-  // even nft.paperTrading:false stays in paper — a hard safety until the Tensor buy path is validated.
+  // NFT executor (Phase 2, self-custody). Paper by default. Setting nft.paperTrading:false switches to
+  // the live Tensor buyLegacy executor (validated simulate-first: every buy is simulated before signing
+  // and refused if the simulated SOL outflow exceeds the true cost). nft.liveDryRun:true is an extra
+  // notch — the live executor then simulates every buy but never submits, so you can watch it run first.
   if (cfg.nft?.paperTrading === false) {
-    log('warn', 'NFT live buying (P2.1) not yet implemented — staying in NFT paper mode');
+    nftSwap = new NftBuyExecutor({
+      connection:            wallet.connection,
+      keypair:               wallet.keypair,
+      cfg,
+      dryRun:                cfg.nft?.liveDryRun === true,
+      priorityMicroLamports: cfg.nft?.priorityMicroLamports ?? 50_000,
+    });
+    log(cfg.nft?.liveDryRun ? 'warn' : 'warn',
+      `🔴 NFT LIVE BUYING ENABLED${cfg.nft?.liveDryRun ? ' (dry-run: simulates, never submits)' : ' — real SOL will be spent'}`,
+      { wallet: wallet.address.slice(0, 8) + '…' });
+  } else {
+    nftSwap = new PaperNftExecutor({ initialSolBalance: cfg.nft?.paperSolBalance ?? 1.0 });
   }
-  nftSwap = new PaperNftExecutor({ initialSolBalance: cfg.nft?.paperSolBalance ?? 1.0 });
 }
 
 function makeCtx() {

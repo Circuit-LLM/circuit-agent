@@ -126,6 +126,11 @@ The agent CAN now buy — self-custody, through `nft_buy`. Give it a **collectio
 listing) or a specific **mint**, and an optional **`maxSol`** price ceiling. It goes through a hard safety
 gate and, in **paper mode** (`nft.paperTrading`, the default), simulates against a virtual balance.
 
+**Live mode is simulate-first.** With `nft.paperTrading:false` the buy is a real Tensor `buyLegacy` — but
+every buy is *simulated before it's signed*, and it is refused if the simulation fails or if the SOL
+outflow would exceed the true cost (price + Tensor fee + royalty). Handles both regular NFTs and pNFTs.
+`nft.liveDryRun:true` makes the live path simulate every buy but never submit — watch it before spending.
+
 Discipline the tool enforces for you — don't fight it:
 - **Caps:** `maxBuySol` (per-buy), `maxOpenNfts` (holdings), `dailyBuyLimitSol` (gross/day), and
   `maxHeldSol` — the **standing NFT exposure** cap (illiquid capital; the one that stops the wallet
