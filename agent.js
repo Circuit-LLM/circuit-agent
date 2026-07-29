@@ -64,7 +64,9 @@ const { CircuitClient }    = require('./lib/circuit');
 const { loadWallet }       = require('./lib/wallet');
 const { SwapExecutor }     = require('./lib/swap');
 const { PaperSwapExecutor } = require('./lib/paper-swap');
+const { PaperNftExecutor }  = require('./lib/paper-nft');
 const positions             = require('./lib/positions');
+const nftPositions          = require('./lib/nft-positions');
 const profile          = require('./lib/profile');
 const lpOptimizer      = require('./lib/lp-optimizer');
 
@@ -88,6 +90,7 @@ const log = (level, msg, data = {}) => {
 let wallet = null;
 let api    = null;
 let swap   = null;
+let nftSwap = null;
 
 function initModules() {
   wallet = loadWallet(RPC_URL);
@@ -119,10 +122,17 @@ function initModules() {
     });
     log('info', 'Agent initialized', { address: wallet.address.slice(0, 8) + '…', apiBase: cfg.api.baseUrl });
   }
+
+  // NFT executor (Phase 2, self-custody). Paper by default; live buying (P2.1) is not wired yet, so
+  // even nft.paperTrading:false stays in paper — a hard safety until the Tensor buy path is validated.
+  if (cfg.nft?.paperTrading === false) {
+    log('warn', 'NFT live buying (P2.1) not yet implemented — staying in NFT paper mode');
+  }
+  nftSwap = new PaperNftExecutor({ initialSolBalance: cfg.nft?.paperSolBalance ?? 1.0 });
 }
 
 function makeCtx() {
-  return { api, wallet, swap, positions, cfg };
+  return { api, wallet, swap, positions, cfg, nftSwap, nftPositions };
 }
 
 // ── CLI: init — generate wallet + setup + register ────────────────────────────
@@ -486,6 +496,9 @@ async function cmdStart() {
 
   // Copilot watches — user-defined price/wallet alerts (deterministic, free endpoints)
   require('./lib/watches').start(cfg, makeCtx(), telegramBot);
+
+  // NFT floor accumulator (Phase 2, self-custody; paper by default). No-ops until nft.watch is set.
+  require('./lib/nft-accumulator').start(cfg, makeCtx(), telegramBot);
 
   // Daily brief — once-per-day Telegram digest
   if (telegramBot) {

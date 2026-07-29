@@ -120,12 +120,24 @@ For "should I sell holding X," combine `nft_asset` (its collection + is there a 
 - `topBidSol` / `topBids` → the standing collection bids you'd sell into. Depth matters.
 - `listed` → open listings; your liquidity proxy. `cheapest` → the actual buyable listings at floor.
 
-## What this skill can and can't do
+## Buying — `nft_buy` (self-custody, paper-first)
 
-It **reads and reasons** — it surfaces opportunities and tells the user what's real. It does
-**not** execute: buying, selling, or listing an NFT is a separate, custodial capability the agent
-does not have. So the honest output is *"here's a candidate and why it does / doesn't survive the
-checklist,"* never *"I bought it."* If the user wants to act, hand them the vetted facts and say so.
+The agent CAN now buy — self-custody, through `nft_buy`. Give it a **collection** (buys the cheapest
+listing) or a specific **mint**, and an optional **`maxSol`** price ceiling. It goes through a hard safety
+gate and, in **paper mode** (`nft.paperTrading`, the default), simulates against a virtual balance.
+
+Discipline the tool enforces for you — don't fight it:
+- **Caps:** `maxBuySol` (per-buy), `maxOpenNfts` (holdings), `dailyBuyLimitSol` (gross/day), and
+  `maxHeldSol` — the **standing NFT exposure** cap (illiquid capital; the one that stops the wallet
+  becoming a bag of unsellable JPEGs). Plus the shared wallet **survival floor**.
+- **Overpay guard:** `maxSol` is a hard ceiling — a buy is refused/fails if the listing price is above it.
+- **Fail-closed:** un-indexed or blacklisted collections are refused.
+- **Accumulate, don't chase:** to ladder into a collection, use the accumulator (config `nft.watch`), not
+  repeated `nft_buy` calls — a floor that hit your target can keep falling.
+
+**Still no selling/listing** — a later, separate capability. A buy is a *commitment of illiquid capital*:
+only buy what survives the vetting checklist (net spread, liquidity, stale-bid, freshness), prefer paper
+until the user explicitly moves to live, and when you do buy, say what it cost and why.
 
 ## Saying "no"
 
