@@ -140,9 +140,28 @@ Discipline the tool enforces for you — don't fight it:
 - **Accumulate, don't chase:** to ladder into a collection, use the accumulator (config `nft.watch`), not
   repeated `nft_buy` calls — a floor that hit your target can keep falling.
 
-**Still no selling/listing** — a later, separate capability. A buy is a *commitment of illiquid capital*:
-only buy what survives the vetting checklist (net spread, liquidity, stale-bid, freshness), prefer paper
-until the user explicitly moves to live, and when you do buy, say what it cost and why.
+A buy is a *commitment of illiquid capital*: only buy what survives the vetting checklist (net spread,
+liquidity, stale-bid, freshness), prefer paper until the user explicitly moves to live, and when you do
+buy, say what it cost and why.
+
+## Selling — `nft_list`, `nft_delist`, `nft_sell` (self-custody, live only)
+
+The agent can now exit, too. Selling is **live only** (there is no paper sell — it moves a real NFT) and
+every action is **simulate-first**. Two ways out, with very different reliability:
+
+- **List / delist (the dependable exit).** `nft_list` puts an owned NFT up at a price; the NFT stays in
+  the wallet (frozen) while listed, and `nft_delist` cancels and reclaims it. No counterparty needed, no
+  cosigner — this always works for an NFT you hold. Use it for patient exits and to set an ask above floor.
+- **`nft_sell` — sell into a standing bid (the arb exit, often unavailable).** Hits the collection's best
+  standing bid for an instant exit. **Key reality: much of Tensor's bid liquidity is _cosigned_ (Tensor's
+  AMM/margin orders), and a self-custody seller cannot fill a cosigned bid.** When the top bid is cosigned,
+  `nft_sell` reports it as unfillable — that is expected, not a bug. It fills only a non-cosigned, native,
+  public bid. `minSol` floors the proceeds (slippage guard).
+
+This is what makes `nft_arb` actionable: buy the floor, then `nft_sell` into the bid — **but only if that
+bid is actually fillable.** Before treating an arb as real, remember most fat bids are stale or cosigned;
+the honest answer is often "the spread exists but the bid can't be filled." Exits are never blocked by the
+global trading pause — you can always get out of a position you hold.
 
 ## Saying "no"
 

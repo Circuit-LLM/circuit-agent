@@ -66,6 +66,7 @@ const { SwapExecutor }     = require('./lib/swap');
 const { PaperSwapExecutor } = require('./lib/paper-swap');
 const { PaperNftExecutor }  = require('./lib/paper-nft');
 const { NftBuyExecutor }    = require('./lib/nft-buy');
+const { NftSellExecutor }   = require('./lib/nft-sell');
 const positions             = require('./lib/positions');
 const nftPositions          = require('./lib/nft-positions');
 const profile          = require('./lib/profile');
@@ -92,6 +93,7 @@ let wallet = null;
 let api    = null;
 let swap   = null;
 let nftSwap = null;
+let nftSell = null;
 
 function initModules() {
   wallet = loadWallet(RPC_URL);
@@ -136,16 +138,25 @@ function initModules() {
       dryRun:                cfg.nft?.liveDryRun === true,
       priorityMicroLamports: cfg.nft?.priorityMicroLamports ?? 50_000,
     });
-    log(cfg.nft?.liveDryRun ? 'warn' : 'warn',
-      `🔴 NFT LIVE BUYING ENABLED${cfg.nft?.liveDryRun ? ' (dry-run: simulates, never submits)' : ' — real SOL will be spent'}`,
+    // Selling (list / delist / sell-into-bid) is live-only and shares the wallet — simulate-first, and it
+    // honours the same dry-run notch so the whole sell path can be watched before any real submit.
+    nftSell = new NftSellExecutor({
+      connection:            wallet.connection,
+      keypair:               wallet.keypair,
+      dryRun:                cfg.nft?.liveDryRun === true,
+      priorityMicroLamports: cfg.nft?.priorityMicroLamports ?? 50_000,
+    });
+    log('warn',
+      `🔴 NFT LIVE TRADING ENABLED${cfg.nft?.liveDryRun ? ' (dry-run: simulates, never submits)' : ' — real SOL will be spent'}`,
       { wallet: wallet.address.slice(0, 8) + '…' });
   } else {
     nftSwap = new PaperNftExecutor({ initialSolBalance: cfg.nft?.paperSolBalance ?? 1.0 });
+    // nftSell stays null in paper mode — the sell tools report "live only" (selling always moves a real NFT).
   }
 }
 
 function makeCtx() {
-  return { api, wallet, swap, positions, cfg, nftSwap, nftPositions };
+  return { api, wallet, swap, positions, cfg, nftSwap, nftSell, nftPositions };
 }
 
 // ── CLI: init — generate wallet + setup + register ────────────────────────────
