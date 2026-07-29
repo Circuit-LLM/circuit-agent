@@ -47,7 +47,8 @@ patient accumulation**, not momentum-chasing:
 | `nft_bids` | full standing collection-bid depth (highest first) | **check bid depth** before trusting an arb — is it one bid or a wall? |
 | `nft_floors` | all collection floors + listing counts, sortable | **survey** the market / find the most-liquid collections |
 | `nft_asset` | one NFT by mint: listed?, price, collection, floor, top bid, `sellableIntoBid` | inspect a **specific NFT** / "is this listed / what's it worth" |
-| `wallet_nfts` | a wallet's NFTs + floor **mark-to-market** total | value or manage a **portfolio** |
+| `wallet_nfts` | ANY wallet's NFTs + floor **mark-to-market** total | value or manage a **portfolio** |
+| `nft_portfolio` | the AGENT's OWN positions: cost basis, floor MTM, unrealized + realized P&L | review **your own** NFT holdings/performance (has cost basis; `wallet_nfts` does not) |
 | `nft_sales` | recent listing **activity** (fills/delists) at last price + avg/median | gauge how **active/liquid** a collection is (velocity), *not* exact sale prices |
 
 **`nft_sales` is activity, not confirmed sales.** It reports listings that *left the book* (sold **or**
@@ -152,11 +153,13 @@ every action is **simulate-first**. Two ways out, with very different reliabilit
 - **List / delist (the dependable exit).** `nft_list` puts an owned NFT up at a price; the NFT stays in
   the wallet (frozen) while listed, and `nft_delist` cancels and reclaims it. No counterparty needed, no
   cosigner — this always works for an NFT you hold. Use it for patient exits and to set an ask above floor.
-- **`nft_sell` — sell into a standing bid (the arb exit, often unavailable).** Hits the collection's best
-  standing bid for an instant exit. **Key reality: much of Tensor's bid liquidity is _cosigned_ (Tensor's
-  AMM/margin orders), and a self-custody seller cannot fill a cosigned bid.** When the top bid is cosigned,
-  `nft_sell` reports it as unfillable — that is expected, not a bug. It fills only a non-cosigned, native,
-  public bid. `minSol` floors the proceeds (slippage guard).
+- **`nft_sell` — sell into a standing bid (the arb exit, often unavailable).** Walks the collection's bid
+  book from the top and fills the **first bid a self-custody seller can actually take**. **Key reality: much
+  of Tensor's bid liquidity is _cosigned_ (Tensor's AMM/margin orders), and a self-custody seller cannot
+  fill a cosigned bid** — `nft_sell` skips those (and SPL-currency / private / filled bids) and, if none are
+  fillable, reports the skipped bids and why (expected, not a bug). `minSol` floors the proceeds (slippage
+  guard). If the NFT is currently listed, `nft_delist` it first — a listed NFT is frozen and can't be sold
+  into a bid.
 
 This is what makes `nft_arb` actionable: buy the floor, then `nft_sell` into the bid — **but only if that
 bid is actually fillable.** Before treating an arb as real, remember most fat bids are stale or cosigned;
