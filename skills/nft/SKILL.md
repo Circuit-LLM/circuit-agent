@@ -39,11 +39,26 @@ patient accumulation**, not momentum-chasing:
 
 | tool | returns | use it to |
 |---|---|---|
+| `nft_search` | collection NAME → address (+ floor) | **start here** whenever the user names a collection — everything else needs the address |
+| `nft_market` | global snapshot: #collections, #listings, bid coverage, live arb count, median floor | **read the macro** before drilling in |
 | `nft_arb` | every collection where floor ≤ best bid, ranked by gross spread | **find** mark-to-market arb in one call |
 | `nft_collection` | one collection: floor, listed count, cheapest listings, top bid, `spreadSol`, `floorBelowBid` | **vet** a specific collection or accumulation target |
+| `nft_bids` | full standing collection-bid depth (highest first) | **check bid depth** before trusting an arb — is it one bid or a wall? |
 | `nft_floors` | all collection floors + listing counts, sortable | **survey** the market / find the most-liquid collections |
+| `nft_asset` | one NFT by mint: listed?, price, collection, floor, top bid, `sellableIntoBid` | inspect a **specific NFT** / "is this listed / what's it worth" |
+| `wallet_nfts` | a wallet's NFTs + floor **mark-to-market** total | value or manage a **portfolio** |
 
-## The three plays
+**Names, not addresses.** Users and their prompts say "Mad Lads," not `EAUom…`. Always `nft_search`
+first to turn a name into the address the other tools need. If search returns several matches, confirm
+which one (compare floors/listing counts) rather than guessing.
+
+## The plays
+
+### 0. Orient — `nft_market`, then `nft_floors`
+
+Before any specific call, `nft_market` tells you the shape of the market (how many collections/listings
+are indexed, whether *any* arbs exist right now, the median floor). If the arb count is 0, don't go
+hunting arbs this pass. `nft_floors` then surfaces the most-liquid collections to work in.
 
 ### 1. Mark-to-market arb — `nft_arb`
 
@@ -62,6 +77,14 @@ Ladder in; a floor that hit your target can keep falling.
 `sort: 'listed'` surfaces the most-liquid collections (safest to operate in). `sort: 'floor'`
 finds the cheapest, `-floor` the priciest. Use it to orient before drilling in.
 
+### 4. Portfolio — `wallet_nfts`, `nft_asset`
+
+`wallet_nfts` values a wallet at the sum of collection floors (`markToMarketSol`) — a **lower bound**;
+trait-rare items are worth more, and unindexed collections show held-but-unvalued. `nft_asset` inspects
+one NFT: is it listed, and `sellableIntoBid` tells you if there's a standing bid to exit into *right now*.
+For "should I sell holding X," combine `nft_asset` (its collection + is there a bid) with `nft_bids`
+(how deep that bid side is).
+
 ---
 
 ## Vetting checklist — run on EVERY arb candidate
@@ -71,9 +94,10 @@ finds the cheapest, `-floor` the priciest. Use it to orient before drilling in.
 2. **Stale-bid smell test.** A bid *far* above floor (e.g. `spreadPct` in the hundreds) is
    almost never free money — it's usually a stale bid left from a higher floor, a spoof, or a
    margin bid that can't actually fill. The bigger the ratio, the more suspicious, not less.
-3. **Liquidity check.** Look at `listed` and the top bids. One bid + two listings = you may not
-   be able to buy the floor *and* sell into the bid before the state changes. Thin collections
-   are traps even when the math looks good.
+3. **Liquidity check.** Look at `listed`, and call `nft_bids` to see the bid *depth*. One lonely bid +
+   two listings = you may not be able to buy the floor *and* sell into the bid before the state changes.
+   A single fat bid over a thin listing book is the classic trap. Thin collections are traps even when
+   the math looks good.
 4. **Freshness.** Floors and bids refresh on a ~30-minute reconciliation; the arb scan caches
    ~60s. Treat every number as a lead to confirm on-chain at the moment of action, not a fill price.
 5. **Coverage.** Bid/arb data covers the voc-based (verified-collection) subset. A collection
