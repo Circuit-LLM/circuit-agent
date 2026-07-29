@@ -48,6 +48,11 @@ patient accumulation**, not momentum-chasing:
 | `nft_floors` | all collection floors + listing counts, sortable | **survey** the market / find the most-liquid collections |
 | `nft_asset` | one NFT by mint: listed?, price, collection, floor, top bid, `sellableIntoBid` | inspect a **specific NFT** / "is this listed / what's it worth" |
 | `wallet_nfts` | a wallet's NFTs + floor **mark-to-market** total | value or manage a **portfolio** |
+| `nft_sales` | recent listing **activity** (fills/delists) at last price + avg/median | gauge how **active/liquid** a collection is (velocity), *not* exact sale prices |
+
+**`nft_sales` is activity, not confirmed sales.** It reports listings that *left the book* (sold **or**
+delisted) at their last list price — a liquidity/velocity read. Don't quote its numbers as "the collection
+sold for X"; use it to judge whether a collection is churning (safer to trade) or dead (a trap).
 
 **Names, not addresses.** Users and their prompts say "Mad Lads," not `EAUom…`. Always `nft_search`
 first to turn a name into the address the other tools need. If search returns several matches, confirm
