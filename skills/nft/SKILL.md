@@ -7,11 +7,12 @@ decide**. All data is computed on-chain by circuit-node (Tensor), no third-party
 
 ## The one rule
 
-**A gross spread is not a profit.** Every arb number these tools return is the raw
-floor-to-bid gap, *before* creator royalties (0–10%), marketplace fees (~1.5%), and the
-risk that the bid is stale or the collection can't be exited. Subtract those in your head
-*every single time* before you call something an opportunity. A confident "free money"
-read on a gross number is how you lose money.
+**Judge on `netSpreadSol`, never `spreadSol`.** `spreadSol` is the raw floor→bid gap; `netSpreadSol`
+already subtracts the collection's real creator royalty (`royaltyBps`) and Tensor fees on both legs —
+it's the number that survives to your pocket. A big positive `spreadSol` with a **negative
+`netSpreadSol`** is a trap the gross number hides. And even a positive net is only a *lead*: a standing
+bid can be stale, spoofed, or too thin to actually fill (see the checklist). "Free money" off a gross
+number is how you lose money.
 
 ---
 
@@ -89,8 +90,9 @@ For "should I sell holding X," combine `nft_asset` (its collection + is there a 
 
 ## Vetting checklist — run on EVERY arb candidate
 
-1. **Net it out.** `netSpread ≈ spreadSol − floorSol × (royaltyPct + ~0.015)`. If you don't
-   know the royalty, assume 5–10%. If the net isn't clearly positive, it's not an opportunity.
+1. **Net it out.** Use the `netSpreadSol` the tools return — it's already net of `royaltyBps` + fees.
+   If `netInTheMoney` is false (net ≤ 0), it is **not** an opportunity, however fat the gross looks.
+   (`royaltyBps` null means royalty wasn't indexed yet and net assumed ~6% — treat as lower-confidence.)
 2. **Stale-bid smell test.** A bid *far* above floor (e.g. `spreadPct` in the hundreds) is
    almost never free money — it's usually a stale bid left from a higher floor, a spoof, or a
    margin bid that can't actually fill. The bigger the ratio, the more suspicious, not less.
@@ -106,7 +108,9 @@ For "should I sell holding X," combine `nft_asset` (its collection + is there a 
 
 ## Interpreting the fields
 
-- `floorBelowBid: true` → floor is at/below the top bid (arb candidate). Necessary, not sufficient.
+- `netSpreadSol` → **the one that matters** — floor→bid gap after royalty + fees, both legs. `netInTheMoney`.
+- `royaltyBps` → the collection's creator royalty (200 = 2%). null = not indexed (net assumed ~6%).
+- `floorBelowBid: true` → floor is at/below the top bid (GROSS arb candidate). Necessary, not sufficient.
 - `spreadSol` → gross floor→bid gap. `spreadPct` → same as % of floor (a *huge* % is a red flag, see #2).
 - `topBidSol` / `topBids` → the standing collection bids you'd sell into. Depth matters.
 - `listed` → open listings; your liquidity proxy. `cheapest` → the actual buyable listings at floor.
