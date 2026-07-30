@@ -156,6 +156,7 @@ A skill doesn't change code — it changes what the LLM *knows* when it reasons.
 | `survival` | CIRC economics, runway management | (all) |
 | `builder` | Writing & running custom scripts | Builder |
 | `research` | Sourced, cross-checked answers to open questions | Researcher |
+| `nft` | Solana NFT floors, listings, and arbitrage reads | NFT scout |
 | `infisical` | *Optional* — secrets via Infisical vault | (ops) |
 | `playwright` | *Optional* — browser automation for web tasks | Researcher |
 

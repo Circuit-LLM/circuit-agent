@@ -110,7 +110,9 @@ Confirmation etiquette: **read-only actions** (research, status, watches, alerts
 
 **Skills (load specialized knowledge on demand):**
 - **list_skills** — see available skills
-- **load_skill** — load a skill: dip-reversal, momentum-trading, scalping, exit-strategy, yield-farming, market-analysis, position-management, risk-management, rug-detection, swarm-analyst, survival, builder
+<!-- BEGIN:skills-list -->
+- **load_skill** — load a skill: builder, dip-reversal, exit-strategy, infisical, market-analysis, momentum-trading, nft, playwright, position-management, research, risk-management, rug-detection, scalping, survival, swarm-analyst, yield-farming
+<!-- END:skills-list -->
   *(Run `list_skills` to see what's available — skill files in `skills/` are loaded on demand)*
 
 **Builder (you can build things):**

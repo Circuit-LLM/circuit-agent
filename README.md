@@ -214,10 +214,13 @@ circuit-agent ships with a **complete closed-loop adaptive trading system** that
 - Files: `data/reflection_log.jsonl`, `data/approvals.jsonl` (append-only audit trails)
 
 **TIER 3: Skill Tracking + Ecosystem Gating**
-- Skill Tracker → correlates skill usage with win rates, auto-ranks strong/weak performers
+- Skill Tracker → logs every skill load, then compares trades **entered after** that load
+  against trades entered without it (a per-skill baseline, not a daily average)
 - Ecosystem Gating → adjusts DCA position size based on network health (TPS, fees, validators)
-- Live Effect: Smaller buys during congestion, disabled skills removed from context
-- Files: `data/skill_performance.jsonl` (append-only correlation log)
+- Live Effect: Smaller buys during congestion. Skill grades are **advisory only** — they
+  surface on the dashboard for you to act on; no skill is ever auto-disabled, and a skill
+  with too few attributed trades reports `INSUFFICIENT_DATA` instead of a grade
+- Files: `data/skill_performance.jsonl` (append-only usage log)
 
 **TIER 7: Dynamic Position Sizing**
 - Regime Scaler → scales entry size based on market regime (bull 1.5×, consolidation 1.0×, recovery 0.3×, dump 0.0×)
@@ -408,7 +411,7 @@ cp soul.md soul.local.md   # Edit freely — gitignored, update-safe
 
 ## Skills
 
-The agent loads specialized knowledge on demand. Ask it to `load skill <name>` in Telegram, or it loads them automatically when relevant:
+The agent loads specialized knowledge on demand — the model decides when to pull one in, and you can ask it to `load skill <name>` in Telegram. Nothing is injected automatically:
 
 | Skill | Covers |
 |-------|--------|
@@ -424,6 +427,8 @@ The agent loads specialized knowledge on demand. Ask it to `load skill <name>` i
 | `swarm-analyst` | Reading swarm signals and consensus |
 | `survival` | CIRC economics, runway management |
 | `builder` | Writing and running custom scripts |
+| `research` | Sourced, cross-checked answers to open questions |
+| `nft` | Solana NFT collections — floors, listings, arbitrage |
 | `infisical` | *Optional* — secrets via Infisical vault instead of `.env` |
 | `playwright` | *Optional* — browser automation for web research tasks |
 

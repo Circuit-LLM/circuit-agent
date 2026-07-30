@@ -98,10 +98,13 @@ agent.js                  Entry point — wires all modules together, starts loo
 - **Effect:** Prevents unvalidated changes, closes operator feedback loop
 
 **Tier 3: Skill Tracking + Ecosystem Gating**
-- `lib/memory/skill-tracker.js` correlates skill usage with win rates
+- `lib/memory/skill-tracker.js` logs every skill load and compares trades entered
+  after a load against trades entered without it
 - `dca-ecosystem-gating.js` adjusts DCA sizing based on network health
 - Dashboard APIs show skill performance + ecosystem status
-- **Effect:** Auto-disable weak skills, reduce position size during congestion
+- **Effect:** Reduce position size during congestion; surface which skills correlate
+  with better entries. Skill grades are **advisory only** — nothing is auto-disabled,
+  and grades are withheld until a skill clears a minimum sample size.
 
 Run `npm test -- tests/backtest-with-simulation.js` to see backtest results on your trade history and generate learned insights. See [docs/ANALYSIS.md](docs/ANALYSIS.md) for full details.
 
@@ -254,7 +257,7 @@ Skills are Markdown knowledge files in `skills/<name>/SKILL.md`. The LLM loads t
 
 Skills contain trading rules, scoring criteria, and decision heuristics written in first-person for the LLM. They are not code — adding a new skill requires only a new `SKILL.md` file.
 
-**Skills injected automatically:** `dip-reversal` is loaded by the pre-buy gate before each selective-mode buy decision.
+**Loading is model-initiated.** Nothing injects a skill automatically — no code outside the `load_skill` tool reads a `SKILL.md`. The model decides what to load, and every load is appended to `data/skill_performance.jsonl` by `lib/memory/skill-tracker.js`.
 
 ---
 

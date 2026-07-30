@@ -862,7 +862,7 @@ body.sb-collapsed .sb-foot{display:none}
 
   <div class="sec-hdr" style="margin-top:16px"><span>//</span>&nbsp;SKILL PERFORMANCE</div>
   <table class="data-table" id="int-skills-table">
-    <thead><tr><th>Skill</th><th>Win Rate</th><th>Avg P&L</th><th>Score</th><th>Days Active</th><th>Verdict</th></tr></thead>
+    <thead><tr><th>Skill</th><th>Loads</th><th>Trades</th><th>Win Rate vs Base</th><th>P&L Lift</th><th>Verdict</th></tr></thead>
     <tbody id="int-skills-tbody"><tr><td colspan="6" class="empty dim">loading…</td></tr></tbody>
   </table>
 
@@ -2738,14 +2738,28 @@ async function loadIntelligence() {
         skillsTbody.innerHTML = '';
         skills.skills.allGrades.forEach(s => {
           const tr = document.createElement('tr');
-          const verdictClass = s.recommendation === 'KEEP' ? 'conf-high' : s.recommendation === 'DISABLE' ? 'conf-stale' : 'conf-thin';
+          const pending = s.recommendation === 'INSUFFICIENT_DATA';
+          const verdictClass = s.recommendation === 'KEEP' ? 'conf-high'
+                             : s.recommendation === 'REVIEW' ? 'conf-stale'
+                             : 'conf-thin';
+          // Until a skill clears the sample minimum we show what it is waiting on
+          // rather than a number that would read as a measurement.
+          const rates = pending
+            ? '<span class="dim">—</span>'
+            : `${fmtPct(s.winRate * 100)} <span class="dim">vs ${fmtPct(s.baselineWinRate * 100)}</span>`;
+          const lift = pending
+            ? '<span class="dim">—</span>'
+            : `<span class="${s.pnlLift >= 0 ? 'pos' : 'neg'}">${s.pnlLift >= 0 ? '+' : ''}${s.pnlLift.toFixed(2)}%</span>`;
+          const label = pending
+            ? `needs ${skills.skills.minSkillTrades ?? 8} trades`
+            : s.recommendation;
           tr.innerHTML = `
             <td><strong>${esc(s.skillName)}</strong></td>
-            <td>${fmtPct(s.avgWinRate * 100)}</td>
-            <td>${fmtPct(s.avgPnl)}</td>
-            <td>${s.performanceScore.toFixed(1)}</td>
-            <td>${s.daysActive}</td>
-            <td><span class="badge ${verdictClass}">${s.recommendation}</span></td>
+            <td>${s.usageCount}</td>
+            <td>${s.attributedTrades} <span class="dim">/ ${s.baselineTrades} base</span></td>
+            <td>${rates}</td>
+            <td>${lift}</td>
+            <td><span class="badge ${verdictClass}">${esc(label)}</span></td>
           `;
           skillsTbody.appendChild(tr);
         });

@@ -6,7 +6,8 @@
   "type": "commonjs",
   "scripts": {
     "start": "node agent.js start",
-    "test": "node --test tests/*.test.js",
+    "test": "npm run test:docs && node --test --test-concurrency=1 tests/*.test.js",
+    "test:docs": "node scripts/sync-skill-docs.js",
     "init": "node agent.js init",
     "setup": "node agent.js setup",
     "wallet": "node agent.js wallet",
