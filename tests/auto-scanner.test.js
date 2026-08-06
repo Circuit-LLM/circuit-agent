@@ -59,3 +59,46 @@ test('auto-scanner buy path smoke test', async (t) => {
     throw err;
   }
 });
+
+// ── Scorer dispatch ──────────────────────────────────────────────────────────
+// A new scorer must be inert for every agent that did not explicitly ask for it. The swarm runs
+// nine agents with strategy.scorer unset and one (agent2) on 'flow'; nothing validates or defaults
+// that key anywhere, so this dispatch is the only thing standing between "shipped" and "activated".
+test('pickScorer only activates a scorer on an exact config opt-in', () => {
+  const { pickScorer }       = require('../lib/auto-scanner');
+  const { scoreDipReversal } = require('../lib/scoring');
+  const { scoreMomentum }    = require('../lib/scoring-momentum');
+  const { scoreFlow }        = require('../lib/scoring-flow');
+
+  // The case that covers the nine control agents: no scorer key at all.
+  assert.strictEqual(pickScorer({ strategy: {} }), scoreDipReversal, 'unset scorer must stay dip-reversal');
+  assert.strictEqual(pickScorer({}), scoreDipReversal, 'no strategy block must stay dip-reversal');
+  assert.strictEqual(pickScorer(undefined), scoreDipReversal, 'absent config must stay dip-reversal');
+
+  // Explicit opt-in.
+  assert.strictEqual(pickScorer({ strategy: { scorer: 'flow' } }), scoreFlow);
+  assert.strictEqual(pickScorer({ strategy: { scorer: 'momentum' } }), scoreMomentum);
+
+  // Fail safe: anything unrecognised falls back rather than throwing or half-selecting. Includes
+  // 'smartmoney', which agent.js routes to a different scanner entirely before reaching here.
+  for (const v of ['dip', 'Flow', 'FLOW', 'smartmoney', '', null, 0, true, {}]) {
+    assert.strictEqual(pickScorer({ strategy: { scorer: v } }), scoreDipReversal,
+      `unrecognised scorer ${JSON.stringify(v)} must fall back to dip-reversal`);
+  }
+});
+
+// scoring-flow.js is required unconditionally at module load, so "inert unless selected" only holds
+// if importing it does nothing. Keep it a leaf: no requires, no module-level work.
+test('scoring-flow is a side-effect-free leaf module', () => {
+  const fs   = require('node:fs');
+  const path = require('node:path');
+  const src  = fs.readFileSync(path.join(__dirname, '..', 'lib', 'scoring-flow.js'), 'utf8');
+
+  const code = src.split('\n').filter(l => !l.trim().startsWith('//')).join('\n');
+  assert.ok(!/\brequire\s*\(/.test(code), 'scoring-flow must not require anything at load');
+
+  const { scoreFlow } = require('../lib/scoring-flow');
+  assert.strictEqual(typeof scoreFlow, 'function');
+  assert.deepStrictEqual(Object.keys(require('../lib/scoring-flow')), ['scoreFlow'],
+    'scoring-flow must export exactly scoreFlow');
+});
